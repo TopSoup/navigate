@@ -1,0 +1,45 @@
+#ignore .metadata
+.metadata
+
+#ignore obj and lib file
+*.[oa]
+
+
+#ignore temp files
+*.swp
+*.temp
+*.tmp
+
+#ignore visualstudio tmp files
+*.mod
+*.elf
+*.dll
+*.lib
+*.suo
+*.ncb
+*.exp
+*.ilk
+*.pdb
+*.sdf
+*.bak
+*.dep
+*.opensdf
+*.plg
+*.opt
+*/Debug/
+
+#Brew Simulator temp files
+*..dir.dat
+/shared/
+brewappmgr
+
+#python
+*.pyc
+
+#ignore android project files
+*.properties
+
+#ignore android building directory
+/obj/
+/gen/
+
