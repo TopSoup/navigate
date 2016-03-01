@@ -1,0 +1,15 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "navigate", "navigate.vcproj", "{6C032ED0-B91D-4C04-B60F-703E7E179691}"
+EndProject
+Global
+	GlobalSection(ProjectConfiguration) = postSolution
+		{6C032ED0-B91D-4C04-B60F-703E7E179691}.Debug.ActiveCfg = Debug|Win32
+		{6C032ED0-B91D-4C04-B60F-703E7E179691}.Debug.Build.0 = Debug|Win32
+		{6C032ED0-B91D-4C04-B60F-703E7E179691}.Release.ActiveCfg = Release|Win32
+		{6C032ED0-B91D-4C04-B60F-703E7E179691}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

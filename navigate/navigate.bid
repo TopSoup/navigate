@@ -1,0 +1,6 @@
+#ifndef NAVIGATE_BID
+#define NAVIGATE_BID
+
+#define AEECLSID_NAVIGATE	0x01010ef6
+
+#endif //NAVIGATE_BID
