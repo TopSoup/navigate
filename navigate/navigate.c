@@ -531,19 +531,20 @@ boolean CMediaPlayer_InitAppData(IApplet* po)
    int               nAscent, nDescent;
    AEEDeviceInfo *   pdi;
 
+#if USE_CAMERA
    //////////////////////////////////////////////////////////////////////////
    int   nErr;
-   
+
    // Create ICamera instance.
    nErr = ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_CAMERA, (void **)&pme->m_pICamera);
    if (nErr)
 	   return nErr;
-   
+
    // Register callback notification function.
    nErr = ICAMERA_RegisterNotify(pme->m_pICamera, CApp_CameraNotify, pme);
    if (nErr)
 	   return nErr;
-   
+ 
    pme->m_sizePreview.cx = 1024;
    pme->m_sizePreview.cy = 1024;
    
@@ -555,9 +556,10 @@ boolean CMediaPlayer_InitAppData(IApplet* po)
    nErr = ICAMERA_Preview(pme->m_pICamera);
    if (nErr)
 		return nErr;
-
+   
    //////////////////////////////////////////////////////////////////////////
    //StartCameraInPreviewMode(pme);
+#endif
 
    // Get screen pixel count
    pdi = MALLOC(sizeof(AEEDeviceInfo));
@@ -684,14 +686,15 @@ int AEEClsCreateInstance(AEECLSID ClsId,IShell * pIShell,IModule * po,void ** pp
    //
    if(ClsId == AEECLSID_NAVIGATE)
 	{
+#if USE_CAMERA
 	   int   nErr;
 	   ICamera *m_pICamera;
 
 	   // Create ICamera instance.
 	   nErr = ISHELL_CreateInstance(pIShell, AEECLSID_CAMERA, (void **)&m_pICamera);
 	   if (nErr)
-	   return nErr;
-
+		return nErr;
+#endif
 		//Create the applet
       if(AEEApplet_New(sizeof(CMediaPlayer), ClsId, pIShell,po,(IApplet**)ppObj,(AEEHANDLER)CMediaPlayer_HandleEvent,(PFNFREEAPPDATA)CMediaPlayer_FreeAppData))
 		{
