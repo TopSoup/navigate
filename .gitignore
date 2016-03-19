@@ -27,6 +27,8 @@
 *.plg
 *.opt
 */Debug/
+*.bar
+*.brh
 
 #Brew Simulator temp files
 *..dir.dat
