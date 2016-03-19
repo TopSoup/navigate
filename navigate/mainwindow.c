@@ -50,7 +50,7 @@ IWindow * CMainWin_New(CTopSoupApp * pOwner)
 
 
 	  //XXX __begin
-      // Initialize logo below the header
+      //Initialize logo below the header
       pme->m_pLogo = ISHELL_LoadResImage(pme->m_pIShell, NAVIGATE_RES_FILE, IDB_LOGO);
       if (!pme->m_pLogo)
          TS_WINERR_RETURN(pme);
@@ -135,6 +135,7 @@ static void CMainWin_Redraw(IWindow * po)
    //XXX __begin
    IDISPLAY_ClearScreen(pme->m_pIDisplay);
 
+   TS_DRAWBACK(pme);
    TS_DRAWHEADER(pme);
    TS_DrawImage(pme->m_pLogo, &pme->m_rectLogo, TRUE);
    IMENUCTL_Redraw(pme->m_pMainMenu);
@@ -199,6 +200,7 @@ static void CMainWin_About(IWindow * po)
    pme->m_bAbout = TRUE;
 
    IDISPLAY_ClearScreen(pme->m_pIDisplay);
+   TS_DRAWBACK(pme);
    TS_DRAWHEADER(pme);
    ISHELL_ShowCopyright(pme->m_pIShell);
 }

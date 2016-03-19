@@ -4,7 +4,6 @@
 /*-------------------------------------------------------------------
             Function Prototypes
 -------------------------------------------------------------------*/
-#define MP_HEADER_CY          16 
 static boolean    CTopSoupApp_InitAppData(IApplet* po);
 //FIXME why origin is not static
 static void		  CTopSoupApp_FreeAppData(IApplet* po);
@@ -85,6 +84,8 @@ Comments:  None
 Side Effects: None
 
 ==============================================================================*/
+#define TS_HEADER_CY          16 
+#define TS_HEADER_Y           10
 boolean CTopSoupApp_InitAppData(IApplet* po)
 {
    CTopSoupApp *    pme = (CTopSoupApp*)po;
@@ -98,7 +99,7 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
       return FALSE;
    ISHELL_GetDeviceInfo(pme->a.m_pIShell, pdi);
    pme->m_cxWidth = pdi->cxScreen;
-	pme->m_cyHeight = pdi->cyScreen;
+   pme->m_cyHeight = pdi->cyScreen;
    pme->m_nColorDepth = pdi->nColorDepth;
    FREEIF(pdi);
 
@@ -119,7 +120,12 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
    pme->m_pHdrImage = ISHELL_LoadResImage(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDB_HEADER);
    if (!pme->m_pHdrImage)
       return FALSE;
-   SETAEERECT(&pme->m_rectHdr, 0, 0, pme->m_cxWidth, MP_HEADER_CY);
+   SETAEERECT(&pme->m_rectHdr, 0, TS_HEADER_Y, pme->m_cxWidth, TS_HEADER_CY);
+   
+   pme->m_pBackImage = ISHELL_LoadResImage(pme->a.m_pIShell,BACKIMG_RES_FILE,IDI_OBJECT_5000);
+   if (!pme->m_pBackImage)
+	 return FALSE;
+   SETAEERECT(&pme->m_rectBack,0,0,pme->m_cxWidth,pme->m_cyHeight);
    //XXX _end
 
 

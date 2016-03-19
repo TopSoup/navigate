@@ -33,6 +33,9 @@ struct CTopSoupApp
 	IImage *          m_pHdrImage;
 	AEERect           m_rectHdr;
 
+	IImage *		  m_pBackImage;
+	AEERect           m_rectBack;
+
 	uint16            m_wMainWin;    // CurSel of CMainWin
 };
 

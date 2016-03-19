@@ -14,6 +14,7 @@
 
 #include "navigate.bid"
 #include "navigate.brh"
+#include "backimg.brh"
 
 	
 #include "logicmacro.h"

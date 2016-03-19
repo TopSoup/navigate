@@ -33,5 +33,6 @@ char *     TS_GetFileName(const char * psz);
 
 //XXX
 #define TS_DRAWHEADER(pme)             TS_DrawImage((pme)->m_pOwner->m_pHdrImage, &(pme)->m_pOwner->m_rectHdr, TRUE)
+#define TS_DRAWBACK(pme)               TS_DrawImage((pme)->m_pOwner->m_pBackImage,&(pme)->m_pOwner->m_rectBack,TRUE)
 
 #endif
