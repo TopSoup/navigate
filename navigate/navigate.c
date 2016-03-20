@@ -11,9 +11,11 @@ static boolean    CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 w
 
 static boolean    CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam);
 static void       CTopSoupApp_RedrawNotify(CTopSoupApp * pme);
+static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
 
-#define MP_SPLASH_TIMER       750
-static void       CTopSoupApp_DrawSplash(CTopSoupApp * pme);
+//XXX
+//#define MP_SPLASH_TIMER       750
+//static void       CTopSoupApp_DrawSplash(CTopSoupApp * pme);
 
 
 //
@@ -84,14 +86,16 @@ Comments:  None
 Side Effects: None
 
 ==============================================================================*/
-#define TS_HEADER_CY          16 
-#define TS_HEADER_Y           10
+#define TS_HEADER_Y           17
 boolean CTopSoupApp_InitAppData(IApplet* po)
 {
    CTopSoupApp *    pme = (CTopSoupApp*)po;
    int               nAscent, nDescent;
    AEEDeviceInfo *   pdi;
-
+   //XXX
+   AEEImageInfo      info;
+   AEERect           rect;
+   AEERect           rect1;
 
    // Get screen pixel count
    pdi = MALLOC(sizeof(AEEDeviceInfo));
@@ -112,22 +116,75 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
 
    CALLBACK_Init(&pme->m_cbRedraw, (PFNNOTIFY)CTopSoupApp_RedrawNotify, pme);
 
-   pme->m_pWin = CMainWin_New(pme);
-   if (!pme->m_pWin)
-	   return FALSE;
-
    //XXX __begin
-   pme->m_pHdrImage = ISHELL_LoadResImage(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDB_HEADER);
-   if (!pme->m_pHdrImage)
-      return FALSE;
-   SETAEERECT(&pme->m_rectHdr, 0, TS_HEADER_Y, pme->m_cxWidth, TS_HEADER_CY);
+   //Header
+   pme->m_pHdrImage = ISHELL_LoadResImage(pme->a.m_pIShell, BACKIMG_RES_FILE, IDI_OBJECT_5003);
+   if (!pme->m_pHdrImage) {
+	   CTopSoupApp_ReleaseRes(pme);    
+	   return FALSE;
+   }
+   IImage_GetInfo(pme->m_pHdrImage,&info);
+   SETAEERECT(&pme->m_rectHdr, 0, TS_HEADER_Y, info.cx, info.cy);
+   
+   if (ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pHdrStatic)) {
+		CTopSoupApp_ReleaseRes(pme);  	
+	   return FALSE;
+   }
+   ISTATIC_SetRect(pme->m_pHdrStatic, &pme->m_rectHdr);
+   ISTATIC_SetProperties(pme->m_pHdrStatic,  ST_MIDDLETEXT | ST_CENTERTEXT | ST_NOSCROLL);
+   
+   ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_TITLE,pme->m_pHdrText,sizeof(pme->m_pHdrText));
+
    
    pme->m_pBackImage = ISHELL_LoadResImage(pme->a.m_pIShell,BACKIMG_RES_FILE,IDI_OBJECT_5000);
-   if (!pme->m_pBackImage)
-	 return FALSE;
-   SETAEERECT(&pme->m_rectBack,0,0,pme->m_cxWidth,pme->m_cyHeight);
+   if (!pme->m_pBackImage) {	
+		CTopSoupApp_ReleaseRes(pme);  	
+	   return FALSE;
+   }
+   IImage_GetInfo(pme->m_pBackImage,&info);
+   SETAEERECT(&pme->m_rectBack,0,0,info.cx,info.cy);
+
+   pme->m_pBottomImage = ISHELL_LoadResImage(pme->a.m_pIShell,BACKIMG_RES_FILE,IDI_OBJECT_5004);
+   if (!pme->m_pBottomImage){
+       CTopSoupApp_ReleaseRes(pme);  	
+	   return FALSE;
+   }
+   IImage_GetInfo(pme->m_pBottomImage,&info);
+   SETAEERECT(&pme->m_rectBtm,0,(pme->m_cyHeight)- info.cy,info.cx,info.cy);
+  
+   if (ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pLeftSoftStatic)) {
+	   CTopSoupApp_ReleaseRes(pme);  	
+	   return FALSE;
+   }
+   SETAEERECT(&rect,0,pme->m_rectBtm.y,pme->m_rectBtm.dx/3,pme->m_rectBtm.dy);
+   ISTATIC_SetRect(pme->m_pLeftSoftStatic, &rect);
+   ISTATIC_SetProperties(pme->m_pLeftSoftStatic, ST_CENTERTEXT | ST_MIDDLETEXT | ST_NOSCROLL);
+
+   if (ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pMidSoftStatic)) {
+	   CTopSoupApp_ReleaseRes(pme);  	
+	   return FALSE;
+   }
+   SETAEERECT(&rect1,rect.dx,rect.y,rect.dx,rect.dy);
+   ISTATIC_SetRect(pme->m_pMidSoftStatic, &rect1);
+   ISTATIC_SetProperties(pme->m_pMidSoftStatic,  ST_MIDDLETEXT | ST_CENTERTEXT | ST_NOSCROLL);
+
+   if (ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pRightSoftStatic)) {
+	   CTopSoupApp_ReleaseRes(pme);  	
+	   return FALSE;
+   }
+   SETAEERECT(&rect,rect1.x + rect1.dx,rect1.y,pme->m_rectBtm.dx - rect1.x - rect1.dx,rect1.dy);
+   ISTATIC_SetRect(pme->m_pRightSoftStatic, &rect);
+   ISTATIC_SetProperties(pme->m_pRightSoftStatic, ST_MIDDLETEXT | ST_CENTERTEXT | ST_NOSCROLL);
+
+
+   SETAEERECT(&pme->m_rectWin, 0, pme->m_rectHdr.y + pme->m_rectHdr.dy + 1, pme->m_cxWidth, pme->m_cyHeight - pme->m_rectHdr.y - pme->m_rectHdr.dy - 1 - pme->m_rectBtm.dy);
    //XXX _end
 
+   pme->m_pWin = CMainWin_New(pme);
+   if (!pme->m_pWin){
+	   CTopSoupApp_ReleaseRes(pme);  	
+	   return FALSE;
+   }
 
    return TRUE;
 }
@@ -161,11 +218,7 @@ static void CTopSoupApp_FreeAppData(IApplet* po)
 {
    CTopSoupApp * pme = (CTopSoupApp *)po;
 
-   //XXX
-   TS_RELEASEIF(pme->m_pHdrImage);
-   
-   CTopSoupApp_CancelRedraw(pme);
-   TS_RELEASEWIN(pme->m_pWin);
+   CTopSoupApp_ReleaseRes(pme);
 }
 
 /*===========================================================================
@@ -287,7 +340,8 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
     {   
          case EVT_APP_START:   // Process Start event
             //XXX
-            CTopSoupApp_DrawSplash(pme);
+			pme->m_eActiveWin = TSW_MAIN;
+			CTopSoupApp_SetWindow(pme, TSW_MAIN, 0);
             return TRUE;
 
          case EVT_APP_STOP:        // process STOP event
@@ -317,7 +371,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
    This function draws the splash screen and brings up the main window
    after the splash timer runs out.
 ===========================================================================*/
-
+/*
 static void CTopSoupApp_DrawSplash(CTopSoupApp * pme)
 {
    // The following 'If statement' is entered only after the splash timer runs out...
@@ -347,6 +401,7 @@ static void CTopSoupApp_DrawSplash(CTopSoupApp * pme)
       pme->m_eActiveWin = TSW_MAIN;
       ISHELL_SetTimer(pme->a.m_pIShell, MP_SPLASH_TIMER, (PFNNOTIFY)CTopSoupApp_DrawSplash, pme); }  
 }
+*/
 
 /*===========================================================================
    This function switches from one window to another:
@@ -356,7 +411,7 @@ static void CTopSoupApp_DrawSplash(CTopSoupApp * pme)
 ===========================================================================*/
 static boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 {
-   // If same window, then redraw and return.
+ 	// If same window, then redraw and return.
    if (pme->m_pWin && pme->m_eActiveWin == eWin && eWin != TSW_NONE)
    {
       CTopSoupApp_Redraw(pme, TRUE);
@@ -364,6 +419,10 @@ static boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dw
    }
 
    TS_RELEASEWIN(pme->m_pWin);
+   //reset res
+   MEMSET(pme->m_pLeftSoftText,0,sizeof(pme->m_pLeftSoftText));
+   MEMSET(pme->m_pRightSoftText,0,sizeof(pme->m_pRightSoftText));
+   MEMSET(pme->m_pMidSoftText,0,sizeof(pme->m_pMidSoftText));
 
    switch (eWin)
    {
@@ -427,6 +486,21 @@ static void CTopSoupApp_RedrawNotify(CTopSoupApp * pme)
       IWINDOW_Enable(pme->m_pWin);
       IWINDOW_Redraw(pme->m_pWin);
    }
+}
+
+static void CTopSoupApp_ReleaseRes(CTopSoupApp * pme)
+{
+	TS_RELEASEIF(pme->m_pHdrImage);
+	TS_RELEASEIF(pme->m_pBackImage);
+	TS_RELEASEIF(pme->m_pBottomImage);
+	TS_RELEASEIF(pme->m_pHdrStatic);
+	TS_RELEASEIF(pme->m_pLeftSoftStatic);
+	TS_RELEASEIF(pme->m_pMidSoftStatic);
+	TS_RELEASEIF(pme->m_pRightSoftStatic);
+
+
+	CTopSoupApp_CancelRedraw(pme);
+	TS_RELEASEWIN(pme->m_pWin);
 }
 
 

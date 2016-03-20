@@ -3,11 +3,6 @@
 
 #include "navigatepch.h"
 
-
-#include "AEEStdLib.h"       
-#include "AEEMenu.h"          // AEE Menu Services
-#include "AEEImageCtl.h"      // AEE ImageCtl Services
-
 typedef struct CTopSoupApp CTopSoupApp;
 
 
@@ -17,6 +12,8 @@ void       TS_DrawImage(IImage * pImage, AEERect * pRect, boolean bCenter);
 //menu
 boolean    TS_AddMenuItem(IMenuCtl * pMenu, uint16 wTextID, AECHAR * pText, uint16 wImageID, uint16 wItemID, uint32 dwData);
 void       TS_SetMenuAttr(IMenuCtl * pMenu, AEECLSID clsMenu, uint16 nColorDepth, AEERect * pRect, uint32 dwProps);
+
+void		TS_SetSoftButtonText(CTopSoupApp * pme,uint16 wTextLeftID, uint16 wTextRightID,uint16 wTextMidID); //ID为0，则不加载文字
 
 //static
 void       TS_FitStaticText(IDisplay * pd, IStatic * ps, AEEFont font, AECHAR * pszText);
@@ -32,7 +29,6 @@ char *     TS_GetFileName(const char * psz);
 
 
 //XXX
-#define TS_DRAWHEADER(pme)             TS_DrawImage((pme)->m_pOwner->m_pHdrImage, &(pme)->m_pOwner->m_rectHdr, TRUE)
-#define TS_DRAWBACK(pme)               TS_DrawImage((pme)->m_pOwner->m_pBackImage,&(pme)->m_pOwner->m_rectBack,TRUE)
+void		TS_DrawBackgroud(IWindow* po);
 
 #endif

@@ -249,6 +249,14 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
+				RelativePath=".\backimg.brh"
+				>
+			</File>
+			<File
+				RelativePath=".\kitimg.brh"
+				>
+			</File>
+			<File
 				RelativePath=".\logicmacro.h"
 				>
 			</File>
@@ -285,6 +293,28 @@
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
+			<File
+				RelativePath=".\backimg.brx"
+				>
+			</File>
+			<File
+				RelativePath=".\kitimg.brx"
+				>
+			</File>
+			<File
+				RelativePath=".\navigate.brx"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="&#22312;&#29983;&#25104;bar&#36164;&#28304;&#25991;&#20214;"
+						CommandLine="$(BREWDIR)\tools\ResourceEditor\brewrc.exe -s -o ./navigate.bar -h ./navigate_res.h .\navigate.brx&#x0D;&#x0A;"
+						Outputs="navigate.bar"
+					/>
+				</FileConfiguration>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

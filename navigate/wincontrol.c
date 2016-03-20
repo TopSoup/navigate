@@ -8,6 +8,7 @@
 /*===========================================================================
    This function draws the image and centers it within the specified 
    rectangle if bCenter is TRUE.
+   - note£ºreturn if image bot fit in the rect
 ===========================================================================*/
 void TS_DrawImage(IImage * pImage, AEERect * pRect, boolean bCenter)
 {
@@ -45,10 +46,10 @@ boolean TS_AddMenuItem(IMenuCtl * pMenu, uint16 wTextID, AECHAR * pText, uint16 
    // Fill in the CtlAddItem structure values
    ai.pText = pText;
    ai.pImage = NULL;
-   ai.pszResImage = NAVIGATE_RES_FILE;
+   ai.pszResImage = KITIMG_RES_FILE;
    ai.pszResText = NAVIGATE_RES_FILE;
    ai.wText = wTextID;
-   ai.wFont = AEE_FONT_NORMAL;
+   ai.wFont = AEE_FONT_LARGE;
    ai.wImage = wImageID;
    ai.wItemID = wItemID;
    ai.dwData = dwData;
@@ -167,7 +168,7 @@ char * TS_GetFileName(const char * psz)
 ===========================================================================*/
 // Based on Menu style sheet:
 #define MENU8_FT                 AEE_FT_NONE
-#define MENU8_SELECT_FT          AEE_FT_RAISED
+#define MENU8_SELECT_FT          AEE_FT_NONE//AEE_FT_RAISED
 #define MENU8_RO                 AEE_RO_TRANSPARENT
 #define MENU8_SELECT_RO          AEE_RO_TRANSPARENT
 #define MENU8_COLOR_MASK 	      (MC_BACK | MC_SEL_BACK | MC_SEL_TEXT)
@@ -189,13 +190,13 @@ void TS_SetMenuAttr(IMenuCtl * pMenu, AEECLSID clsMenu, uint16 nColorDepth, AEER
 	normal.yOffset = 0;
 	normal.roImage = MENU8_RO;
 
-   sel.ft = MENU8_SELECT_FT;
+    sel.ft = MENU8_SELECT_FT;
 	sel.xOffset = 0;
 	sel.yOffset = 0;
 	sel.roImage = MENU8_SELECT_RO;
 
 	// Menu Colors
-   col.cSelText = MENU8_SELECT_TEXT;
+    col.cSelText = MENU8_SELECT_TEXT;
 	col.wMask = MENU8_COLOR_MASK;
 
    if (clsMenu == AEECLSID_MENUCTL)
@@ -222,3 +223,36 @@ void TS_SetMenuAttr(IMenuCtl * pMenu, AEECLSID clsMenu, uint16 nColorDepth, AEER
          IMENUCTL_SetRect(pMenu, pRect);
    }
 }
+
+void TS_DrawBackgroud(IWindow* po) {
+	CWindow* pme = (CWindow*)po;
+
+    TS_DrawImage(pme->m_pOwner->m_pBackImage,&pme->m_pOwner->m_rectBack,TRUE);
+	
+	TS_DrawImage(pme->m_pOwner->m_pHdrImage, &pme->m_pOwner->m_rectHdr, TRUE);
+	TS_FitStaticText(pme->m_pOwner->a.m_pIDisplay, pme->m_pOwner->m_pHdrStatic, AEE_FONT_LARGE, pme->m_pOwner->m_pHdrText);
+	
+	TS_DrawImage(pme->m_pOwner->m_pBottomImage,&pme->m_pOwner->m_rectBtm,TRUE);
+    TS_FitStaticText(pme->m_pOwner->a.m_pIDisplay,pme->m_pOwner->m_pLeftSoftStatic,AEE_FONT_LARGE,pme->m_pOwner->m_pLeftSoftText);
+	TS_FitStaticText(pme->m_pOwner->a.m_pIDisplay,pme->m_pOwner->m_pRightSoftStatic,AEE_FONT_LARGE,pme->m_pOwner->m_pRightSoftText);
+	TS_FitStaticText(pme->m_pOwner->a.m_pIDisplay,pme->m_pOwner->m_pMidSoftStatic,AEE_FONT_LARGE,pme->m_pOwner->m_pMidSoftText);
+	
+	ISTATIC_Redraw(pme->m_pOwner->m_pHdrStatic);
+	ISTATIC_Redraw(pme->m_pOwner->m_pLeftSoftStatic);
+	ISTATIC_Redraw(pme->m_pOwner->m_pRightSoftStatic);
+	ISTATIC_Redraw(pme->m_pOwner->m_pMidSoftStatic);
+}
+
+void TS_SetSoftButtonText(CTopSoupApp * pme,uint16 wTextLeftID, uint16 wTextRightID,uint16 wTextMidID)
+{
+	MEMSET(pme->m_pLeftSoftText,0,sizeof(pme->m_pLeftSoftText));
+	MEMSET(pme->m_pRightSoftText,0,sizeof(pme->m_pRightSoftText));
+	MEMSET(pme->m_pMidSoftText,0,sizeof(pme->m_pMidSoftText));
+	if(wTextLeftID)
+		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,wTextLeftID,pme->m_pLeftSoftText,sizeof(pme->m_pLeftSoftText));
+	if(wTextRightID)
+		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,wTextRightID,pme->m_pRightSoftText,sizeof(pme->m_pRightSoftText));
+	if(wTextMidID)
+		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,wTextMidID,pme->m_pMidSoftText,sizeof(pme->m_pMidSoftText));
+}
+

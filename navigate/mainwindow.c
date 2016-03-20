@@ -8,10 +8,7 @@ struct CMainWin
 	INHERIT_CWindow(IWindow);
 
 	//XXX
-	IImage *       m_pLogo;
-	AEERect        m_rectLogo;
 	IMenuCtl *     m_pMainMenu;
-	flg            m_bAbout:1;
 };
 
 typedef struct CMainWin CMainWin;
@@ -43,32 +40,17 @@ IWindow * CMainWin_New(CTopSoupApp * pOwner)
       return NULL;
 
    {
-      int      cx = ((CTopSoupApp*)pme->m_pOwner)->m_cxWidth;
-      int      cy = ((CTopSoupApp*)pme->m_pOwner)->m_cyHeight;
-      int      y, dy;
-      AEERect  rect;
-
-
 	  //XXX __begin
       //Initialize logo below the header
-      pme->m_pLogo = ISHELL_LoadResImage(pme->m_pIShell, NAVIGATE_RES_FILE, IDB_LOGO);
-      if (!pme->m_pLogo)
-         TS_WINERR_RETURN(pme);
-
-      y = ((CTopSoupApp*)pme->m_pOwner)->m_rectHdr.dy + 1;
-      dy = cy/2 - y;
-      SETAEERECT(&pme->m_rectLogo, 0, y, cx, dy);
-      IIMAGE_SetFrameCount(pme->m_pLogo, 2);
-      IIMAGE_SetAnimationRate(pme->m_pLogo, 500);
-
       if (ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_MENUCTL, (void **)&pme->m_pMainMenu))
          TS_WINERR_RETURN(pme);
 
-      SETAEERECT(&rect, 0, cy/2 + 1, cx, cy/2 - 1);
-      TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth, &rect, 0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDM_MAIN_PLAYFILE, NULL, IDB_PLAY,     IDM_MAIN_PLAYFILE, 0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDM_MAIN_RECORD,   NULL, IDB_RECORD,   IDM_MAIN_RECORD,   0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDM_MAIN_ABOUT,    NULL, IDB_ABOUT,    IDM_MAIN_ABOUT,    0);
+      TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth,&((CTopSoupApp*)pme->m_pOwner)->m_rectWin , 0);
+      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_MY_LOCATION, NULL, IDI_OBJECT_15201, IDS_STRING_MY_LOCATION, 0);
+      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_NAVIGATE,   NULL, IDI_OBJECT_15202, IDS_STRING_NAVIGATE,   0);
+      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_APPINFO,    NULL, IDI_OBJECT_15203, IDS_STRING_APPINFO,    0);
+
+	  TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
 	  //XXX __end
 
 
@@ -85,8 +67,6 @@ static void CMainWin_Delete(IWindow * po)
    CMainWin *  pme = (CMainWin *)po;
 
    //XXX __begin
-   TS_RELEASEIF(pme->m_pLogo);
-
    if (pme->m_pMainMenu)
 	   pme->m_pOwner->m_wMainWin = IMENUCTL_GetSel(pme->m_pMainMenu);
    TS_RELEASEIF(pme->m_pMainMenu);
@@ -111,13 +91,11 @@ static void CMainWin_Enable(IWindow * po, boolean bEnable)
    if (!pme->m_bActive)
    {
       IMENUCTL_SetActive(pme->m_pMainMenu, FALSE);
-      IIMAGE_Stop(pme->m_pLogo);
       return;
    }
 
    IMENUCTL_SetActive(pme->m_pMainMenu, TRUE);
    IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMainWin);
-   TS_DrawImage(pme->m_pLogo, &pme->m_rectLogo, TRUE);
    //XXX __end
 }
 
@@ -135,10 +113,9 @@ static void CMainWin_Redraw(IWindow * po)
    //XXX __begin
    IDISPLAY_ClearScreen(pme->m_pIDisplay);
 
-   TS_DRAWBACK(pme);
-   TS_DRAWHEADER(pme);
-   TS_DrawImage(pme->m_pLogo, &pme->m_rectLogo, TRUE);
+   TS_DrawBackgroud(po);
    IMENUCTL_Redraw(pme->m_pMainMenu);
+   
 
    IDISPLAY_Update(pme->m_pIDisplay);
    //XXX _end
@@ -154,14 +131,14 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
    boolean     bRet = TRUE;
 
    //XXX __begin
-   if (eCode == EVT_COPYRIGHT_END && pme->m_bAbout)
-   {
-      pme->m_bAbout = FALSE;
-      CTopSoupApp_Redraw(pme->m_pOwner, TRUE);
-      return TRUE;
+   if ( TS_ISSOFT(eCode)){
+	   if( AVK_SOFT1 == wParam )
+		   return TRUE;
+	   if( AVK_SOFT2 == wParam )
+		   return TRUE;
    }
-            
-   if (TS_ISEVTKEY(eCode))
+   
+   if (TS_ISEVTKEY(eCode)) 
       return IMENUCTL_HandleEvent(pme->m_pMainMenu, eCode, wParam, dwParam);
 
    if (!TS_ISEVTCMD(eCode))
@@ -169,16 +146,16 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
 
    switch (wParam)
    {
-      case IDM_MAIN_PLAYFILE:
+      case IDS_STRING_MY_LOCATION:
          break;
 
-      case IDM_MAIN_RECORD:
+      case IDS_STRING_NAVIGATE:
          break;
 
-      case IDM_MAIN_ABOUT:
-         CMainWin_About(pme);
-         break;
-
+      case IDS_STRING_APPINFO:
+         CMainWin_About((IWindow*)pme);
+		 break;
+	 
       default:
          bRet = FALSE;
          break;
@@ -197,10 +174,7 @@ static void CMainWin_About(IWindow * po)
 
 	CTopSoupApp_DisableWin(pme->m_pOwner);
 
-   pme->m_bAbout = TRUE;
-
    IDISPLAY_ClearScreen(pme->m_pIDisplay);
-   TS_DRAWBACK(pme);
-   TS_DRAWHEADER(pme);
+   TS_DrawBackgroud(po);
    ISHELL_ShowCopyright(pme->m_pIShell);
 }

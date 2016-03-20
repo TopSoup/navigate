@@ -7,6 +7,7 @@
 #include "nmdef.h"
 #include "AEEMenu.h"  
 
+#include "logicmacro.h"
 #include "window.h"
 #include "navigate.h"
 #include "mainwindow.h"
@@ -15,9 +16,10 @@
 #include "navigate.bid"
 #include "navigate.brh"
 #include "backimg.brh"
+#include "kitimg.brh"
 
 	
-#include "logicmacro.h"
+
 
 #endif
 

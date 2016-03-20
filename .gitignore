@@ -29,6 +29,8 @@
 */Debug/
 *.bar
 *.brh
+*.mak
+*.exe
 
 #Brew Simulator temp files
 *..dir.dat

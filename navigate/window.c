@@ -1,19 +1,4 @@
 #include "window.h"
-
-struct CWindow
-{
-	INHERIT_CWindow(IWindow);
-};
-
-typedef struct CWindow        CWindow;
-
-static void       CMainWin_Delete(IWindow * po);
-static void       CMainWin_Enable(IWindow * po, boolean bEnable);
-static void       CMainWin_Redraw(IWindow * po);
-static boolean    CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam);
-
-static void       CMainWin_About(IWindow * po);
-
 /*===============================================================================
 
                      CWindow Functions

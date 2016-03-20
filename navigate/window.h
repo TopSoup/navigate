@@ -63,6 +63,13 @@ QINTERFACE(IWindow)
 	IDisplay *     m_pIDisplay; \
 	flg            m_bActive:1
 
+// Base class of all IWindow objects.
+struct CWindow
+{
+	INHERIT_CWindow(IWindow);
+};
+typedef struct CWindow        CWindow;
+
 IWindow *  CWindow_New(int16 nSize, CTopSoupApp * pOwner, VTBL(IWindow) * pvt);
 boolean    CWindow_ProcessEnable(IWindow * po, boolean bEnable);
 
