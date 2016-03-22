@@ -27,6 +27,10 @@
 *.plg
 *.opt
 */Debug/
+*.bar
+*.brh
+*.mak
+*.exe
 
 #Brew Simulator temp files
 *..dir.dat
@@ -42,4 +46,20 @@ brewappmgr
 #ignore android building directory
 /obj/
 /gen/
+
+#mac operater
+__MACOSX/
+.DS_Store
+navigate/doc/*
+
+#vs  file
+navigate/UpgradeLog.XML
+navigate/_UpgradeReport_Files/
+navigate/navigate.vcproj.*
+
+#brew shared 
+navigate/shared/
+
+#tags
+navigate/tags
 
