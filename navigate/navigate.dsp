@@ -96,10 +96,6 @@ SOURCE=.\AEEAppGen.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\AEEMediaUtil.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\AEEModGen.c
 # End Source File
 # Begin Source File

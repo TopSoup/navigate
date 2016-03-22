@@ -17,12 +17,21 @@ GENERAL DESCRIPTION:
 #include "AEEPosDet.h"
 #include "transform.h"
 
-typedef struct _TrackState TrackState;
+#define LOC_CONFIG_FILE "gpsConfig.txt"
+#define LOC_CONFIG_OPT_STRING       "GPS_OPTIMIZATION_MODE = "
+#define LOC_CONFIG_QOS_STRING       "GPS_QOS = "
+#define LOC_CONFIG_SVR_TYPE_STRING  "GPS_SERVER_TYPE = "
+#define LOC_CONFIG_SVR_IP_STRING    "GPS_SERVER_IP = "
+#define LOC_CONFIG_SVR_PORT_STRING  "GPS_SERVER_PORT = "
+
+ #define LOC_QOS_DEFAULT       127
+
+typedef struct _LocState LocState;
 typedef enum {
-   TRACK_LOCAL,      /* Uses AEEGPS_TRACK_LOCAL */
-   TRACK_NETWORK,     /* Uses AEEGPS_TRACK_NETOWORK */
-   TRACK_AUTO        /* Attempts using AEEGPS_TRACK_LOCAL if it fails uses AEEGPS_TRACK_NETWORK */
-} TrackType;
+   LOC_LOCAL,      /* Uses AEEGPS_LOC_LOCAL */
+   LOC_NETWORK,     /* Uses AEEGPS_LOC_NETOWORK */
+   LOC_AUTO        /* Attempts using AEEGPS_LOC_LOCAL if it fails uses AEEGPS_LOC_NETWORK */
+} LocType;
 
 typedef struct {
 	double lat;       /* latitude on WGS-84 Geoid */
@@ -64,7 +73,7 @@ struct _GetGPSInfo {
    boolean      bPaused;
    uint16       wMainMenuEntry;
    boolean      bAbort;
-   TrackState   *pts;
+   LocState		*pts;
 };
 
 #ifdef __cplusplus
@@ -89,24 +98,24 @@ extern "C" {
 
    /* Creates and initializes a handle for tracking. 
    ** Invoke the CALLBACK_Cancel( pcb ) to destroy this object. */
-   int Track_Init( IShell *pIShell, IPosDet *pIPos, AEECallback *pcb, TrackState **po );
+   int Loc_Init( IShell *pIShell, IPosDet *pIPos, AEECallback *pcb, LocState **po );
 
-   /* Starts the tracking using the object created in Track_Init */
-   int Track_Start( TrackState *pts, TrackType t, int nFixes, int nInterval, PositionData *pData );
+   /* Starts the tracking using the object created in Loc_Init */
+   int Loc_Start( LocState *pts, LocType t, int nFixes, int nInterval, PositionData *pData );
 
    /* Stops the tracking, does not clean up the object, it can be
-   ** further used with Track_Start. Only CALLBACK_Cancel(pcb) releases
+   ** further used with Loc_Start. Only CALLBACK_Cancel(pcb) releases
    ** the object. */
-   int Track_Stop( TrackState *pts );
+   int Loc_Stop( LocState *pts );
 
    /* Calculate the distance between A and B */
-   double Track_Calc_Distance( double latA, double lngA, double latB, double lngB );
+   double Loc_Calc_Distance( double latA, double lngA, double latB, double lngB );
 
    /* Calculate the Azimuth between A and B */
-   double Track_Calc_Azimuth( double latA, double lngA, double latB, double lngB );
+   double Loc_Calc_Azimuth( double latA, double lngA, double latB, double lngB );
 
    /* For test */
-   void Track_Test_All();
+   void Loc_Test_All();
 
 #ifdef __cplusplus
 }

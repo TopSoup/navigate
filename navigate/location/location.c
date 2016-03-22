@@ -1,13 +1,13 @@
 /*======================================================
-FILE:  SP_Track.c
+FILE:  SP_Loc.c
 
-SERVICES: Tracking using IPosDet.
-  Track_Init
-  Track_Start
-  Track_Stop
+SERVICES: Locing using IPosDet.
+  Loc_Init
+  Loc_Start
+  Loc_Stop
 
 GENERAL DESCRIPTION:
-	Sample code to demonstrate services of IPosDet. See SP_Track.h for the
+	Sample code to demonstrate services of IPosDet. See SP_Loc.h for the
    description of exported functions.
 
         Copyright ?2003 QUALCOMM Incorporated.
@@ -17,18 +17,19 @@ GENERAL DESCRIPTION:
 #include "AEEComdef.h"
 #include "BREWVersion.h"
 #include "AEEStdLib.h"
+#include "AEEFile.h"
 #include "location.h"
 
-struct _TrackState{
+struct _LocState{
    boolean     bInNotification;     /* When the state machine is notifying the client */
-   boolean     bSetForCancellation; /* Track is meant to be cancelled. do so when it is safe. */
-   boolean     bInProgress;         /* when tracking is in progress. */
+   boolean     bSetForCancellation; /* Loc is meant to be cancelled. do so when it is safe. */
+   boolean     bInProgress;         /* when Locing is in progress. */
 /* For Dest Position */
    boolean	   bSetDestPos;
 
 /**************************/
 
-/* For TRACK_AUTO */
+/* For LOC_AUTO */
    boolean     bModeAuto;
    boolean     bModeLocal;
 
@@ -47,23 +48,43 @@ struct _TrackState{
 
 /* Client passed members. */
    int nPendingFixes;
-   int nTrackInterval;
+   int nLocInterval;
    IPosDet    *pPos;
    IShell     *pShell;
 /**************************/
 };
 
 
-static void Track_Notify( TrackState *pts )
+/*======================================================================= 
+Function: Loc_ReadGPSSettings()
+
+Description: 
+   Reads the GPS configuration settings from the configuration file.
+=======================================================================*/
+static uint32 Loc_ReadGPSSettings(IFile * pIFile, AEEGPSConfig *gpsConfig);
+
+/*======================================================================= 
+Function: Loc_WriteGPSSettings()
+
+Description: 
+   Write the GPS configuration settings from the configuration file.
+
+Prototype:
+
+   uint32 Loc_WriteGPSSettings(CLoc *pMe, IFile * pIFile);
+=======================================================================*/
+static uint32 Loc_WriteGPSSettings( IFile * pIFile , AEEGPSConfig *gpsConfig);
+
+static void Loc_Notify( LocState *pts )
 {
    pts->bInNotification = TRUE;
    pts->pcbResp->pfnNotify( pts->pcbResp->pNotifyData );
    pts->bInNotification = FALSE;
 }
 
-static void Track_Cancel( AEECallback *pcb )
+static void Loc_Cancel( AEECallback *pcb )
 {
-   TrackState *pts = (TrackState *)pcb->pCancelData;
+   LocState *pts = (LocState *)pcb->pCancelData;
 
    if( TRUE == pts->bInNotification ) {
       /* It is not safe to cleanup from a notification. Defer it. */
@@ -84,16 +105,16 @@ static void Track_Cancel( AEECallback *pcb )
    FREE( pts );
 }
 
-static void Track_cbInterval( TrackState *pts )
+static void Loc_cbInterval( LocState *pts )
 {
    /* Cancel if it was deferred. */
    if( TRUE == pts->bSetForCancellation ) {
 
-      Track_Cancel( pts->pcbResp );
+      Loc_Cancel( pts->pcbResp );
       return;
    }
 
-   DBGPRINTF( "TRACK : bAuto:%d bLocal:%d", pts->bModeAuto, pts->bModeLocal );
+   DBGPRINTF( "Loc : bAuto:%d bLocal:%d", pts->bModeAuto, pts->bModeLocal );
 
    // Request GPSInfo
    if( TRUE == pts->bInProgress && SUCCESS != IPOSDET_GetGPSInfo( pts->pPos, 
@@ -105,18 +126,18 @@ static void Track_cbInterval( TrackState *pts )
       /* Report a failure and bailout */
       pts->pResp->nErr = AEEGPS_ERR_GENERAL_FAILURE;
 
-      Track_Notify( pts );
+      Loc_Notify( pts );
 
-      Track_Stop( pts );
+      Loc_Stop( pts );
 
    }
 }
 
-static void Track_Network( TrackState *pts )
+static void Loc_Network( LocState *pts )
 {
    AEEGPSConfig config;
 
-   DBGPRINTF( "TRACK NETWORK" );
+   DBGPRINTF( "Loc NETWORK" );
    
    (void) IPOSDET_GetGPSConfig( pts->pPos, &config );
 
@@ -127,11 +148,11 @@ static void Track_Network( TrackState *pts )
    pts->bModeLocal = FALSE;
 }
 
-static void Track_Local( TrackState *pts )
+static void Loc_Local( LocState *pts )
 {
    AEEGPSConfig config;
 
-   DBGPRINTF( "TRACK LOCAL" );
+   DBGPRINTF( "Loc LOCAL" );
 
    (void) IPOSDET_GetGPSConfig( pts->pPos, &config );
 
@@ -142,7 +163,7 @@ static void Track_Local( TrackState *pts )
    pts->bModeLocal = TRUE;
 }
 
-static void Track_cbInfo( TrackState *pts )
+static void Loc_cbInfo( LocState *pts )
 {
    if( pts->theInfo.status == AEEGPS_ERR_NO_ERR 
       || (pts->theInfo.status == AEEGPS_ERR_INFO_UNAVAIL && pts->theInfo.fValid) ) {
@@ -171,7 +192,7 @@ static void Track_cbInfo( TrackState *pts )
 	  //当前夹角
 	  if (FCMP_G(FABS(pts->lastCoordinate.lat), 0))
 	  {
-		  pts->pResp->heading = Track_Calc_Azimuth(pts->lastCoordinate.lat, pts->lastCoordinate.lon, pts->pResp->lat, pts->pResp->lon);
+		  pts->pResp->heading = Loc_Calc_Azimuth(pts->lastCoordinate.lat, pts->lastCoordinate.lon, pts->pResp->lat, pts->pResp->lon);
 	  }
 	  else
 	  {
@@ -185,8 +206,8 @@ static void Track_cbInfo( TrackState *pts )
 	  if (pts->pResp->bSetDestPos)
 	  {
 		  //计算距离和方位角
-		  pts->pResp->distance = Track_Calc_Distance(pts->pResp->lat, pts->pResp->lon, pts->pResp->destPos.lat, pts->pResp->destPos.lon);
-		  pts->pResp->destHeading = Track_Calc_Azimuth(pts->pResp->lat, pts->pResp->lon, pts->pResp->destPos.lat, pts->pResp->destPos.lon);
+		  pts->pResp->distance = Loc_Calc_Distance(pts->pResp->lat, pts->pResp->lon, pts->pResp->destPos.lat, pts->pResp->destPos.lon);
+		  pts->pResp->destHeading = Loc_Calc_Azimuth(pts->pResp->lat, pts->pResp->lon, pts->pResp->destPos.lat, pts->pResp->destPos.lon);
 	  }
 	  
 	  pts->lastCoordinate.lat = pts->pResp->lat;
@@ -196,7 +217,7 @@ static void Track_cbInfo( TrackState *pts )
 
       pts->pResp->nErr = SUCCESS;
 
-      Track_Notify( pts );
+      Loc_Notify( pts );
 
       if( (!pts->nPendingFixes || --pts->nPendingFixes > 0) 
          && FALSE == pts->bSetForCancellation ) {
@@ -204,23 +225,23 @@ static void Track_cbInfo( TrackState *pts )
          if( pts->bModeAuto && pts->bModeLocal == FALSE ) {
 
             /* Try with local first */
-            Track_Local( pts );
+            Loc_Local( pts );
          }
 
-         ISHELL_SetTimerEx( pts->pShell, pts->nTrackInterval * 1000, &pts->cbIntervalTimer );
+         ISHELL_SetTimerEx( pts->pShell, pts->nLocInterval * 1000, &pts->cbIntervalTimer );
       }
       else {
 
-         Track_Stop( pts );
+         Loc_Stop( pts );
       }
    }
    else {
 
       if( pts->bModeAuto && pts->bModeLocal ) {
 
-         /* Retry with TRACK_NETWORK */
-         Track_Network( pts );
-         Track_cbInterval( pts );
+         /* Retry with LOC_NETWORK */
+         Loc_Network( pts );
+         Loc_cbInterval( pts );
       }
 
       else { 
@@ -228,16 +249,16 @@ static void Track_cbInfo( TrackState *pts )
          /* Inform the application of failure code. */
          pts->pResp->nErr = pts->theInfo.status;
          
-         Track_Notify( pts );
+         Loc_Notify( pts );
          
          /* On timeout re-try. For other reasons bailout. */
          if( pts->theInfo.status == AEEGPS_ERR_TIMEOUT ) {
             
-            Track_cbInterval( pts );
+            Loc_cbInterval( pts );
          }
          else {
             
-            Track_Stop( pts );
+            Loc_Stop( pts );
          }
       }
    }
@@ -245,14 +266,14 @@ static void Track_cbInfo( TrackState *pts )
 
 
 /*======================================================================= 
-Function: Track_Init()
+Function: Loc_Init()
 
 Description: 
-   Creates and initializes a handle for tracking.
+   Creates and initializes a handle for Locing.
 
 Prototype:
 
-   int Track_Init( IShell *pIShell, IPosDet *pIPos, AEECallback *pcb, TrackState **po )
+   int Loc_Init( IShell *pIShell, IPosDet *pIPos, AEECallback *pcb, LocState **po )
 
 Parameters:
    pIShell: [in]. IShell instance.
@@ -267,7 +288,7 @@ Return Value:
    ENOMEMORY - When system is out of memory.
  
 Comments:  
-   Invoke the CALLBACK_Cancel( pcb ) to destroy TrackState object.
+   Invoke the CALLBACK_Cancel( pcb ) to destroy LocState object.
 
 Side Effects: 
    None
@@ -275,17 +296,17 @@ Side Effects:
 See Also:
    None
 =======================================================================*/
-int Track_Init( IShell *pIShell, IPosDet *pIPos, AEECallback *pcb, TrackState **po )
+int Loc_Init( IShell *pIShell, IPosDet *pIPos, AEECallback *pcb, LocState **po )
 {
    int nErr = SUCCESS;
-   TrackState *pts = NULL;
+   LocState *pts = NULL;
 
    if( !pIShell || !pIPos || !pcb || !po ) {
 
       nErr = EBADPARM;
 
    }
-   else if( NULL == (pts = MALLOC( sizeof(TrackState) )) ){
+   else if( NULL == (pts = MALLOC( sizeof(LocState) )) ){
 
       nErr = ENOMEMORY;
 
@@ -303,11 +324,11 @@ int Track_Init( IShell *pIShell, IPosDet *pIPos, AEECallback *pcb, TrackState **
       /* Install the notification cb */
       CALLBACK_Cancel( pcb );
       pts->pcbResp = pcb;
-      pts->pcbResp->pfnCancel   = Track_Cancel;
+      pts->pcbResp->pfnCancel   = Loc_Cancel;
       pts->pcbResp->pCancelData = pts;
 
-      CALLBACK_Init( &pts->cbIntervalTimer, Track_cbInterval, pts );
-      CALLBACK_Init( &pts->cbInfo, Track_cbInfo, pts );
+      CALLBACK_Init( &pts->cbIntervalTimer, Loc_cbInterval, pts );
+      CALLBACK_Init( &pts->cbInfo, Loc_cbInfo, pts );
    }
 
    *po = pts;
@@ -316,19 +337,19 @@ int Track_Init( IShell *pIShell, IPosDet *pIPos, AEECallback *pcb, TrackState **
 }
 
 /*======================================================================= 
-Function: Track_Stop()
+Function: Loc_Stop()
 
 Description: 
-   Stops the tracking, does not clean up the object, it can be
-   further used with Track_Start. Only CALLBACK_Cancel(pcb) releases
+   Stops the Locing, does not clean up the object, it can be
+   further used with Loc_Start. Only CALLBACK_Cancel(pcb) releases
    the object.
 
 Prototype:
 
-   int Track_Stop( TrackState *pts );
+   int Loc_Stop( LocState *pts );
 
 Parameters:
-   pts: [in]. TrackState object created using Track_Init().
+   pts: [in]. LocState object created using Loc_Init().
 
 Return Value:
 
@@ -336,15 +357,15 @@ Return Value:
    EBADPARM - One or more of the Invalid arguments
  
 Comments:  
-   Invoke the CALLBACK_Cancel( pcb ) to destroy TrackState object.
+   Invoke the CALLBACK_Cancel( pcb ) to destroy LocState object.
 
 Side Effects: 
    None
 
 See Also:
-   Track_Init()
+   Loc_Init()
 =======================================================================*/
-int Track_Stop( TrackState *pts )
+int Loc_Stop( LocState *pts )
 {
    if( !pts ) {
       return EBADPARM;
@@ -356,32 +377,32 @@ int Track_Stop( TrackState *pts )
    CALLBACK_Cancel( &pts->cbInfo );
    CALLBACK_Cancel( &pts->cbIntervalTimer );
 
-   /* Report that Tracking is halted */
+   /* Report that Locing is halted */
    pts->pResp->nErr = EIDLE;
    
-   //Track_Notify( pts );
+   //Loc_Notify( pts );
 
    if( TRUE == pts->bSetForCancellation ) {
 
-      Track_Cancel( pts->pcbResp );
+      Loc_Cancel( pts->pcbResp );
    }
    
    return SUCCESS;
 }
 
 /*======================================================================= 
-Function: Track_Start()
+Function: Loc_Start()
 
 Description: 
-   Starts the tracking using the object created in Track_Init().
+   Starts the Locing using the object created in Loc_Init().
 
 Prototype:
 
-   int Track_Start( TrackState *pts, TrackType t, int nFixes, int nInterval, PositionData *pData );
+   int Loc_Start( LocState *pts, LocType t, int nFixes, int nInterval, PositionData *pData );
 
 Parameters:
-   pts: [in]. TrackState object created using Track_Init().
-   t: [in]. Type of tracking.
+   pts: [in]. LocState object created using Loc_Init().
+   t: [in]. Type of Locing.
    nFixes: [in]. Number of fixes.
    nInterval: [in]. Interval between fixes in seconds.
    pData: [in]. Memory in which the Position response is to be filled.
@@ -393,18 +414,18 @@ Return Value:
    EUNSUPPORTED - Unimplemented
    ENOMEMORY - When system is out of memory.
    EFAILED - General failure.
-   EALREADY - When tracking is already in progress.
+   EALREADY - When Locing is already in progress.
  
 Comments:  
-   Invoke the CALLBACK_Cancel( pcb ) to destroy TrackState object.
+   Invoke the CALLBACK_Cancel( pcb ) to destroy LocState object.
 
 Side Effects: 
    None
 
 See Also:
-   Track_Init()
+   Loc_Init()
 =======================================================================*/
-int Track_Start( TrackState *pts, TrackType t, int nFixes, 
+int Loc_Start( LocState *pts, LocType t, int nFixes, 
                    int nInterval, PositionData *pData )
 {
    int nErr = SUCCESS;
@@ -425,25 +446,25 @@ int Track_Start( TrackState *pts, TrackType t, int nFixes,
 
       pts->pResp          = pData;
       pts->nPendingFixes  = nFixes;
-      pts->nTrackInterval = nInterval;
+      pts->nLocInterval = nInterval;
       pts->bModeAuto      = FALSE;
       pts->bModeLocal     = FALSE;
 
       IPOSDET_GetGPSConfig( pts->pPos, &config );
 
       /* Configure the IPosDet Instance */
-      if( t == TRACK_LOCAL ) {
+      if( t == LOC_LOCAL ) {
 
          config.mode = AEEGPS_MODE_TRACK_LOCAL;
          pts->bModeLocal = TRUE;
       }
-      else if( t == TRACK_NETWORK ){
+      else if( t == LOC_NETWORK ){
 
          config.mode = AEEGPS_MODE_TRACK_NETWORK;
       }
-      else if( t == TRACK_AUTO ) {
+      else if( t == LOC_AUTO ) {
 
-         DBGPRINTF( "TRACK AUTO" );
+         DBGPRINTF( "Loc AUTO" );
 
          if( nFixes == 1 ) {
            
@@ -470,8 +491,8 @@ int Track_Start( TrackState *pts, TrackType t, int nFixes,
 
       if( nErr == EUNSUPPORTED && pts->bModeAuto ) {
 
-         /* As TRACK_LOCAL is unsupported on certain devices. If this is auto mode 
-         ** and we tried to track locally, change it network based tracking. */
+         /* As LOC_LOCAL is unsupported on certain devices. If this is auto mode 
+         ** and we tried to Loc locally, change it network based Locing. */
 
          pts->bModeAuto = FALSE;
          pts->bModeLocal = FALSE;
@@ -485,7 +506,7 @@ int Track_Start( TrackState *pts, TrackType t, int nFixes,
 
          pts->bInProgress    = TRUE;
 
-         Track_cbInterval( pts );
+         Loc_cbInterval( pts );
       }
 
    }
@@ -493,20 +514,350 @@ int Track_Start( TrackState *pts, TrackType t, int nFixes,
 }
 
 /* Calculate the distance between A and B */
-double Track_Calc_Distance( double latA, double lngA, double latB, double lngB )
+double Loc_Calc_Distance( double latA, double lngA, double latB, double lngB )
 {
 	return calc_distance(latA, lngA, latB, lngB);
 }
 
 /* Calculate the Azimuth between A and B */
-double Track_Calc_Azimuth( double latA, double lngA, double latB, double lngB )
+double Loc_Calc_Azimuth( double latA, double lngA, double latB, double lngB )
 {
 	return calc_azimuth(latA, lngA, latB, lngB);
 }
 
 
 
-void Track_Test_All()
+
+/*======================================================================= 
+Function: Loc_InitGPSSettings()
+
+Description: 
+   Initializes the GPS configuration to the default values.
+=======================================================================*/
+uint32 Loc_InitGPSSettings(IShell *pIShell, AEEGPSConfig *gpsConfig)
+{
+   IFileMgr   *pIFileMgr = NULL;
+   IFile      *pIConfigFile = NULL;
+   uint32      nResult = 0;
+   
+   if (pIShell == NULL || gpsConfig == NULL)
+      return EFAILED;
+
+   // Create the instance of IFileMgr
+   nResult = ISHELL_CreateInstance( pIShell, AEECLSID_FILEMGR, (void**)&pIFileMgr );
+   if ( SUCCESS != nResult ) {
+      return nResult;
+   }
+
+   // If the config file exists, open it and read the settings.  Otherwise, we need to
+   // create a new config file.
+   nResult = IFILEMGR_Test( pIFileMgr, LOC_CONFIG_FILE );
+   if ( SUCCESS == nResult ) {
+      pIConfigFile = IFILEMGR_OpenFile( pIFileMgr, LOC_CONFIG_FILE, _OFM_READ );
+      if ( !pIConfigFile ) {
+         nResult = EFAILED;
+      }
+      else {
+         nResult = Loc_ReadGPSSettings( pIConfigFile, gpsConfig );
+      }
+   }
+   else {
+      pIConfigFile = IFILEMGR_OpenFile( pIFileMgr, LOC_CONFIG_FILE, _OFM_CREATE );
+      if ( !pIConfigFile ) {
+         nResult = EFAILED;
+      }
+      else {
+         // Setup the default GPS settings
+         gpsConfig->optim  = AEEGPS_OPT_DEFAULT;
+         gpsConfig->qos    = LOC_QOS_DEFAULT;
+         gpsConfig->server.svrType = AEEGPS_SERVER_DEFAULT;
+         nResult = Loc_WriteGPSSettings( pIConfigFile , gpsConfig);
+      }
+   }
+
+   // Free the IFileMgr and IFile instances
+   IFILE_Release( pIConfigFile );
+   IFILEMGR_Release( pIFileMgr );
+
+   return nResult;
+}
+
+
+
+/*======================================================================= 
+Function: DistToSemi()
+
+Description: 
+   Utility function that determines index of the first semicolon in the
+   input string.
+=======================================================================*/
+static int DistToSemi(const char * pszStr)
+{
+   int nCount = 0;
+
+   if ( !pszStr ) { 
+      return -1;
+   }
+
+   while ( *pszStr != 0 ) {
+      if ( *pszStr == ';' ) {
+         return nCount;
+      }
+      else {
+         nCount++;
+         pszStr++;
+      }
+   }
+
+   return -1;
+}
+
+
+
+/*======================================================================= 
+Function: Loc_ReadGPSSettings()
+
+Description: 
+   Reads the GPS configuration settings from the configuration file.
+=======================================================================*/
+static uint32 Loc_ReadGPSSettings(IFile * pIFile, AEEGPSConfig *gpsConfig)
+{
+   char    *pszBuf = NULL;
+   char    *pszTok = NULL;
+   char    *pszSvr = NULL;
+   char    *pszDelimiter = ";";
+   int32   nResult = 0;
+   FileInfo fiInfo;
+
+   if (pIFile == NULL || gpsConfig == NULL)
+      return EFAILED;
+
+   if ( SUCCESS != IFILE_GetInfo( pIFile, &fiInfo ) ) {
+      return EFAILED;
+   }
+
+   if ( fiInfo.dwSize == 0 ) {
+      return EFAILED;
+   }
+
+   // Allocate enough memory to read the full text into memory
+   pszBuf = MALLOC( fiInfo.dwSize );
+
+   nResult = IFILE_Read( pIFile, pszBuf, fiInfo.dwSize );
+   if ( (uint32)nResult < fiInfo.dwSize ) {
+      FREE( pszBuf );
+      return EFAILED;
+   }
+
+   // Check for an optimization mode setting in the file:
+   pszTok = STRSTR( pszBuf, LOC_CONFIG_OPT_STRING );
+   if ( pszTok ) {
+      pszTok = pszTok + STRLEN( LOC_CONFIG_OPT_STRING );
+      gpsConfig->optim = (AEEGPSOpt)STRTOUL( pszTok, &pszDelimiter, 10 );
+   }
+
+   // Check for a QoS setting in the file:
+   pszTok = STRSTR( pszBuf, LOC_CONFIG_QOS_STRING );
+   if ( pszTok ) {
+      pszTok = pszTok + STRLEN( LOC_CONFIG_QOS_STRING );
+      gpsConfig->qos = (AEEGPSQos)STRTOUL( pszTok, &pszDelimiter, 10 );
+   }
+
+   // Check for a server type setting in the file:
+   pszTok = STRSTR( pszBuf, LOC_CONFIG_SVR_TYPE_STRING );
+   if ( pszTok ) {
+      pszTok = pszTok + STRLEN( LOC_CONFIG_SVR_TYPE_STRING );
+      gpsConfig->server.svrType = STRTOUL( pszTok, &pszDelimiter, 10 );
+
+      // If the server type is IP, we need to find the ip address and the port number
+      if ( AEEGPS_SERVER_IP == gpsConfig->server.svrType ) {
+         pszTok = STRSTR( pszBuf, LOC_CONFIG_SVR_IP_STRING );
+         if ( pszTok ) {
+            pszTok = pszTok + STRLEN( LOC_CONFIG_SVR_IP_STRING );
+            nResult = DistToSemi( pszTok );
+            pszSvr = MALLOC( nResult+1 );
+            STRNCPY( pszSvr, pszTok, nResult );
+            *(pszSvr+nResult) = 0;  // Need to manually NULL-terminate the string
+            if ( !INET_ATON( pszSvr, &gpsConfig->server.svr.ipsvr.addr ) ) {
+               FREE( pszBuf );
+               FREE( pszSvr );
+               return EFAILED;
+            }
+            FREE( pszSvr );
+         }
+         pszTok = STRSTR( pszBuf, LOC_CONFIG_SVR_PORT_STRING );
+         if ( pszTok ) {
+            pszTok = pszTok + STRLEN( LOC_CONFIG_SVR_PORT_STRING );
+            gpsConfig->server.svr.ipsvr.port = AEE_htons((INPort)STRTOUL( pszTok, &pszDelimiter, 10 ));
+         }
+      }
+   }
+
+   FREE( pszBuf );
+   
+   return SUCCESS;
+}
+
+
+/*======================================================================= 
+Function: Loc_WriteGPSSettings()
+
+Description: 
+   Write the GPS configuration settings from the configuration file.
+
+Prototype:
+
+   uint32 Loc_WriteGPSSettings(CLoc *pMe, IFile * pIFile);
+=======================================================================*/
+static uint32 Loc_WriteGPSSettings( IFile * pIFile , AEEGPSConfig *gpsConfig)
+{
+   char    *pszBuf;
+   int32    nResult;
+
+   if (pIFile == NULL || gpsConfig == NULL)
+      return EFAILED;
+
+   pszBuf = MALLOC( 1024 );
+
+   // Truncate the file, in case it already contains data
+   IFILE_Truncate( pIFile, 0 );
+
+   // Write out the optimization setting:
+   SPRINTF( pszBuf, LOC_CONFIG_OPT_STRING"%d;\r\n", gpsConfig->optim );
+   nResult = IFILE_Write( pIFile, pszBuf, STRLEN( pszBuf ) );
+   if ( 0 == nResult ) {
+      FREE(pszBuf);
+      return EFAILED;
+   }
+   
+   // Write out the QoS setting:
+   SPRINTF( pszBuf, LOC_CONFIG_QOS_STRING"%d;\r\n", gpsConfig->qos );
+   nResult = IFILE_Write( pIFile, pszBuf, STRLEN( pszBuf ) );
+   if ( 0 == nResult ) {
+      FREE(pszBuf);
+      return EFAILED;
+   }
+   
+   // Write out the server type setting:
+   SPRINTF( pszBuf, LOC_CONFIG_SVR_TYPE_STRING"%d;\r\n", gpsConfig->server.svrType );
+   nResult = IFILE_Write( pIFile, pszBuf, STRLEN( pszBuf ) );
+   if ( 0 == nResult ) {
+      FREE(pszBuf);
+      return EFAILED;
+   }
+   
+   if ( AEEGPS_SERVER_IP == gpsConfig->server.svrType ) {
+      // Write out the IP address setting:
+      INET_NTOA( gpsConfig->server.svr.ipsvr.addr, pszBuf, 50 );
+      nResult = IFILE_Write( pIFile, LOC_CONFIG_SVR_IP_STRING, STRLEN( LOC_CONFIG_SVR_IP_STRING ) );
+      if ( 0 == nResult ) {
+         FREE(pszBuf);
+         return EFAILED;
+      }
+      nResult = IFILE_Write( pIFile, pszBuf, STRLEN( pszBuf ) );
+      if ( 0 == nResult ) {
+         FREE(pszBuf);
+         return EFAILED;
+      }
+      nResult = IFILE_Write( pIFile, ";\r\n", STRLEN( ";\r\n" ) );
+      if ( 0 == nResult ) {
+         FREE(pszBuf);
+         return EFAILED;
+      }
+
+      // Write out the port setting:
+      SPRINTF( pszBuf, LOC_CONFIG_SVR_PORT_STRING"%d;\r\n", AEE_ntohs(gpsConfig->server.svr.ipsvr.port) );
+      nResult = IFILE_Write( pIFile, pszBuf, STRLEN( pszBuf ) );
+      if ( 0 == nResult ) {
+         FREE(pszBuf);
+         return EFAILED;
+      }
+   }
+
+   FREE( pszBuf );
+
+   return SUCCESS;
+}
+
+
+
+/*======================================================================= 
+Function: Loc_SaveGPSSettings()
+
+Description: 
+   Opens the configuration file and saves the settings.
+=======================================================================*/
+uint32 Loc_SaveGPSSettings( IShell *pIShell )
+{
+   IFileMgr   *pIFileMgr = NULL;
+   IFile      *pIConfigFile = NULL;
+   uint32      nResult = 0;
+
+   if (pIShell == NULL)
+      return EFAILED;
+   
+   // Create the instance of IFileMgr
+   nResult = ISHELL_CreateInstance( pIShell, AEECLSID_FILEMGR, (void**)&pIFileMgr );
+   if ( SUCCESS != nResult ) {
+      return nResult;
+   }
+
+   // If the config file exists, open it and read the settings.  Otherwise, we need to
+   // create a new config file.
+   nResult = IFILEMGR_Test( pIFileMgr, LOC_CONFIG_FILE );
+   if ( SUCCESS == nResult ) {
+      pIConfigFile = IFILEMGR_OpenFile( pIFileMgr, LOC_CONFIG_FILE, _OFM_READWRITE );
+      if ( !pIConfigFile ) {
+         nResult = EFAILED;
+      }
+      else {
+		 // Setup the default GPS settings
+		 AEEGPSConfig *gpsConfig = (AEEGPSConfig*)MALLOC(sizeof(AEEGPSConfig));
+		 if (gpsConfig != NULL)
+		 {
+			gpsConfig->optim  = AEEGPS_OPT_DEFAULT;
+			gpsConfig->qos    = LOC_QOS_DEFAULT;
+			gpsConfig->server.svrType = AEEGPS_SERVER_DEFAULT;
+			nResult = Loc_WriteGPSSettings( pIConfigFile , gpsConfig);
+			FREE(gpsConfig);
+		 }
+         else
+		 {
+			 nResult = EFAILED;
+		 }
+      }
+   }
+   else {
+      pIConfigFile = IFILEMGR_OpenFile( pIFileMgr, LOC_CONFIG_FILE, _OFM_CREATE );
+      if ( !pIConfigFile ) {
+         nResult = EFAILED;
+      }
+      else {
+         // Setup the default GPS settings
+		 AEEGPSConfig *gpsConfig = (AEEGPSConfig*)MALLOC(sizeof(AEEGPSConfig));
+		 if (gpsConfig != NULL)
+		 {
+			gpsConfig->optim  = AEEGPS_OPT_DEFAULT;
+			gpsConfig->qos    = LOC_QOS_DEFAULT;
+			gpsConfig->server.svrType = AEEGPS_SERVER_DEFAULT;
+			nResult = Loc_WriteGPSSettings( pIConfigFile , gpsConfig);
+			FREE(gpsConfig);
+		 }
+         else
+		 {
+			 nResult = EFAILED;
+		 }
+      }
+   }
+
+   // Free the IFileMgr and IFile instances
+   IFILE_Release( pIConfigFile );
+   IFILEMGR_Release( pIFileMgr );
+
+   return nResult;
+}
+
+void Loc_Test_All()
 {
    Coordinate c1, c2;
    double dis = 0, th = 0;
@@ -521,8 +872,8 @@ void Track_Test_All()
    //1 chengde 40.8493953666,118.0478839599
    c2.lat = 40.8493953666;
    c2.lon = 118.0478839599;
-   dis = Track_Calc_Distance(c1.lat, c1.lon, c2.lat, c2.lon);
-   th = Track_Calc_Azimuth(c1.lat, c1.lon, c2.lat, c2.lon);
+   dis = Loc_Calc_Distance(c1.lat, c1.lon, c2.lat, c2.lon);
+   th = Loc_Calc_Azimuth(c1.lat, c1.lon, c2.lat, c2.lon);
 
    MEMSET(szDis,0,sizeof(szDis));
    FLOATTOWSTR(dis, bufDis, 32);
@@ -537,8 +888,8 @@ void Track_Test_All()
    //2 shanghai 31.1774276, 121.5272106	//1076679.0804040465
    c2.lat = 31.1774276;
    c2.lon = 121.5272106;
-   dis = Track_Calc_Distance(c1.lat, c1.lon, c2.lat, c2.lon);
-   th = Track_Calc_Azimuth(c1.lat, c1.lon, c2.lat, c2.lon);
+   dis = Loc_Calc_Distance(c1.lat, c1.lon, c2.lat, c2.lon);
+   th = Loc_Calc_Azimuth(c1.lat, c1.lon, c2.lat, c2.lon);
 
    MEMSET(szDis,0,sizeof(szDis));
    FLOATTOWSTR(dis, bufDis, 32);
@@ -553,8 +904,8 @@ void Track_Test_All()
    //3 sjz 38.0422378880,114.4925141047
    c2.lat = 38.0422378880;
    c2.lon = 114.4925141047;
-   dis = Track_Calc_Distance(c1.lat, c1.lon, c2.lat, c2.lon);
-   th = Track_Calc_Azimuth(c1.lat, c1.lon, c2.lat, c2.lon);
+   dis = Loc_Calc_Distance(c1.lat, c1.lon, c2.lat, c2.lon);
+   th = Loc_Calc_Azimuth(c1.lat, c1.lon, c2.lat, c2.lon);
 
    MEMSET(szDis,0,sizeof(szDis));
    FLOATTOWSTR(dis, bufDis, 32);
@@ -569,8 +920,8 @@ void Track_Test_All()
    //4 zhangjiakou 40.3964667463,114.8377011418
    c2.lat = 40.3964667463;
    c2.lon = 114.8377011418;
-   dis = Track_Calc_Distance(c1.lat, c1.lon, c2.lat, c2.lon);
-   th = Track_Calc_Azimuth(c1.lat, c1.lon, c2.lat, c2.lon);
+   dis = Loc_Calc_Distance(c1.lat, c1.lon, c2.lat, c2.lon);
+   th = Loc_Calc_Azimuth(c1.lat, c1.lon, c2.lat, c2.lon);
 
    MEMSET(szDis,0,sizeof(szDis));
    FLOATTOWSTR(dis, bufDis, 32);

@@ -147,11 +147,11 @@ IWindow * CNavigateWin_New(CTopSoupApp * pOwner, void *pDest)
 			CALLBACK_Init( &pGetGPSInfo->cbPosDet, CNavigateWin_GetGPSInfo_Callback, pme );
 			CALLBACK_Init( &pGetGPSInfo->cbProgressTimer, CNavigateWin_GetGPSInfo_SecondTicker, pme );
 			
-			nErr = Track_Init( pme->m_pIShell, pGetGPSInfo->pPosDet, &pGetGPSInfo->cbPosDet, &pGetGPSInfo->pts );
-			nErr = Track_Start( pGetGPSInfo->pts, TRACK_NETWORK, 0, 0, &pGetGPSInfo->theInfo );
+			nErr = Loc_Init( pme->m_pIShell, pGetGPSInfo->pPosDet, &pGetGPSInfo->cbPosDet, &pGetGPSInfo->pts );
+			nErr = Loc_Start( pGetGPSInfo->pts, LOC_NETWORK, 0, 0, &pGetGPSInfo->theInfo );
 			if( nErr != SUCCESS ) {
 				pGetGPSInfo->theInfo.nErr = nErr;
-				DBGPRINTF("Track_Start Failed!");
+				DBGPRINTF("Loc_Start Failed!");
 			}
 			else {
 				ISHELL_SetTimerEx( pme->m_pIShell, 1000, &pGetGPSInfo->cbProgressTimer );
@@ -176,7 +176,7 @@ static void CNavigateWin_Delete(IWindow * po)
 	//释放定位模块
 	if (pGetGPSInfo->pPosDet)
 	{
-		Track_Stop(pGetGPSInfo->pts);
+		Loc_Stop(pGetGPSInfo->pts);
 		
 		CALLBACK_Cancel( &pGetGPSInfo->cbProgressTimer );
 		CALLBACK_Cancel( &pGetGPSInfo->cbPosDet );
@@ -389,7 +389,7 @@ static void CNavigateWin_GetGPSInfo_Callback( IWindow *po )
 		//释放定位模块
 		if (pGetGPSInfo->pPosDet)
 		{
-			Track_Stop(pGetGPSInfo->pts);
+			Loc_Stop(pGetGPSInfo->pts);
 			
 			CALLBACK_Cancel( &pGetGPSInfo->cbProgressTimer );
 			CALLBACK_Cancel( &pGetGPSInfo->cbPosDet );
