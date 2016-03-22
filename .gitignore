@@ -42,6 +42,7 @@ brewappmgr
 
 #ignore android project files
 *.properties
+*.positions
 
 #ignore android building directory
 /obj/

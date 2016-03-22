@@ -124,7 +124,6 @@ static void CMainWin_Redraw(IWindow * po)
 /*===========================================================================
    This function processes events routed to main window.
 ===========================================================================*/
-#define MP_QCP_REC_FILE       "sample.qcp"
 static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam)
 {
    CMainWin *  pme = (CMainWin *)po;
@@ -134,10 +133,16 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
    if ( TS_ISSOFT(eCode)){
 	   if( AVK_SOFT1 == wParam )
 		   return TRUE;
+
+	   //ÍË³ö³ÌÐò
 	   if( AVK_SOFT2 == wParam )
-		   return TRUE;
+	   {
+			ISHELL_CloseApplet(pme->m_pIShell, FALSE);
+			return TRUE;
+	   }
    }
    
+
    if (TS_ISEVTKEY(eCode)) 
       return IMENUCTL_HandleEvent(pme->m_pMainMenu, eCode, wParam, dwParam);
 
@@ -147,11 +152,19 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
    switch (wParam)
    {
       case IDS_STRING_MY_LOCATION:
+		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE, 0);
          break;
 
       case IDS_STRING_NAVIGATE:
-         break;
-
+		  {
+			  //default beijing, for test
+			  Coordinate	dest;
+			  dest.lat = 39.911954;
+			  dest.lon = 116.377817;
+			  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE, (uint32)&dest);
+			  
+			  break;
+		  }
       case IDS_STRING_APPINFO:
          CMainWin_About((IWindow*)pme);
 		 break;

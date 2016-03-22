@@ -23,4 +23,15 @@
     <Text>确定</Text>
   </String>
 </Strings>
+<Strings Encoding="Unicode">
+	<STRING Id="505" Name="IDS_MO_TEXT_UNICODE">
+		<Text>目标位置:北京天安门#经度:E,114.111000#纬度:N,33.222222</Text>
+	</STRING>
+</Strings>
+<Objects>
+	<Object Id="1000" Name="IDP_NAVIGATOR" MimeType="image/png">
+		<File>.\images\navigator.png</File>
+	</Object>
+</Objects>
+
 </BREWRes>

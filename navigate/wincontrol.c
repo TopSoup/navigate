@@ -145,6 +145,8 @@ void TS_FitStaticText(IDisplay * pd, IStatic * ps, AEEFont font, AECHAR * pszTex
    ISTATIC_SetText(ps, NULL, pszText, AEE_FONT_NORMAL, font);
    if (nFits < nLen)
       pszText[nFits] = chSave;
+
+   ISTATIC_Redraw(ps);
 }
 
 /*===========================================================================
@@ -236,11 +238,6 @@ void TS_DrawBackgroud(IWindow* po) {
     TS_FitStaticText(pme->m_pOwner->a.m_pIDisplay,pme->m_pOwner->m_pLeftSoftStatic,AEE_FONT_LARGE,pme->m_pOwner->m_pLeftSoftText);
 	TS_FitStaticText(pme->m_pOwner->a.m_pIDisplay,pme->m_pOwner->m_pRightSoftStatic,AEE_FONT_LARGE,pme->m_pOwner->m_pRightSoftText);
 	TS_FitStaticText(pme->m_pOwner->a.m_pIDisplay,pme->m_pOwner->m_pMidSoftStatic,AEE_FONT_LARGE,pme->m_pOwner->m_pMidSoftText);
-	
-	ISTATIC_Redraw(pme->m_pOwner->m_pHdrStatic);
-	ISTATIC_Redraw(pme->m_pOwner->m_pLeftSoftStatic);
-	ISTATIC_Redraw(pme->m_pOwner->m_pRightSoftStatic);
-	ISTATIC_Redraw(pme->m_pOwner->m_pMidSoftStatic);
 }
 
 void TS_SetSoftButtonText(CTopSoupApp * pme,uint16 wTextLeftID, uint16 wTextRightID,uint16 wTextMidID)

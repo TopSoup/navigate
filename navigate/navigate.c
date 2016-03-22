@@ -1,6 +1,5 @@
 #include "logicmacro.h"
 
-
 /*-------------------------------------------------------------------
             Function Prototypes
 -------------------------------------------------------------------*/
@@ -9,9 +8,25 @@ static boolean    CTopSoupApp_InitAppData(IApplet* po);
 static void		  CTopSoupApp_FreeAppData(IApplet* po);
 static boolean    CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wParam, uint32 dwParam);
 
-static boolean    CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam);
 static void       CTopSoupApp_RedrawNotify(CTopSoupApp * pme);
 static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
+
+/*===============================================================================
+                        SMS & TELEPHONE TEST
+=============================================================================== */
+#define USAGE_SMS_TX_ASCII      100   
+#define USAGE_SMS_TX_UNICODE    101
+
+// PHONE NUMBER
+#define DESTINATION_NUMBER "15511823090" 
+ 
+// ascii 短信内容，对于unicode短信内容，必须由资源文件bar中获取，否则编码不对 
+#define MO_TEXT_ASCII "Destination:Beijing#lat:37.123456#lon:114.121345" 
+
+static void		  CTopSoupApp_SendSMSMessage(CTopSoupApp * pMe, uint16 wParam);
+static boolean    CTopSoupApp_ReceiveSMSMessage(CTopSoupApp *pme, uint32 uMsgId);
+static void		  CTopSoupApp_MakeSOSCall(CTopSoupApp * pme, char* szNumber);
+static void		  CTopSoupApp_EndSOSCall(CTopSoupApp * pme);
 
 //XXX
 //#define MP_SPLASH_TIMER       750
@@ -96,7 +111,8 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
    AEEImageInfo      info;
    AEERect           rect;
    AEERect           rect1;
-
+   int				 nErr;
+   
    // Get screen pixel count
    pdi = MALLOC(sizeof(AEEDeviceInfo));
    if (!pdi)
@@ -186,6 +202,25 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
 	   return FALSE;
    }
 
+
+   //FOR SMS & TEL TEST
+   if (ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_SMS, (void **)&pme->m_pISMS) != SUCCESS)
+	{
+		DBGPRINTF("AEECLSID_SMS Create Failed!");
+		return FALSE;
+	}
+
+   // Register for Text and EMS 
+   ISHELL_RegisterNotify(pme->a.m_pIShell, AEECLSID_NAVIGATE, AEECLSID_SMSNOTIFIER, (AEESMS_TYPE_TEXT << 16) | NMASK_SMS_TYPE);   
+
+   //Tel
+   nErr =ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_CALLMGR, (void**) &pme->m_pCallMgr);
+   DBGPRINTF("CreateInst AEECLSID_CALLMGR ret %d", nErr);
+   if(nErr != AEE_SUCCESS)
+   {
+       return FALSE;
+   }
+
    return TRUE;
 }
 
@@ -216,9 +251,16 @@ Side Effects: None
 ==============================================================================*/
 static void CTopSoupApp_FreeAppData(IApplet* po)
 {
-   CTopSoupApp * pme = (CTopSoupApp *)po;
-
-   CTopSoupApp_ReleaseRes(pme);
+	CTopSoupApp * pme = (CTopSoupApp *)po;
+	
+	//SMS
+	TS_RELEASEIF(pme->m_pISMS);
+	TS_RELEASEIF(pme->m_pISMSMsg);
+	
+	//Tel
+	TS_RELEASEIF(pme->m_pCallMgr);
+	
+	CTopSoupApp_ReleaseRes(pme);
 }
 
 /*===========================================================================
@@ -356,7 +398,48 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
             CTopSoupApp_SetWindow(pme, pme->m_eSuspendWin, 0);
             return (TRUE);
 
+		 case EVT_NOTIFY:
+			 {
+				 AEENotify *wp = (AEENotify *)dwParam;
+				 DBGPRINTF("receive notify cls=%x", wp->cls);
+				 
+				 if( wp->cls == AEECLSID_SMSNOTIFIER ) {
+					 if( wp->dwMask == ((AEESMS_TYPE_TEXT << 16) | NMASK_SMS_TYPE) ) {
+						 uint32 uMsgId = (uint32)wp->pData;
+						 CTopSoupApp_ReceiveSMSMessage(pme, uMsgId);
+						 DBGPRINTF("msgid :%d", uMsgId);
+					 } else {
+						 DBGPRINTF("Rece unkown mask sms: %x",wp->dwMask);
+						 return FALSE;
+					 }
+				 }
+			 }
+			 return (TRUE);
+
          case EVT_KEY:	            // Process key event
+			 {
+				//FOR SMS & TEL TEST
+				if (wParam == AVK_0)
+				{
+					DBGPRINTF("SEND SMS TEST ...");
+					//CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_ASCII);
+					CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_UNICODE);
+				}
+
+				//FOR TEL TEST
+				if (wParam == AVK_1)
+				{
+					DBGPRINTF("CALL TEST ...");
+					CTopSoupApp_MakeSOSCall(pme, "15511823090");
+				}
+
+				if (wParam == AVK_2)
+				{
+					DBGPRINTF("CALL TEST END ...");
+					CTopSoupApp_EndSOSCall(pme);
+				}
+			 }
+
          case EVT_COMMAND:          // Process menu command event
          case EVT_COPYRIGHT_END:    // Copyright dialog ended
             if (pme->m_pWin)
@@ -409,7 +492,7 @@ static void CTopSoupApp_DrawSplash(CTopSoupApp * pme)
    (2) Contructs the new window, if any
    (3) Enables and redraws the new window, if any
 ===========================================================================*/
-static boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
+boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 {
  	// If same window, then redraw and return.
    if (pme->m_pWin && pme->m_eActiveWin == eWin && eWin != TSW_NONE)
@@ -430,6 +513,14 @@ static boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dw
          pme->m_pWin = CMainWin_New(pme); 
          break;
 
+	  case TSW_WHERE:   
+		  pme->m_pWin = CWhereWin_New(pme); 
+		  break;
+		  
+	  case TSW_NAVIGATE:     
+		  pme->m_pWin = CNavigateWin_New(pme, (Coordinate*)(dwParam)); 
+		  break;
+		  
       case TSW_NONE:       
          return TRUE; 
          break;
@@ -503,6 +594,295 @@ static void CTopSoupApp_ReleaseRes(CTopSoupApp * pme)
 	TS_RELEASEWIN(pme->m_pWin);
 }
 
+
+/*===============================================================================
+                        SMS & TELEPHONE TEST
+=============================================================================== */
+
+
+static boolean CTopSoupApp_ReceiveSMSMessage(CTopSoupApp* pme, uint32 uMsgId)
+{
+	ISMSMsg *pSMS  = NULL;
+	if(ISMS_ReceiveMsg(pme->m_pISMS, uMsgId, &pSMS) ==AEE_SUCCESS) {
+		SMSMsgOpt TmpOpt;
+		char szPhone[32], szText[256];
+		MEMSET(szPhone, 0, sizeof(szPhone));
+		MEMSET(szText, 0, sizeof(szText));
+
+		if(ISMSMSG_GetOpt(pSMS, MSGOPT_FROM_DEVICE_SZ,&TmpOpt)==AEE_SUCCESS) {
+			STRCPY(szPhone, (char*)TmpOpt.pVal);
+			//@yao 短信中心和亲情号码
+			//if( NULL == STRSTR("10659031107260,18931880692,18903110989",szPhone) ) {
+			//	DBGPRINTF("sms sender is not in center list");
+			//	return FALSE;
+			//}
+
+			//短信内容:目标位置:北京天安门,经度:E,114.000纬度:N,33.2222
+			///        目标位置:北京天安门#经度:E,114.000#纬度:N,33.2222
+			if(ISMSMSG_GetOpt(pSMS, MSGOPT_PAYLOAD_WSZ,&TmpOpt)==AEE_SUCCESS) {
+				WSTRTOUTF8((AECHAR*)TmpOpt.pVal,WSTRLEN((AECHAR*)TmpOpt.pVal), (byte*)szText, sizeof(szText));
+				//WSTRTOSTR((AECHAR*)TmpOpt.pVal,WSTRLEN((AECHAR*)TmpOpt.pVal), (char*)szText)//, sizeof(szText));
+				DBGPRINTF("WSZ msg from %s: %s",szPhone,szText);
+			} else if( ISMSMSG_GetOpt(pSMS,MSGOPT_PAYLOAD_SZ,&TmpOpt) == AEE_SUCCESS ) {
+				STRCPY(szText,(const char*)(TmpOpt.pVal));
+				DBGPRINTF("SZ msg from %s: %s",szPhone,szText);
+			} else {
+				DBGPRINTF("Can not get sms text");
+				return FALSE;
+			}
+		} else {
+			DBGPRINTF("Can not get sms number: ");
+		}
+		ISMSMSG_Release(pSMS);
+	}
+	return TRUE;
+}
+
+static void SMSCallBack_Send(void *p)   
+{   
+   CTopSoupApp *pme = (CTopSoupApp *)p;   
+  
+   uint16 errType = AEESMS_GETERRORTYPE(pme->m_retVal);
+   uint16 err = AEESMS_GETERROR(pme->m_retVal);
+
+   SMSMsgOpt smo[2];
+   int dwSecs = 0;
+
+   DBGPRINTF("SMSCallBack_Send called");   
+
+   smo[1].nId = MSGOPT_END;
+   smo[1].pVal = NULL;
+
+   switch(err) {
+      case AEESMS_ERROR_NONE:
+         DBGPRINTF("Sent OK");
+         break;
+
+      default:
+         DBGPRINTF("Error type: %d \n", errType);
+         DBGPRINTF("Error = %d \n", err);
+         DBGPRINTF("Error!");
+         break;
+   }
+
+   // 短信发送完毕后，释放ISMSMsg，否则它将保留在其中，对下一条短信产生影响   
+   if(pme->m_pISMSMsg != NULL)   
+   {   
+       ISMSMSG_Release(pme->m_pISMSMsg);   
+       pme->m_pISMSMsg = NULL;   
+   }   
+}
+
+static void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam)  
+{   
+	// Make sure the pointers we'll be using are valid   
+	if (pme == NULL || pme->a.m_pIShell == NULL || pme->a.m_pIDisplay == NULL)   
+		return;
+	
+	switch (wParam)   
+	{   
+	case USAGE_SMS_TX_ASCII:   
+		{
+			int nErr;   
+			WebOpt awo[6]; /* ***IMPORTANT**** grow this if you add more   
+			WebOpts here, or shrink it and call AddOpt() multiple times */   
+			int    i = 0;   
+			uint32 nReturn=0;                                    
+			
+			
+			nErr =ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_SMSMSG, (void **)&pme->m_pISMSMsg);   
+			DBGPRINTF("CreateInstance of AEECLSID_SMSMSG ret %d", nErr);   
+			if(nErr != AEE_SUCCESS)   
+			{   
+				break;   
+			}   
+			
+			/* NULL terminated string providing destination device number.   
+			'+' as first character signifies international number.  */   
+			awo[i].nId  = MSGOPT_TO_DEVICE_SZ ;   
+			awo[i].pVal = (void *)DESTINATION_NUMBER;   
+			i++;   
+			
+			/* ascii text to be send */   
+			awo[i].nId  = MSGOPT_PAYLOAD_SZ ;   
+			awo[i].pVal = (void *)MO_TEXT_ASCII;   
+			i++;   
+			
+			/* encoding */   
+			awo[i].nId  = MSGOPT_PAYLOAD_ENCODING;   
+			awo[i].pVal = (void *)AEE_ENC_ISOLATIN1;   
+			i++;   
+			
+			awo[i].nId  = MSGOPT_MOSMS_ENCODING;   
+			awo[i].pVal = (void *)AEESMS_ENC_ASCII;   
+			i++;   
+#if 0   
+			/* user ack */   
+			awo[i].nId  = MSGOPT_USER_ACK;   
+			awo[i].pVal = (void *)TRUE;   
+			i++;   
+#endif   
+			/* this is absolutely necessary, do not remove, marks the end of the   
+			array of WebOpts */   
+			awo[i].nId  = WEBOPT_END;   
+			
+			/* add 'em */   
+			nErr =ISMSMSG_AddOpt(pme->m_pISMSMsg, awo);   
+			DBGPRINTF("ISMSMSG_AddOpt ret %d", nErr);   
+			
+			CALLBACK_Init(&pme->m_cb, SMSCallBack_Send, pme);   
+			ISMS_SendMsg(pme->m_pISMS, pme->m_pISMSMsg, &pme->m_cb, &pme->m_retVal);   
+			
+			// Higher 16 bits specify error type specified as AEESMS_ERRORTYPE_XXX    
+			// lower  16 bits specify error specified as AEESMS_ERROR_XXX   
+			DBGPRINTF("ISMS_SendMsg ret 0x%x", nReturn);   
+		} 
+		break;   
+		
+	case USAGE_SMS_TX_UNICODE:   
+		{ 
+			int nErr;   
+			WebOpt awo[6]; /* ***IMPORTANT**** grow this if you add more   
+			WebOpts here, or shrink it and call AddOpt() multiple times */   
+			int    i = 0;   
+			uint32 nReturn=0;                                    
+			AECHAR pszBuf[100];   
+			
+			nErr =ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_SMSMSG, (void **)&pme->m_pISMSMsg);   
+			DBGPRINTF("CreateInstance of AEECLSID_SMSMSG ret %d", nErr);   
+			if(nErr != AEE_SUCCESS)   
+			{   
+				break;   
+			}   
+			
+			/* NULL terminated string providing destination device number.   
+			'+' as first character signifies international number.  */   
+			awo[i].nId  = MSGOPT_TO_DEVICE_SZ ;   
+			awo[i].pVal = (void *)DESTINATION_NUMBER;   
+			i++;   
+			
+			/* unicode text to be send */   
+			awo[i].nId  = MSGOPT_PAYLOAD_WSZ ;   
+			ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_MO_TEXT_UNICODE, pszBuf, sizeof(pszBuf));
+			{
+				char szbuf[128];
+				WSTRTOSTR(pszBuf, szbuf, WSTRLEN(pszBuf) + 1);
+				DBGPRINTF(szbuf);
+			}
+			awo[i].pVal = (void *)pszBuf;   
+			i++;   
+			
+			/* encoding */   
+			awo[i].nId  = MSGOPT_PAYLOAD_ENCODING;   
+			awo[i].pVal = (void *)AEE_ENC_UNICODE ;   
+			i++;   
+			
+			awo[i].nId  = MSGOPT_MOSMS_ENCODING;   
+			awo[i].pVal = (void *)AEESMS_ENC_UNICODE;   
+			i++;   
+			
+#if 0   
+			/* user ack */   
+			awo[i].nId  = MSGOPT_READ_ACK;   
+			awo[i].pVal = (void *)TRUE;   
+			i++;   
+#endif   
+			
+			/* this is absolutely necessary, do not remove, marks the end of the   
+			array of WebOpts */   
+			awo[i].nId  = MSGOPT_END;   
+			
+			/* add 'em */   
+			nErr =ISMSMSG_AddOpt(pme->m_pISMSMsg, awo);   
+			DBGPRINTF("ISMSMSG_AddOpt ret %d", nErr);   
+			
+			CALLBACK_Init(&pme->m_cb, SMSCallBack_Send, pme);   
+			ISMS_SendMsg(pme->m_pISMS, pme->m_pISMSMsg, &pme->m_cb, &pme->m_retVal);   
+			
+			// Higher 16 bits specify error type specified as AEESMS_ERRORTYPE_XXX    
+			// lower  16 bits specify error specified as AEESMS_ERROR_XXX   
+			DBGPRINTF("ISMS_SendMsg ret 0x%x", nReturn);   
+		}  
+		break;
+		
+	default:   
+		return;   
+    }   
+	
+    // Display above event.    
+    //DisplayEvent (pme, wParam);   
+	
+    return;   
+}
+
+
+static void CTopSoupApp_OriginateListener(CTopSoupApp *pme, ModelEvent *pEvent)
+{
+	AEETCallEvent* pCallEvent = (AEETCallEvent*) pEvent;
+	
+	switch (pCallEvent->evCode)
+	{
+	case AEET_EVENT_CALL_CONNECT:
+		{
+			DBGPRINTF("Rx:   AEET_EVENT_CALL_CONNECT cd=%d", pCallEvent->call.cd);
+			break;
+		}
+		
+	case AEET_EVENT_CALL_ERROR:
+		{
+			DBGPRINTF("AEET_EVENT_CALL_ERROR");
+			LISTENER_Cancel(&pme->callListener);
+			
+			break;
+		}
+		
+	case AEET_EVENT_INBAND_FWD_BURST_DTMF:
+		{
+			DBGPRINTF("AEET_EVENT_INBAND_FWD_BURST_DTMF");
+			break;
+		}
+		
+	case AEET_EVENT_CALL_END:
+		{
+			
+			DBGPRINTF("Rx:   AEET_EVENT_CALL_END");
+			LISTENER_Cancel(&pme->callListener);
+			if (pme->m_pOutgoingCall != NULL)
+			{
+				ICALL_End(pme->m_pOutgoingCall);
+				TS_RELEASEIF(pme->m_pOutgoingCall);
+			}
+			
+			break;
+		}
+		
+	default:
+		{
+			DBGPRINTF("OriginateListener Rx:  %d", pCallEvent->evCode);
+			break;
+		}
+	}
+}
+
+//For SOS Test
+static void CTopSoupApp_MakeSOSCall(CTopSoupApp * pme, char* szNumber)
+{
+	int Result;
+
+	LISTENER_Init(&pme->callListener, (PFNLISTENER) CTopSoupApp_OriginateListener, pme);
+	Result = ICALLMGR_Originate(pme->m_pCallMgr, AEET_CALL_TYPE_VOICE, szNumber, NULL, &pme->m_pOutgoingCall, &pme->callListener);
+	DBGPRINTF("ICALLMGR_Originate return with res=%d", Result);
+}
+
+static void CTopSoupApp_EndSOSCall(CTopSoupApp * pme)
+{
+	DBGPRINTF("CTopSoupApp_EndSOSCall in %x", pme->m_pOutgoingCall);
+	if (pme->m_pOutgoingCall != NULL)
+	{
+		ICALL_End(pme->m_pOutgoingCall);
+		TS_RELEASEIF(pme->m_pOutgoingCall);
+	}
+}
 
 
 

@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MEDIAPLAYER_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "$(BREWDIR)\inc" /I "$(BREWDIR)\sdk\inc" /D "AEE_SIMULATOR" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "$(BREWDIR)\inc" /I "$(BREWDIR)\sdk\inc" /I "." /I ".\location" /D "AEE_SIMULATOR" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -104,7 +104,31 @@ SOURCE=.\AEEModGen.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\logicmacro.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\mainwindow.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\navigate.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\navigatewindow.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\wherewindow.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\wincontrol.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\window.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -124,16 +148,144 @@ SOURCE=..\..\inc\AEEModGen.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\logicmacro.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\mainwindow.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\mediaplayer_res.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\navigate.bid
 # End Source File
+# Begin Source File
+
+SOURCE=.\navigate.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\navigatepch.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\navigatewindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\wherewindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\wincontrol.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\window.h
+# End Source File
 # End Group
 # Begin Group "Resource Files"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+# Begin Source File
+
+SOURCE=.\backimg.brx
+
+!IF  "$(CFG)" == "navigate - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "navigate - Win32 Debug"
+
+# Begin Custom Build
+InputPath=.\backimg.brx
+
+BuildCmds= \
+	"$(BREWDIR)\tools\ResourceEditor\brewrc.exe" -s -o ./backimg.bar -h ./backimg.brh $(InputPath)
+
+"backimg.bar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"backimg.brh" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\kitimg.brx
+
+!IF  "$(CFG)" == "navigate - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "navigate - Win32 Debug"
+
+# Begin Custom Build
+InputPath=.\kitimg.brx
+
+BuildCmds= \
+	"$(BREWDIR)\tools\ResourceEditor\brewrc.exe" -s -o ./kitimg.bar -h ./kitimg.brh $(InputPath)
+
+"kitimg.bar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"kitimg.brh" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\navigate.brx
+
+!IF  "$(CFG)" == "navigate - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "navigate - Win32 Debug"
+
+# Begin Custom Build
+InputPath=.\navigate.brx
+
+BuildCmds= \
+	"$(BREWDIR)\tools\ResourceEditor\brewrc.exe" -s -o ./navigate.bar -h ./navigate.brh $(InputPath)
+
+"navigate.bar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"navigate.brh" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# End Group
+# Begin Group "location"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\location\e_asin.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\location\location.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\location\location.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\location\transform.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\location\transform.h
+# End Source File
 # End Group
 # End Target
 # End Project

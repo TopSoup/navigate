@@ -13,9 +13,10 @@ typedef enum TSWindow
 {
 	TSW_NONE,
 	TSW_MAIN,
+	TSW_WHERE,
+	TSW_NAVIGATE,
 	TSW_LAST
 } TSWindow;
-
 
 // navigate app global structure.
 struct CTopSoupApp
@@ -55,6 +56,18 @@ struct CTopSoupApp
 	AECHAR            m_pRightSoftText[TS_MAX_STRLEN];
 
 	uint16            m_wMainWin;    // CurSel of CMainWin
+
+
+	//SMS
+	ISMS              *m_pISMS;      
+    ISMSMsg           *m_pISMSMsg;       // To encapsulate composed/sent message 
+	AEECallback       m_cb;				// General callback
+	uint32            m_retVal;         // General place holder for error
+
+	//Tel
+	ICallMgr *m_pCallMgr;
+	ICall *m_pOutgoingCall;
+    CallListener callListener;
 };
 
 typedef struct CTopSoupApp  CTopSoupApp;
@@ -65,5 +78,6 @@ typedef struct CTopSoupApp  CTopSoupApp;
 #define CTopSoupApp_DisableWin(p)     { IWINDOW_Disable((p)->m_pWin); CTopSoupApp_CancelRedraw(p); }
 
 void CTopSoupApp_Redraw(CTopSoupApp * pme, boolean bDefer);
+boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam);
 
 #endif
