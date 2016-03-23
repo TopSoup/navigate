@@ -29,10 +29,6 @@ struct _LocState{
 
 /**************************/
 
-/* For LOC_AUTO */
-   boolean     bModeAuto;
-   boolean     bModeLocal;
-
 /* Private members to work with IPosDet */
    AEECallback cbIntervalTimer;
    AEECallback cbInfo;
@@ -47,7 +43,6 @@ struct _LocState{
 /**************************/
 
 /* Client passed members. */
-   int nPendingFixes;
    int nLocInterval;
    IPosDet    *pPos;
    IShell     *pShell;
@@ -114,7 +109,7 @@ static void Loc_cbInterval( LocState *pts )
       return;
    }
 
-   DBGPRINTF( "Loc : bAuto:%d bLocal:%d", pts->bModeAuto, pts->bModeLocal );
+   DBGPRINTF( "@Loc_cbInterval ");
 
    // Request GPSInfo
    if( TRUE == pts->bInProgress && SUCCESS != IPOSDET_GetGPSInfo( pts->pPos, 
@@ -137,167 +132,101 @@ static void Loc_Network( LocState *pts )
 {
    AEEGPSConfig config;
 
-   DBGPRINTF( "Loc NETWORK" );
+   DBGPRINTF( "Loc_Network" );
    
    (void) IPOSDET_GetGPSConfig( pts->pPos, &config );
 
    config.mode = AEEGPS_MODE_TRACK_NETWORK;
 
    (void) IPOSDET_SetGPSConfig( pts->pPos, &config );
-
-   pts->bModeLocal = FALSE;
 }
 
-static void Loc_Local( LocState *pts )
+static void Loc_StandAlone( LocState *pts )
 {
    AEEGPSConfig config;
 
-   DBGPRINTF( "Loc LOCAL" );
+   DBGPRINTF( "Loc_StandAlone" );
 
    (void) IPOSDET_GetGPSConfig( pts->pPos, &config );
 
-   config.mode = AEEGPS_MODE_TRACK_LOCAL;
+   config.mode = AEEGPS_MODE_TRACK_STANDALONE;
 
    (void) IPOSDET_SetGPSConfig( pts->pPos, &config );
-
-   pts->bModeLocal = TRUE;
 }
 
-static void Loc_cbInfo( LocState *pts )
-{
-   if( pts->theInfo.status == AEEGPS_ERR_NO_ERR 
-      || (pts->theInfo.status == AEEGPS_ERR_INFO_UNAVAIL && pts->theInfo.fValid) ) {
-
+static void Loc_cbInfo( LocState *pts ) {
+	
+	if( pts->theInfo.status == AEEGPS_ERR_NO_ERR 
+		|| (pts->theInfo.status == AEEGPS_ERR_INFO_UNAVAIL && pts->theInfo.fValid) ) {
+		
 #if MIN_BREW_VERSION(2,1)
-      pts->pResp->lat = WGS84_TO_DEGREES( pts->theInfo.dwLat );
+		pts->pResp->lat = WGS84_TO_DEGREES( pts->theInfo.dwLat );
 #ifdef AEE_SIMULATOR
-	  //FOR TEST
-      pts->pResp->lon = -WGS84_TO_DEGREES( pts->theInfo.dwLon );
+		//FOR TEST
+		pts->pResp->lon = -WGS84_TO_DEGREES( pts->theInfo.dwLon );
 #else
-	  pts->pResp->lon = WGS84_TO_DEGREES( pts->theInfo.dwLon );
+		pts->pResp->lon = WGS84_TO_DEGREES( pts->theInfo.dwLon );
 #endif
 #else
-      double    wgsFactor;
-      wgsFactor = FASSIGN_STR("186413.5111");
-      pts->pResp->lat = FASSIGN_INT(pts->theInfo.dwLat);
-      pts->pResp->lat = FDIV(pts->pResp->lat, wgsFactor);
-
-      pts->pResp->lon = FASSIGN_INT(pts->theInfo.dwLon);
-      pts->pResp->lon = FDIV(pts->pResp->lon, wgsFactor);
+		double    wgsFactor;
+		wgsFactor = FASSIGN_STR("186413.5111");
+		pts->pResp->lat = FASSIGN_INT(pts->theInfo.dwLat);
+		pts->pResp->lat = FDIV(pts->pResp->lat, wgsFactor);
+		
+		pts->pResp->lon = FASSIGN_INT(pts->theInfo.dwLon);
+		pts->pResp->lon = FDIV(pts->pResp->lon, wgsFactor);
 #endif /* MIN_BREW_VERSION 2.1 */
-
-	  pts->pResp->height = pts->theInfo.wAltitude - 500;
-	  pts->pResp->velocityHor = FMUL( pts->theInfo.wVelocityHor,0.25);
-	
-	  //当前夹角
-	  if (FCMP_G(FABS(pts->lastCoordinate.lat), 0))
-	  {
-		  pts->pResp->heading = Loc_Calc_Azimuth(pts->lastCoordinate.lat, pts->lastCoordinate.lon, pts->pResp->lat, pts->pResp->lon);
-	  }
-	  else
-	  {
-		  pts->pResp->heading = 0;
-	  }
-
-	  //For Test Hack
-	  //pts->pResp->lat = 38.0422378880;
-	  //pts->pResp->lon = 114.4925141047;
-
-	  if (pts->pResp->bSetDestPos)
-	  {
-		  //计算距离和方位角
-		  pts->pResp->distance = Loc_Calc_Distance(pts->pResp->lat, pts->pResp->lon, pts->pResp->destPos.lat, pts->pResp->destPos.lon);
-		  pts->pResp->destHeading = Loc_Calc_Azimuth(pts->pResp->lat, pts->pResp->lon, pts->pResp->destPos.lat, pts->pResp->destPos.lon);
-	  }
-	  
-	  pts->lastCoordinate.lat = pts->pResp->lat;
-	  pts->lastCoordinate.lon = pts->pResp->lon;
-
-      pts->pResp->dwFixNum++;
-
-      pts->pResp->nErr = SUCCESS;
-
-      Loc_Notify( pts );
-
-      if( (!pts->nPendingFixes || --pts->nPendingFixes > 0) 
-         && FALSE == pts->bSetForCancellation ) {
-
-         if( pts->bModeAuto && pts->bModeLocal == FALSE ) {
-
-            /* Try with local first */
-            Loc_Local( pts );
-         }
-
-         ISHELL_SetTimerEx( pts->pShell, pts->nLocInterval * 1000, &pts->cbIntervalTimer );
-      }
-      else {
-
-         Loc_Stop( pts );
-      }
-   }
-   else {
-
-      if( pts->bModeAuto && pts->bModeLocal ) {
-
-         /* Retry with LOC_NETWORK */
-         Loc_Network( pts );
-         Loc_cbInterval( pts );
-      }
-
-      else { 
-         
-         /* Inform the application of failure code. */
-         pts->pResp->nErr = pts->theInfo.status;
-         
-         Loc_Notify( pts );
-         
-         /* On timeout re-try. For other reasons bailout. */
-         if( pts->theInfo.status == AEEGPS_ERR_TIMEOUT ) {
-            
-            Loc_cbInterval( pts );
-         }
-         else {
-            
-            Loc_Stop( pts );
-         }
-      }
-   }
+		
+		pts->pResp->height = pts->theInfo.wAltitude - 500;
+		pts->pResp->velocityHor = FMUL( pts->theInfo.wVelocityHor,0.25);
+		
+		//当前夹角
+		if (FCMP_G(FABS(pts->lastCoordinate.lat), 0))
+		{
+			pts->pResp->heading = Loc_Calc_Azimuth(pts->lastCoordinate.lat, pts->lastCoordinate.lon, pts->pResp->lat, pts->pResp->lon);
+		}
+		else
+		{
+			pts->pResp->heading = 0;
+		}
+		
+		//For Test Hack
+		//pts->pResp->lat = 38.0422378880;
+		//pts->pResp->lon = 114.4925141047;
+		
+		if (pts->pResp->bSetDestPos)
+		{
+			//计算距离和方位角
+			pts->pResp->distance = Loc_Calc_Distance(pts->pResp->lat, pts->pResp->lon, pts->pResp->destPos.lat, pts->pResp->destPos.lon);
+			pts->pResp->destHeading = Loc_Calc_Azimuth(pts->pResp->lat, pts->pResp->lon, pts->pResp->destPos.lat, pts->pResp->destPos.lon);
+		}
+		
+		//记录历史定位信息
+		pts->lastCoordinate.lat = pts->pResp->lat;
+		pts->lastCoordinate.lon = pts->pResp->lon;
+		
+		pts->pResp->dwFixNum++;
+		
+		pts->pResp->nErr = SUCCESS;
+		
+		Loc_Notify( pts );
+		
+		if( FALSE == pts->bSetForCancellation ) {
+			
+			ISHELL_SetTimerEx( pts->pShell, pts->nLocInterval * 1000, &pts->cbIntervalTimer );
+		}
+		else {
+			
+			Loc_Stop( pts );
+		}
+	}
 }
 
 
 /*======================================================================= 
 Function: Loc_Init()
-
-Description: 
-   Creates and initializes a handle for Locing.
-
-Prototype:
-
-   int Loc_Init( IShell *pIShell, IPosDet *pIPos, AEECallback *pcb, LocState **po )
-
-Parameters:
-   pIShell: [in]. IShell instance.
-   pIPos: [in]. IPosDet instance.
-   pcb: [in]. A persistent callback invoked on a position response.
-   po: [out]. Handle to internal object.
-
-Return Value:
-
-   SUCCESS
-   EBADPARM - One or more of the Invalid arguments
-   ENOMEMORY - When system is out of memory.
- 
-Comments:  
-   Invoke the CALLBACK_Cancel( pcb ) to destroy LocState object.
-
-Side Effects: 
-   None
-
-See Also:
-   None
 =======================================================================*/
-int Loc_Init( IShell *pIShell, IPosDet *pIPos, AEECallback *pcb, LocState **po )
-{
+int Loc_Init( IShell *pIShell, IPosDet *pIPos, AEECallback *pcb, LocState **po ) {
    int nErr = SUCCESS;
    LocState *pts = NULL;
 
@@ -338,32 +267,6 @@ int Loc_Init( IShell *pIShell, IPosDet *pIPos, AEECallback *pcb, LocState **po )
 
 /*======================================================================= 
 Function: Loc_Stop()
-
-Description: 
-   Stops the Locing, does not clean up the object, it can be
-   further used with Loc_Start. Only CALLBACK_Cancel(pcb) releases
-   the object.
-
-Prototype:
-
-   int Loc_Stop( LocState *pts );
-
-Parameters:
-   pts: [in]. LocState object created using Loc_Init().
-
-Return Value:
-
-   SUCCESS
-   EBADPARM - One or more of the Invalid arguments
- 
-Comments:  
-   Invoke the CALLBACK_Cancel( pcb ) to destroy LocState object.
-
-Side Effects: 
-   None
-
-See Also:
-   Loc_Init()
 =======================================================================*/
 int Loc_Stop( LocState *pts )
 {
@@ -392,41 +295,8 @@ int Loc_Stop( LocState *pts )
 
 /*======================================================================= 
 Function: Loc_Start()
-
-Description: 
-   Starts the Locing using the object created in Loc_Init().
-
-Prototype:
-
-   int Loc_Start( LocState *pts, LocType t, int nFixes, int nInterval, PositionData *pData );
-
-Parameters:
-   pts: [in]. LocState object created using Loc_Init().
-   t: [in]. Type of Locing.
-   nFixes: [in]. Number of fixes.
-   nInterval: [in]. Interval between fixes in seconds.
-   pData: [in]. Memory in which the Position response is to be filled.
-
-Return Value:
-
-   SUCCESS
-   EBADPARM - One or more of the Invalid arguments
-   EUNSUPPORTED - Unimplemented
-   ENOMEMORY - When system is out of memory.
-   EFAILED - General failure.
-   EALREADY - When Locing is already in progress.
- 
-Comments:  
-   Invoke the CALLBACK_Cancel( pcb ) to destroy LocState object.
-
-Side Effects: 
-   None
-
-See Also:
-   Loc_Init()
 =======================================================================*/
-int Loc_Start( LocState *pts, LocType t, int nFixes, 
-                   int nInterval, PositionData *pData )
+int Loc_Start( LocState *pts, PositionData *pData )
 {
    int nErr = SUCCESS;
 
@@ -445,71 +315,40 @@ int Loc_Start( LocState *pts, LocType t, int nFixes,
       pData->dwFixNum     = 0;
 
       pts->pResp          = pData;
-      pts->nPendingFixes  = nFixes;
-      pts->nLocInterval = nInterval;
-      pts->bModeAuto      = FALSE;
-      pts->bModeLocal     = FALSE;
+      pts->nLocInterval = pData->gpsConfig.nInterval;
 
       IPOSDET_GetGPSConfig( pts->pPos, &config );
 
       /* Configure the IPosDet Instance */
-      if( t == LOC_LOCAL ) {
-
-         config.mode = AEEGPS_MODE_TRACK_LOCAL;
-         pts->bModeLocal = TRUE;
-      }
-      else if( t == LOC_NETWORK ){
-
-         config.mode = AEEGPS_MODE_TRACK_NETWORK;
-      }
-      else if( t == LOC_AUTO ) {
-
-         DBGPRINTF( "Loc AUTO" );
-
-         if( nFixes == 1 ) {
-           
-            config.mode = AEEGPS_MODE_ONE_SHOT;
-         }
-         else {
-
-			config.mode = AEEGPS_MODE_ONE_SHOT;
-            //config.mode = AEEGPS_MODE_TRACK_LOCAL;
-            pts->bModeAuto  = TRUE;
-            pts->bModeLocal = TRUE;
-         }
-      }
-
-      config.nFixes = nFixes;
-      config.nInterval = nInterval;
+      config.mode = pData->gpsConfig.mode;
+      config.nFixes = pData->gpsConfig.nFixes;
+      config.nInterval = pData->gpsConfig.nInterval;
 
       // ADDING SUPPORT FOR USER-DEFINED PDE IP ADDRESS AND QOS
-      config.server = pData->server;
-      config.optim = pData->optim;
-      config.qos = pData->qos;
+      config.server = pData->gpsConfig.server;
+      config.optim = pData->gpsConfig.optim;
+      config.qos = pData->gpsConfig.qos;
 
       nErr = IPOSDET_SetGPSConfig( pts->pPos, &config );
 
-      if( nErr == EUNSUPPORTED && pts->bModeAuto ) {
+      if( nErr == EUNSUPPORTED && config.mode == AEEGPS_MODE_TRACK_NETWORK ) {
 
-         /* As LOC_LOCAL is unsupported on certain devices. If this is auto mode 
-         ** and we tried to Loc locally, change it network based Locing. */
+         /* As AEEGPS_MODE_TRACK_NETWORK is unsupported on certain devices.
+         ** and we tried to Loc as AEEGPS_MODE_TRACK_STANDALONE. */
 
-         pts->bModeAuto = FALSE;
-         pts->bModeLocal = FALSE;
-
-         config.mode = AEEGPS_MODE_TRACK_NETWORK;
+         config.mode = AEEGPS_MODE_TRACK_STANDALONE;
 
          nErr = IPOSDET_SetGPSConfig( pts->pPos, &config );
       }
 
       if( nErr == SUCCESS ) {
 
-         pts->bInProgress    = TRUE;
+         pts->bInProgress = TRUE;
 
          Loc_cbInterval( pts );
       }
-
    }
+
    return nErr;
 }
 
@@ -524,9 +363,6 @@ double Loc_Calc_Azimuth( double latA, double lngA, double latB, double lngB )
 {
 	return calc_azimuth(latA, lngA, latB, lngB);
 }
-
-
-
 
 /*======================================================================= 
 Function: Loc_InitGPSSettings()
