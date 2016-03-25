@@ -123,7 +123,7 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
    pme->m_nColorDepth = pdi->nColorDepth;
    FREEIF(pdi);
 
-   IDISPLAY_GetFontMetrics(pme->a.m_pIDisplay, AEE_FONT_LARGE, &nAscent, &nDescent);
+   pme->m_nFontHeight = IDISPLAY_GetFontMetrics(pme->a.m_pIDisplay, AEE_FONT_LARGE, &nAscent, &nDescent) + 1;
    pme->m_nLChSize = nAscent + nDescent;
 
    IDISPLAY_GetFontMetrics(pme->a.m_pIDisplay, AEE_FONT_NORMAL, &nAscent, &nDescent);
@@ -221,6 +221,25 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
        return FALSE;
    }
 
+   {
+		IDBMgr * pDBMgr = NULL;
+
+		// Create the IDBMgr object
+		if(ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_DBMGR, (void**)(&pDBMgr)) != SUCCESS)
+		return FALSE;
+
+		// Open the ExpenseTracker database.  If it does not exist then create it.
+		// Once the database is opened, the IDBMgr is not longer needed so it is released.
+		if((pme->m_pDatabase = IDBMGR_OpenDatabase(pDBMgr, DESTINATION_DB_FILE, TRUE)) == NULL) {
+		IDBMGR_Release(pDBMgr);
+		return FALSE;
+		}
+		else
+		{
+		IDBMGR_Release(pDBMgr);
+		}
+	}
+
    return TRUE;
 }
 
@@ -260,6 +279,9 @@ static void CTopSoupApp_FreeAppData(IApplet* po)
 	//Tel
 	TS_RELEASEIF(pme->m_pCallMgr);
 	
+	//DataBase
+	TS_RELEASEIF( pme->m_pDatabase);
+
 	CTopSoupApp_ReleaseRes(pme);
 }
 
@@ -441,6 +463,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 			 }
 
          case EVT_COMMAND:          // Process menu command event
+		 case EVT_CTL_SEL_CHANGED:  // Process Sel Changed event
          case EVT_COPYRIGHT_END:    // Copyright dialog ended
             if (pme->m_pWin)
                return IWINDOW_HandleEvent(pme->m_pWin, eCode, wParam, dwParam);
@@ -521,6 +544,9 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 		  pme->m_pWin = CNavigateWin_New(pme, (Coordinate*)(dwParam)); 
 		  break;
 		  
+	  case TSW_DESTINATION:     
+		  pme->m_pWin = CDestinationWin_New(pme); 
+	      break;
       case TSW_NONE:       
          return TRUE; 
          break;

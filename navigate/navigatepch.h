@@ -8,18 +8,24 @@
 #include "AEEGraphics.h"	  // AEE Graphics Services
 #include "AEESMS.h"			  // AEE SMS Services
 #include "AEETelephone.h"     // AEE Telephone Services
+#include "AEEDB.h"			  // AEE DataBase Services
+#include "AEEFile.h"		  // AEE File Services
 
 #include "nmdef.h"
 
 #include "logicmacro.h"
 #include "window.h"
+#include "wincontrol.h"
+
 #include "navigate.h"
 #include "mainwindow.h"
 #include "wherewindow.h"
 #include "navigatewindow.h"
-#include "wincontrol.h"
+#include "destinationwindow.h"
+
 
 #include "location.h"
+#include "dbfunc.h"
 
 #include "navigate.bid"
 #include "navigate.brh"

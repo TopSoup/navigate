@@ -8,6 +8,16 @@ typedef struct _IWindow  IWindow;
 //string TODO solove include file problem, put it in logimacro mode
 #define TS_MAX_STRLEN         64
 
+/*  DataBase */
+#define EXPENSE_LIST_ID             1000                  // Base ID of expense items displayed in the menu control
+#define REPORT_LIST_ID              2000                  // Base ID of report file names displayed in the menu control
+
+#define DESTINATION_DB_FILE       "destination.db"         // Base database file name
+#define MAX_RES_STRING_BUF_SIZE      256                  // Max buffer size for string buffers
+#define MAX_AMOUNT_DIGITS            8                    // Max digits for amount strings                
+#define AMOUNT_BUFFER_SIZE           10                   // Max string buffer size for amount strings
+#define MAX_DESC_SIZE                32
+
 //TODO how to add annotate
 typedef enum TSWindow
 {
@@ -15,6 +25,7 @@ typedef enum TSWindow
 	TSW_MAIN,
 	TSW_WHERE,
 	TSW_NAVIGATE,
+	TSW_DESTINATION,
 	TSW_LAST
 } TSWindow;
 
@@ -33,6 +44,7 @@ struct CTopSoupApp
 	IWindow *         m_pWin; 
 	flg               m_bRedraw:1;
 
+	int               m_nFontHeight;  // Stores the height of the AEE_FONT_BOLD font.  This will
 	//XXX to add code here
 	IImage *          m_pHdrImage;
 	AEERect           m_rectHdr;
@@ -68,6 +80,9 @@ struct CTopSoupApp
 	ICallMgr *m_pCallMgr;
 	ICall *m_pOutgoingCall;
     CallListener callListener;
+
+	//Destination DataBse
+	IDatabase*		m_pDatabase;		// Database
 };
 
 typedef struct CTopSoupApp  CTopSoupApp;

@@ -48,6 +48,7 @@ IWindow * CMainWin_New(CTopSoupApp * pOwner)
       TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth,&((CTopSoupApp*)pme->m_pOwner)->m_rectWin , 0);
       TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_MY_LOCATION, NULL, IDI_OBJECT_15201, IDS_STRING_MY_LOCATION, 0);
       TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_NAVIGATE,   NULL, IDI_OBJECT_15202, IDS_STRING_NAVIGATE,   0);
+	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_DESTINATION,   NULL, IDI_OBJECT_15203, IDS_STRING_DESTINATION,   0);
       TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_APPINFO,    NULL, IDI_OBJECT_15203, IDS_STRING_APPINFO,    0);
 
 	  TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
@@ -162,6 +163,12 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
 			  dest.lat = 39.911954;
 			  dest.lon = 116.377817;
 			  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE, (uint32)&dest);
+			  
+			  break;
+		  }
+	  case IDS_STRING_DESTINATION:
+		  {
+			  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DESTINATION, 0);
 			  
 			  break;
 		  }

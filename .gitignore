@@ -9,6 +9,7 @@
 *.swp
 *.temp
 *.tmp
+*.db
 
 #ignore visualstudio tmp files
 *.mod
