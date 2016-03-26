@@ -37,8 +37,13 @@ typedef enum TSWindow
 	TSW_DEST_NEW,	//新建目的地
 	TSW_DEST_INFO,	//功能说明
 
-	//3 SOS和发送短信复用界面
+	//3 
+	//目的地列表项内容
+	TSW_DEST_LIST_ITEM,	//列表项内容
+
+	//SOS和发送短信复用界面
 	TSW_SEND_NUM,		//接收电话号码
+	
 
 	/* Interval */
 	//1

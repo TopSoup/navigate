@@ -100,6 +100,10 @@ SOURCE=.\AEEModGen.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\destinfowindow.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\destlistwindow.c
 # End Source File
 # Begin Source File
@@ -157,6 +161,10 @@ SOURCE=..\..\inc\AEEMediaUtil.h
 # Begin Source File
 
 SOURCE=..\..\inc\AEEModGen.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\destinfowindow.h
 # End Source File
 # Begin Source File
 

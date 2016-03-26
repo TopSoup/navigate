@@ -560,6 +560,10 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 		  pme->m_pWin = CNewDestWin_New(pme); 
 	      break;
 
+	  case TSW_DEST_INFO:
+		  pme->m_pWin = CDestInfoWin_New(pme); 
+	      break;
+
       case TSW_NONE:       
          return TRUE; 
          break;

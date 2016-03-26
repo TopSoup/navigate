@@ -1,9 +1,9 @@
-#include "mainwindow.h"
+#include "destinfowindow.h"
 
 
 
-// SOS window: Displays main menu.
-struct CSOSWin
+// DestInfoWin window: Displays main menu.
+struct CDestInfoWin
 {
 	INHERIT_CWindow(IWindow);
 
@@ -11,31 +11,31 @@ struct CSOSWin
 	IMenuCtl *     m_pMainMenu;
 };
 
-typedef struct CSOSWin CSOSWin;
+typedef struct CDestInfoWin CDestInfoWin;
 
 
-static void       CSOSWin_Delete(IWindow * po);
-static void       CSOSWin_Enable(IWindow * po, boolean bEnable);
-static void       CSOSWin_Redraw(IWindow * po);
-static boolean    CSOSWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam);
+static void       CDestInfoWin_Delete(IWindow * po);
+static void       CDestInfoWin_Enable(IWindow * po, boolean bEnable);
+static void       CDestInfoWin_Redraw(IWindow * po);
+static boolean    CDestInfoWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam);
 
-static void       CSOSWin_About(IWindow * po);
+static void       CDestInfoWin_About(IWindow * po);
 
 /*===============================================================================
 
-                     CSOSWin Functions
+                     CDestInfoWin Functions
 
 =============================================================================== */
 /*===========================================================================
    This function constucts the main window.
 ===========================================================================*/
-IWindow * CSOSWin_New(CTopSoupApp * pOwner)
+IWindow * CDestInfoWin_New(CTopSoupApp * pOwner)
 {
-   CSOSWin *        pme;
+   CDestInfoWin *        pme;
    VTBL(IWindow)     vtbl;
    
-   IWINDOW_SETVTBL(&vtbl, CSOSWin_Enable, CSOSWin_Redraw, CSOSWin_HandleEvent, CSOSWin_Delete);
-   pme = (CSOSWin *)CWindow_New(sizeof(CSOSWin), pOwner, &vtbl);
+   IWINDOW_SETVTBL(&vtbl, CDestInfoWin_Enable, CDestInfoWin_Redraw, CDestInfoWin_HandleEvent, CDestInfoWin_Delete);
+   pme = (CDestInfoWin *)CWindow_New(sizeof(CDestInfoWin), pOwner, &vtbl);
    if (!pme)
       return NULL;
 
@@ -63,9 +63,9 @@ IWindow * CSOSWin_New(CTopSoupApp * pOwner)
 /*===========================================================================
    This function deletes the main window.
 ===========================================================================*/
-static void CSOSWin_Delete(IWindow * po)
+static void CDestInfoWin_Delete(IWindow * po)
 {
-   CSOSWin *  pme = (CSOSWin *)po;
+   CDestInfoWin *  pme = (CDestInfoWin *)po;
 
    //XXX __begin
    if (pme->m_pMainMenu)
@@ -79,9 +79,9 @@ static void CSOSWin_Delete(IWindow * po)
 /*===========================================================================
    This function enables/disables the main window.
 ===========================================================================*/
-static void CSOSWin_Enable(IWindow * po, boolean bEnable)
+static void CDestInfoWin_Enable(IWindow * po, boolean bEnable)
 {
-   CSOSWin *  pme = (CSOSWin *)po;
+   CDestInfoWin *  pme = (CDestInfoWin *)po;
  
 
    if (!CWindow_ProcessEnable(po, bEnable))
@@ -103,9 +103,9 @@ static void CSOSWin_Enable(IWindow * po, boolean bEnable)
 /*===========================================================================
    This function redraws the main window.
 ===========================================================================*/
-static void CSOSWin_Redraw(IWindow * po)
+static void CDestInfoWin_Redraw(IWindow * po)
 {
-   CSOSWin *  pme = (CSOSWin *)po;
+   CDestInfoWin *  pme = (CDestInfoWin *)po;
 
    if (!pme->m_bActive)
       return;
@@ -125,9 +125,9 @@ static void CSOSWin_Redraw(IWindow * po)
 /*===========================================================================
    This function processes events routed to main window.
 ===========================================================================*/
-static boolean CSOSWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam)
+static boolean CDestInfoWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam)
 {
-   CSOSWin *  pme = (CSOSWin *)po;
+   CDestInfoWin *  pme = (CDestInfoWin *)po;
    boolean     bRet = TRUE;
 
    //XXX __begin
@@ -138,7 +138,7 @@ static boolean CSOSWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, 
 	   //ÍË³ö³ÌÐò
 	   if( AVK_SOFT2 == wParam )
 	   {
-			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
+			ISHELL_CloseApplet(pme->m_pIShell, FALSE);
 			return TRUE;
 	   }
    }
@@ -161,11 +161,11 @@ static boolean CSOSWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, 
 		  break;
 
 	  case IDS_STRING_SOS:
-		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_DEST, 0);
+		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_SOS, 0);
 		  break;
 
       case IDS_STRING_APPINFO:
-         CSOSWin_About((IWindow*)pme);
+         CDestInfoWin_About((IWindow*)pme);
 		 break;
 	 
       default:
@@ -180,9 +180,9 @@ static boolean CSOSWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, 
 /*===========================================================================
    This function displays the About dialog of the app.
 ===========================================================================*/
-static void CSOSWin_About(IWindow * po)
+static void CDestInfoWin_About(IWindow * po)
 {
-   CSOSWin *  pme = (CSOSWin *)po;
+   CDestInfoWin *  pme = (CDestInfoWin *)po;
 
 	CTopSoupApp_DisableWin(pme->m_pOwner);
 
