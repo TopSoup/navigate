@@ -19,9 +19,14 @@
 
 #include "navigate.h"
 #include "mainwindow.h"
+
 #include "wherewindow.h"
 #include "navigatewindow.h"
-#include "destinationwindow.h"
+#include "soswindow.h"
+
+#include "navigatedestwindow.h"
+#include "destlistwindow.h"
+#include "newdestwindow.h"
 
 
 #include "location.h"

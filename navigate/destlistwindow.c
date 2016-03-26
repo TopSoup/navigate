@@ -1,8 +1,8 @@
-#include "destinationwindow.h"
+#include "destlistwindow.h"
 
 
-// Main window: Displays main menu.
-struct CDestinationWin
+// Destination window: Displays main menu.
+struct CDestListWin
 {
 	INHERIT_CWindow(IWindow);
 
@@ -10,31 +10,31 @@ struct CDestinationWin
 	IMenuCtl *     m_pMainMenu;		//Record List
 };
 
-typedef struct CDestinationWin CDestinationWin;
+typedef struct CDestListWin CDestListWin;
 
 
-static void       CDestinationWin_Delete(IWindow * po);
-static void       CDestinationWin_Enable(IWindow * po, boolean bEnable);
-static void       CDestinationWin_Redraw(IWindow * po);
-static boolean    CDestinationWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam);
+static void       CDestListWin_Delete(IWindow * po);
+static void       CDestListWin_Enable(IWindow * po, boolean bEnable);
+static void       CDestListWin_Redraw(IWindow * po);
+static boolean    CDestListWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam);
 
-static void       CDestinationWin_About(IWindow * po);
+static void       CDestListWin_About(IWindow * po);
 
 /*===============================================================================
 
-                     CDestinationWin Functions
+                     CDestListWin Functions
 
 =============================================================================== */
 /*===========================================================================
    This function constucts the main window.
 ===========================================================================*/
-IWindow * CDestinationWin_New(CTopSoupApp * pOwner)
+IWindow * CDestListWin_New(CTopSoupApp * pOwner)
 {
-   CDestinationWin *        pme;
+   CDestListWin *        pme;
    VTBL(IWindow)     vtbl;
    
-   IWINDOW_SETVTBL(&vtbl, CDestinationWin_Enable, CDestinationWin_Redraw, CDestinationWin_HandleEvent, CDestinationWin_Delete);
-   pme = (CDestinationWin *)CWindow_New(sizeof(CDestinationWin), pOwner, &vtbl);
+   IWINDOW_SETVTBL(&vtbl, CDestListWin_Enable, CDestListWin_Redraw, CDestListWin_HandleEvent, CDestListWin_Delete);
+   pme = (CDestListWin *)CWindow_New(sizeof(CDestListWin), pOwner, &vtbl);
    if (!pme)
       return NULL;
 
@@ -74,9 +74,9 @@ IWindow * CDestinationWin_New(CTopSoupApp * pOwner)
 /*===========================================================================
    This function deletes the main window.
 ===========================================================================*/
-static void CDestinationWin_Delete(IWindow * po)
+static void CDestListWin_Delete(IWindow * po)
 {
-   CDestinationWin *  pme = (CDestinationWin *)po;
+   CDestListWin *  pme = (CDestListWin *)po;
   
    //XXX __begin
    TS_RELEASEIF(pme->m_pMainMenu);
@@ -88,9 +88,9 @@ static void CDestinationWin_Delete(IWindow * po)
 /*===========================================================================
    This function enables/disables the main window.
 ===========================================================================*/
-static void CDestinationWin_Enable(IWindow * po, boolean bEnable)
+static void CDestListWin_Enable(IWindow * po, boolean bEnable)
 {
-   CDestinationWin *  pme = (CDestinationWin *)po;
+   CDestListWin *  pme = (CDestListWin *)po;
  
 
    if (!CWindow_ProcessEnable(po, bEnable))
@@ -113,9 +113,9 @@ static void CDestinationWin_Enable(IWindow * po, boolean bEnable)
 /*===========================================================================
    This function redraws the main window.
 ===========================================================================*/
-static void CDestinationWin_Redraw(IWindow * po)
+static void CDestListWin_Redraw(IWindow * po)
 {
-   CDestinationWin *  pme = (CDestinationWin *)po;
+   CDestListWin *  pme = (CDestListWin *)po;
 
    if (!pme->m_bActive)
       return;
@@ -128,20 +128,31 @@ static void CDestinationWin_Redraw(IWindow * po)
 
    {
    uint32 nTotal = 0;
+#ifdef HAVE_TITLE
    AECHAR psTitle[ MAX_DESC_SIZE + 1 ];
-
+#endif
+   
    //For Test
-//   if( IDATABASE_GetRecordCount( pme->m_pOwner->m_pDatabase ) == 0 )
-//   {
-//		TS_AddExpenseItem(pme->m_pOwner, L"Beijing", L"37.012345", L"114.123456");
-//		TS_AddExpenseItem(pme->m_pOwner, L"Ceijing", L"37.112345", L"114.223456");
-//		TS_AddExpenseItem(pme->m_pOwner, L"Deijing", L"37.212345", L"114.323456");
-//		TS_AddExpenseItem(pme->m_pOwner, L"Eeijing", L"37.312345", L"114.423456");
-//   }
+   if( IDATABASE_GetRecordCount( pme->m_pOwner->m_pDatabase ) == 0 )
+   {
+		TS_AddExpenseItem(pme->m_pOwner, L"Aeijing", L"37.012345", L"114.123456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Beijing", L"37.112345", L"114.223456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Ceijing", L"37.212345", L"114.323456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Deijing", L"37.312345", L"114.423456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Eeijing", L"37.012345", L"114.123456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Feijing", L"37.112345", L"114.223456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Geijing", L"37.212345", L"114.323456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Heijing", L"37.312345", L"114.423456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Ieijing", L"37.012345", L"114.123456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Jeijing", L"37.112345", L"114.223456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Keijing", L"37.212345", L"114.323456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Leijing", L"37.312345", L"114.423456");
+   }
 
    // Get Expense List
    TS_GetExpenseList( pme->m_pOwner, pme->m_pMainMenu, &nTotal);
 
+#ifdef HAVE_TITLE
    // Set Appropriate Title
    if( IDATABASE_GetRecordCount( pme->m_pOwner->m_pDatabase ) == 0 )
    {
@@ -160,6 +171,7 @@ static void CDestinationWin_Redraw(IWindow * po)
          IMENUCTL_SetTitle(pme->m_pMainMenu, NULL, NULL, psTitle);
       }
    }
+#endif
 
    // Active Menu
    IMENUCTL_SetActive( pme->m_pMainMenu, TRUE);
@@ -174,9 +186,9 @@ static void CDestinationWin_Redraw(IWindow * po)
 /*===========================================================================
    This function processes events routed to main window.
 ===========================================================================*/
-static boolean CDestinationWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam)
+static boolean CDestListWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam)
 {
-   CDestinationWin *  pme = (CDestinationWin *)po;
+   CDestListWin *  pme = (CDestListWin *)po;
    boolean     bRet = TRUE;
 
    DBGPRINTF("dest ecode:%x", eCode);
@@ -188,11 +200,12 @@ static boolean CDestinationWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 
 	   //ÍË³ö³ÌÐò
 	   if( AVK_SOFT2 == wParam )
 	   {
-			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
+			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_DEST, 0);
 			return TRUE;
 	   }
    }
-   
+
+#ifdef HAVE_TITLE
    //When receive sel changed event, update menu title with cur item desc.
    if (TS_ISSELCHG(eCode))
    {            
@@ -204,7 +217,8 @@ static boolean CDestinationWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 
 	   IMENUCTL_Redraw(pMenu);
 	   return TRUE;
    }
-	
+#endif
+   
    if (TS_ISEVTKEY(eCode)) 
    {
       return IMENUCTL_HandleEvent(pme->m_pMainMenu, eCode, wParam, dwParam);
@@ -221,9 +235,9 @@ static boolean CDestinationWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 
 /*===========================================================================
    This function displays the About dialog of the app.
 ===========================================================================*/
-static void CDestinationWin_About(IWindow * po)
+static void CDestListWin_About(IWindow * po)
 {
-   CDestinationWin *  pme = (CDestinationWin *)po;
+   CDestListWin *  pme = (CDestListWin *)po;
 
 	CTopSoupApp_DisableWin(pme->m_pOwner);
 

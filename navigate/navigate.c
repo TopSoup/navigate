@@ -532,21 +532,34 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 
    switch (eWin)
    {
+
+	  //1
       case TSW_MAIN:       
          pme->m_pWin = CMainWin_New(pme); 
          break;
 
+	  //2
 	  case TSW_WHERE:   
 		  pme->m_pWin = CWhereWin_New(pme); 
 		  break;
 		  
-	  case TSW_NAVIGATE:     
-		  pme->m_pWin = CNavigateWin_New(pme, (Coordinate*)(dwParam)); 
+	  case TSW_NAVIGATE_DEST:     
+		  pme->m_pWin = CNavigateDestWin_New(pme); 
 		  break;
-		  
-	  case TSW_DESTINATION:     
-		  pme->m_pWin = CDestinationWin_New(pme); 
+	
+	  case TSW_SOS:
+		  pme->m_pWin = CSOSWin_New(pme); 
 	      break;
+
+	  //3
+	  case TSW_DEST_LIST:     
+		  pme->m_pWin = CDestListWin_New(pme); 
+	      break;
+
+	  case TSW_DEST_NEW:
+		  pme->m_pWin = CNewDestWin_New(pme); 
+	      break;
+
       case TSW_NONE:       
          return TRUE; 
          break;

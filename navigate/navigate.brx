@@ -10,18 +10,30 @@
 	<String Id="3" Name="IDS_STRING_NAVIGATE">
 		<Text>目标领航</Text>
 	</String>
-	<String Id="4" Name="IDS_STRING_APPINFO">
-		<Text>功能介绍</Text>
+	<String Id="4" Name="IDS_STRING_SOS">
+		<Text>SOS位置求助</Text>
 	</String>
-	<String Id="5" Name="IDS_STRING_SELECT">
+	<String Id="5" Name="IDS_STRING_APPINFO">
+		<Text>版本信息</Text>
+	</String>
+	<String Id="6" Name="IDS_STRING_SELECT">
 		<Text>选择</Text>
 	</String>
-	<String Id="6" Name="IDS_STRING_BACK">
+	<String Id="7" Name="IDS_STRING_BACK">
 		<Text>返回</Text>
 	</String>
-  <String Id="7" Name="IDS_OK">
-    <Text>确定</Text>
-  </String>
+	<String Id="8" Name="IDS_OK">
+    	<Text>确定</Text>
+	</String>
+	<String Id="9" Name="IDS_STRING_DEST_LIST">
+		<Text>目的地列表</Text>
+	</String>
+	<String Id="10" Name="IDS_STRING_DEST_NEW">
+		<Text>新建目的地</Text>
+	</String>
+	<String Id="11" Name="IDS_STRING_DEST_INFO">
+		<Text>功能介绍</Text>
+	</String>
 </Strings>
 <Strings Encoding="Unicode">
   <String Id="501" Name="IDS_STRING_DESTINATION">

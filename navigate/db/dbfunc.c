@@ -23,6 +23,9 @@ INITIALIZATION & SEQUENCING REQUIREMENTS:
 #include "navigate.brh"
 #include "nmdef.h"
 
+//使用图标替代序号
+#define USE_LIST_ICON
+
 static boolean TS_ParseExpenseRecord( IDBRecord* pRecord, AECHAR* psDesc, AECHAR* psLat, AECHAR* psLon );
 
 //*****************************************************************************
@@ -455,20 +458,17 @@ boolean TS_GetExpenseList( CTopSoupApp * pApp, IMenuCtl* pMenu, uint32* pnTotal)
    IDBRecord* pRecord;
    AECHAR psDesc[MAX_DESC_SIZE + 2];
    AECHAR psItemBuf[ MAX_RES_STRING_BUF_SIZE ];
-
-   AECHAR psAlignedItemBuf[ MAX_RES_STRING_BUF_SIZE ];
-   AECHAR psSpaceChar[] = { ' ','\0' };
-   uint16 nItemWidth, nSpaceWidth;
-   uint16 nNumSpaces;
-   AEERect rRect;
-   uint16 i;
    CtlAddItem ai;
    uint32 total = 0;
    
    // Initialize
    ai.wText = 0;
    ai.pImage = NULL;
+#ifdef USE_LIST_ICON
    ai.pszResImage = ai.pszResText = NAVIGATE_RES_FILE;
+#else
+   ai.pszResImage = ai.pszResText = NULL;
+#endif
    ai.wFont = AEE_FONT_NORMAL;
    ai.dwData = 0;
 
@@ -485,24 +485,27 @@ boolean TS_GetExpenseList( CTopSoupApp * pApp, IMenuCtl* pMenu, uint32* pnTotal)
   *pnTotal = 0;
 
   // Get each record in the database, one at a time
-  IMENUCTL_GetRect( pMenu, &rRect );
   while( (pRecord = IDATABASE_GetNextRecord( pApp->m_pDatabase )) != NULL )
   {
-    // Parse the date/time, transaction type and amount from the current record
-
+    // Parse the description from the current record
     TS_ParseExpenseRecord( pRecord, psDesc, NULL, NULL );
 
 	// Check Valid
     if( WSTRLEN(psDesc) > 0)
     {
+	  total ++ ;
+
 	  // Create the menu entry.
-      ai.pText = psDesc;
-      ai.wImage = IDB_LOCATION;
+	  WSPRINTF(psItemBuf, MAX_RES_STRING_BUF_SIZE, L"%02d. %s", total, psDesc);
+
+#ifdef USE_LIST_ICON
+	  ai.wImage = IDB_LOCATION;
+#else
+	  ai.wImage = 0;
+#endif
+	  ai.pText = psItemBuf;
       ai.wItemID = EXPENSE_LIST_ID + IDBRECORD_GetID(pRecord);
       IMENUCTL_AddItemEx(pMenu, &ai);
-
-      // Add the entry amount to the total
-	  total ++ ;
     }
     // Release the current record
 

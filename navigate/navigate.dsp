@@ -100,7 +100,7 @@ SOURCE=.\AEEModGen.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\destinationwindow.c
+SOURCE=.\destlistwindow.c
 # End Source File
 # Begin Source File
 
@@ -116,7 +116,19 @@ SOURCE=.\navigate.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\navigatedestwindow.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\navigatewindow.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\newdestwindow.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\soswindow.c
 # End Source File
 # Begin Source File
 
@@ -148,7 +160,7 @@ SOURCE=..\..\inc\AEEModGen.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\destinationwindow.h
+SOURCE=.\destlistwindow.h
 # End Source File
 # Begin Source File
 
@@ -172,11 +184,23 @@ SOURCE=.\navigate.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\navigatedestwindow.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\navigatepch.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\navigatewindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\newdestwindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\soswindow.h
 # End Source File
 # Begin Source File
 

@@ -22,10 +22,33 @@ typedef struct _IWindow  IWindow;
 typedef enum TSWindow
 {
 	TSW_NONE,
-	TSW_MAIN,
-	TSW_WHERE,
-	TSW_NAVIGATE,
-	TSW_DESTINATION,
+
+	/* First Level */
+	TSW_MAIN,			//主页面
+
+	/* Second Level */
+	TSW_WHERE,				//1 我在哪
+	TSW_NAVIGATE_DEST,		//2 目标领航
+	TSW_SOS,				//3 SOS
+
+	/* Third Level */
+	//2
+	TSW_DEST_LIST,	//目的地列表
+	TSW_DEST_NEW,	//新建目的地
+	TSW_DEST_INFO,	//功能说明
+
+	//3 SOS和发送短信复用界面
+	TSW_SEND_NUM,		//接收电话号码
+
+	/* Interval */
+	//1
+	TSW_LOCATING,		//定位中...
+	TSW_NAVIGATE,		//领航
+	
+	//3 
+	TSW_ADDRBOOK,		//联系人界面
+	TSW_SMSBOX,			//短信收件箱
+	
 	TSW_LAST
 } TSWindow;
 
