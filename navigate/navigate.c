@@ -440,6 +440,8 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 
          case EVT_KEY:	            // Process key event
 			 {
+				 DBGPRINTF("eCode:%x Key:%x", eCode, wParam);
+
 				//FOR SMS & TEL TEST
 				if (wParam == AVK_0)
 				{

@@ -1,7 +1,7 @@
 #include "newdestwindow.h"
 
 #define MP_MAX_STRLEN 64
-#define MP_NEW_DEST_CY 16
+#define MP_NEW_DEST_CY 32
 
 #define MAX_CONTENT_SIZE 30
 
@@ -62,15 +62,15 @@ IWindow * CNewDestWin_New(CTopSoupApp * pOwner)
 		   (ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_TEXTCTL, (void**)(&pme->m_pTextDesc)) != SUCCESS ))
 		   TS_WINERR_RETURN(pme);
 
-		SETAEERECT(&rect, 0, dy, cx/4, dy);
+		SETAEERECT(&rect, 0, dy, cx/4, MP_NEW_DEST_CY);
 		ISTATIC_SetRect(pme->m_pStaticLat, &rect);
 
 		dy += MP_NEW_DEST_CY;
-		SETAEERECT(&rect, 0, dy, cx/4, dy);
+		SETAEERECT(&rect, 0, dy, cx/4, MP_NEW_DEST_CY);
 		ISTATIC_SetRect(pme->m_pStaticLon, &rect);
 
 		dy += MP_NEW_DEST_CY;
-		SETAEERECT(&rect, 0, dy, cx/4, dy);
+		SETAEERECT(&rect, 0, dy, cx/4, MP_NEW_DEST_CY);
 		ISTATIC_SetRect(pme->m_pStaticDesc, &rect);
 
 		// Let's reset text control size so on subsequent this won't misbehave by erasing screen
@@ -78,6 +78,10 @@ IWindow * CNewDestWin_New(CTopSoupApp * pOwner)
 		ITEXTCTL_SetRect(pme->m_pTextLat, &rect);
 		ITEXTCTL_SetRect(pme->m_pTextLon, &rect);
 		ITEXTCTL_SetRect(pme->m_pTextDesc, &rect);
+
+		ISTATIC_SetRect(pme->m_pStaticLat, &rect);
+		ISTATIC_SetRect(pme->m_pStaticLon, &rect);
+		ISTATIC_SetRect(pme->m_pStaticDesc, &rect);
 		
 		TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
 		//XXX __end
@@ -134,6 +138,7 @@ static void CNewDestWin_Redraw(IWindow * po)
 {
 	CNewDestWin *  pme = (CNewDestWin *)po;
 	AEERect  rRect;
+	int		 dy = MP_NEW_DEST_CY*3;
 
 	if (!pme->m_bActive)
 		return;
@@ -155,24 +160,33 @@ static void CNewDestWin_Redraw(IWindow * po)
 	// 1 Display lat input text
 	ISTATIC_GetRect(pme->m_pStaticLat, &rRect );
     ITEXTCTL_Reset( pme->m_pTextLat );
+	ITEXTCTL_SetTitle(pme->m_pTextLat,NAVIGATE_RES_FILE,IDS_STRING_LAT,NULL);
     ITEXTCTL_SetProperties( pme->m_pTextLat, TP_FRAME );
 
     // Set the starting X coordinate position of the control and its width (screen width
     // minus the width of the label string).
     rRect.x = 2 + rRect.dx;
     rRect.dx = pme->m_pOwner->m_cxWidth - rRect.x -2;
+
+	SETAEERECT(&rRect, pme->m_pOwner->m_cxWidth/4+2, dy, pme->m_pOwner->m_cxWidth/2, dy);
+	ISTATIC_SetRect(pme->m_pStaticLat, &rRect);
+
 	ITEXTCTL_SetText(pme->m_pTextLat, L"0.0",  MAX_CONTENT_SIZE);
+	SETAEERECT(&rRect, 0, dy, pme->m_pOwner->m_cxWidth/2, MP_NEW_DEST_CY);
+	DBGPRINTF("latRect:(%d %d, %d-%d)", rRect.x, rRect.y, rRect.dx, rRect.dy);
+
     ITEXTCTL_SetRect(pme->m_pTextLat, &rRect );
-    ITEXTCTL_SetInputMode( pme->m_pTextLat, AEE_TM_NUMBERS );
+    ITEXTCTL_SetInputMode( pme->m_pTextLat, AEE_TM_T9 );
     //pMe->m_nInputMode = IMT_LITTLE_CASE_LETTER;
-    ITEXTCTL_SetMaxSize( pme->m_pTextLat, MAX_CONTENT_SIZE+1 );
+    ITEXTCTL_SetMaxSize( pme->m_pTextLat, 16 );
     ITEXTCTL_SetActive( pme->m_pTextLat, TRUE );
     ITEXTCTL_Redraw( pme->m_pTextLat);
 
 
-	// 2 Display lat input text
+	// 2 Display lon input text
 	ISTATIC_GetRect(pme->m_pStaticLon, &rRect );
     ITEXTCTL_Reset( pme->m_pTextLon );
+	ITEXTCTL_SetTitle(pme->m_pTextLon,NAVIGATE_RES_FILE,IDS_STRING_LON,NULL);
     ITEXTCTL_SetProperties( pme->m_pTextLon, TP_FRAME );
 
     // Set the starting X coordinate position of the control and its width (screen width
@@ -180,17 +194,21 @@ static void CNewDestWin_Redraw(IWindow * po)
     rRect.x = 2 + rRect.dx;
     rRect.dx = pme->m_pOwner->m_cxWidth - rRect.x -2;
 	ITEXTCTL_SetText(pme->m_pTextLon, L"0.0",  MAX_CONTENT_SIZE);
+	dy += MP_NEW_DEST_CY;
+	SETAEERECT(&rRect, 0, dy, pme->m_pOwner->m_cxWidth/2, MP_NEW_DEST_CY);
+	DBGPRINTF("lonRect:(%d %d, %d-%d)", rRect.x, rRect.y, rRect.dx, rRect.dy);
     ITEXTCTL_SetRect(pme->m_pTextLon, &rRect );
-    ITEXTCTL_SetInputMode( pme->m_pTextLon, AEE_TM_NUMBERS );
+    ITEXTCTL_SetInputMode( pme->m_pTextLon, AEE_TM_T9 );
     //pMe->m_nInputMode = IMT_LITTLE_CASE_LETTER;
-    ITEXTCTL_SetMaxSize( pme->m_pTextLon, MAX_CONTENT_SIZE+1 );
+    ITEXTCTL_SetMaxSize( pme->m_pTextLon, 16 );
     ITEXTCTL_SetActive( pme->m_pTextLon, FALSE );
     ITEXTCTL_Redraw( pme->m_pTextLon);
 	
 
-	// 2 Display lat input text
+	// 3 Display desc input text
 	ISTATIC_GetRect(pme->m_pStaticDesc, &rRect );
     ITEXTCTL_Reset( pme->m_pTextDesc );
+	ITEXTCTL_SetTitle(pme->m_pTextDesc,NAVIGATE_RES_FILE,IDS_STRING_NAME,NULL);
     ITEXTCTL_SetProperties( pme->m_pTextDesc, TP_FRAME );
 
     // Set the starting X coordinate position of the control and its width (screen width
@@ -198,10 +216,13 @@ static void CNewDestWin_Redraw(IWindow * po)
     rRect.x = 2 + rRect.dx;
     rRect.dx = pme->m_pOwner->m_cxWidth - rRect.x -2;
 	ITEXTCTL_SetText(pme->m_pTextDesc, L"0.0",  MAX_CONTENT_SIZE);
+	dy += MP_NEW_DEST_CY;
+	SETAEERECT(&rRect, 0, dy, pme->m_pOwner->m_cxWidth/2, MP_NEW_DEST_CY);
+	DBGPRINTF("descRect:(%d %d, %d-%d)", rRect.x, rRect.y, rRect.dx, rRect.dy);
     ITEXTCTL_SetRect(pme->m_pTextDesc, &rRect );
-    ITEXTCTL_SetInputMode( pme->m_pTextDesc, AEE_TM_NUMBERS );
+    ITEXTCTL_SetInputMode( pme->m_pTextDesc, AEE_TM_T9 );
     //pMe->m_nInputMode = IMT_LITTLE_CASE_LETTER;
-    ITEXTCTL_SetMaxSize( pme->m_pTextDesc, MAX_CONTENT_SIZE+1 );
+    ITEXTCTL_SetMaxSize( pme->m_pTextDesc, 16 );
     ITEXTCTL_SetActive( pme->m_pTextDesc, FALSE );
     ITEXTCTL_Redraw( pme->m_pTextDesc);
 
@@ -219,6 +240,8 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	CNewDestWin *  pme = (CNewDestWin *)po;
 	boolean     bRet = TRUE;
 	
+	DBGPRINTF("eCode:%x key:%x", eCode, wParam);
+
 	//*
 	// text控件处理DOWN键后，后面程序继续处理
     if (ITEXTCTL_HandleEvent(pme->m_pTextLat, eCode, wParam, dwParam))
@@ -231,6 +254,8 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
         {
             return TRUE;
         }
+		DBGPRINTF("LAT eCode:%x key:%x", eCode, wParam);
+		return TRUE;
     }
 	
     // text控件处理DOWN键后，后面程序继续处理
@@ -244,6 +269,10 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
         {
             return TRUE;
         }
+
+		DBGPRINTF("LON eCode:%x key:%x", eCode, wParam);
+
+		return TRUE;
     }
 	
 	// text控件处理DOWN键后，后面程序继续处理
@@ -257,6 +286,9 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
         {
             return TRUE;
         }
+
+		DBGPRINTF("DESC eCode:%x key:%x", eCode, wParam);
+		return TRUE;
     }
 	//*/
 	

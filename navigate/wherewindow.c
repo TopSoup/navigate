@@ -164,10 +164,8 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 ===========================================================================*/
 static void CWhereWin_Delete(IWindow * po)
 {
-CWhereWin *  pme = (CWhereWin *)po;
-	
-	struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
-	
+	CWhereWin *  pme = (CWhereWin *)po;	
+
 	//释放定位模块
 	CWhereWin_LocStop(po);
 	
@@ -191,8 +189,6 @@ CWhereWin *  pme = (CWhereWin *)po;
 ===========================================================================*/
 static void CWhereWin_Enable(IWindow * po, boolean bEnable)
 {
-	CWhereWin *  pme = (CWhereWin *)po;
-	
 	if (!CWindow_ProcessEnable(po, bEnable))
 		return;
 }

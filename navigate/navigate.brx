@@ -34,6 +34,15 @@
 	<String Id="11" Name="IDS_STRING_DEST_INFO">
 		<Text>功能介绍</Text>
 	</String>
+	<String Id="12" Name="IDS_STRING_LAT">
+		<Text>经度: </Text>
+	</String>
+	<String Id="13" Name="IDS_STRING_LON">
+		<Text>纬度: </Text>
+	</String>
+	<String Id="14" Name="IDS_STRING_NAME">
+		<Text>名称: </Text>
+	</String>
 </Strings>
 <Strings Encoding="Unicode">
   <String Id="501" Name="IDS_STRING_DESTINATION">
