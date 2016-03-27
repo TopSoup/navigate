@@ -335,17 +335,5 @@ SOURCE=.\db\dbfunc.c
 SOURCE=.\db\dbfunc.h
 # End Source File
 # End Group
-# Begin Group "amountctl"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=.\amountctl\amountctl.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\amountctl\amountctl.h
-# End Source File
-# End Group
 # End Target
 # End Project

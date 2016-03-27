@@ -48,6 +48,8 @@ brewappmgr
 #ignore android building directory
 /obj/
 /gen/
+navigate/navigate/
+navigate/objs/
 
 #mac operater
 __MACOSX/

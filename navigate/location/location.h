@@ -107,7 +107,7 @@ extern "C" {
    double Loc_Calc_Azimuth( double latA, double lngA, double latB, double lngB );
 
    /* For test */
-   void Loc_Test_All();
+   void Loc_Test_All(void);
 
 #ifdef __cplusplus
 }

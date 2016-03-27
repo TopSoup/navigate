@@ -693,7 +693,7 @@ uint32 Loc_SaveGPSSettings( IShell *pIShell )
    return nResult;
 }
 
-void Loc_Test_All()
+void Loc_Test_All(void)
 {
    Coordinate c1, c2;
    double dis = 0, th = 0;
