@@ -133,9 +133,11 @@ IWindow * CNavigateWin_New(CTopSoupApp * pOwner, void *pDest)
 		struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
 		ZEROAT( pGetGPSInfo );
 		
-		//pGetGPSInfo->theInfo.server = 0;//pMe->gpsSettings.server;
-		pGetGPSInfo->theInfo.qos = 127;//pMe->gpsSettings.qos;
-		pGetGPSInfo->theInfo.optim = 1;//pMe->gpsSettings.optim;
+		pGetGPSInfo->theInfo.gpsConfig.server.svrType = AEEGPS_SERVER_DEFAULT;
+		pGetGPSInfo->theInfo.gpsConfig.qos = 16;
+		pGetGPSInfo->theInfo.gpsConfig.optim = 1;
+		pGetGPSInfo->theInfo.gpsConfig.mode = AEEGPS_MODE_TRACK_NETWORK;
+		
 		if (pDest != NULL)
 		{
 			pGetGPSInfo->theInfo.destPos = *((Coordinate*)pDest);
@@ -148,10 +150,11 @@ IWindow * CNavigateWin_New(CTopSoupApp * pOwner, void *pDest)
 			CALLBACK_Init( &pGetGPSInfo->cbProgressTimer, CNavigateWin_GetGPSInfo_SecondTicker, pme );
 			
 			nErr = Loc_Init( pme->m_pIShell, pGetGPSInfo->pPosDet, &pGetGPSInfo->cbPosDet, &pGetGPSInfo->pts );
-			nErr = Loc_Start( pGetGPSInfo->pts, LOC_NETWORK, 0, 0, &pGetGPSInfo->theInfo );
+			nErr = Loc_Start( pGetGPSInfo->pts, &pGetGPSInfo->theInfo );
 			if( nErr != SUCCESS ) {
 				pGetGPSInfo->theInfo.nErr = nErr;
 				DBGPRINTF("Loc_Start Failed!");
+				CNavigateWin_Redraw((IWindow*)pme);
 			}
 			else {
 				ISHELL_SetTimerEx( pme->m_pIShell, 1000, &pGetGPSInfo->cbProgressTimer );

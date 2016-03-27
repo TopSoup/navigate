@@ -9,6 +9,7 @@
 *.swp
 *.temp
 *.tmp
+*.db
 
 #ignore visualstudio tmp files
 *.mod
@@ -47,6 +48,8 @@ brewappmgr
 #ignore android building directory
 /obj/
 /gen/
+navigate/navigate/
+navigate/objs/
 
 #mac operater
 __MACOSX/

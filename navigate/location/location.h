@@ -27,11 +27,6 @@ GENERAL DESCRIPTION:
  #define LOC_QOS_DEFAULT       127
 
 typedef struct _LocState LocState;
-typedef enum {
-   LOC_LOCAL,      /* Uses AEEGPS_LOC_LOCAL */
-   LOC_NETWORK,     /* Uses AEEGPS_LOC_NETOWORK */
-   LOC_AUTO        /* Attempts using AEEGPS_LOC_LOCAL if it fails uses AEEGPS_LOC_NETWORK */
-} LocType;
 
 typedef struct {
 	double lat;       /* latitude on WGS-84 Geoid */
@@ -50,10 +45,7 @@ typedef struct {
    double destHeading; /* Heading degrees between current position with destPos */
 
    //Config Param
-   AEEGPSServer server; /* Specifies the server type and configuration */
-   AEEGPSQos qos;		/* Corresponds to the number of seconds that the application wants the position determination engine to search for satellites */
-   AEEGPSOpt optim;		/* Specifies whether to optimize the position determination request for speed, accuracy, or data exchange */
-   AEEGPSMode mode;		/* Specifies gps work mode */
+   AEEGPSConfig gpsConfig;
 
    Coordinate destPos;	/* Specifies destination */
    boolean bSetDestPos;
@@ -101,7 +93,7 @@ extern "C" {
    int Loc_Init( IShell *pIShell, IPosDet *pIPos, AEECallback *pcb, LocState **po );
 
    /* Starts the tracking using the object created in Loc_Init */
-   int Loc_Start( LocState *pts, LocType t, int nFixes, int nInterval, PositionData *pData );
+   int Loc_Start( LocState *pts, PositionData *pData );
 
    /* Stops the tracking, does not clean up the object, it can be
    ** further used with Loc_Start. Only CALLBACK_Cancel(pcb) releases
@@ -115,7 +107,7 @@ extern "C" {
    double Loc_Calc_Azimuth( double latA, double lngA, double latB, double lngB );
 
    /* For test */
-   void Loc_Test_All();
+   void Loc_Test_All(void);
 
 #ifdef __cplusplus
 }

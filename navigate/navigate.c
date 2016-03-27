@@ -123,7 +123,7 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
    pme->m_nColorDepth = pdi->nColorDepth;
    FREEIF(pdi);
 
-   IDISPLAY_GetFontMetrics(pme->a.m_pIDisplay, AEE_FONT_LARGE, &nAscent, &nDescent);
+   pme->m_nFontHeight = IDISPLAY_GetFontMetrics(pme->a.m_pIDisplay, AEE_FONT_LARGE, &nAscent, &nDescent) + 1;
    pme->m_nLChSize = nAscent + nDescent;
 
    IDISPLAY_GetFontMetrics(pme->a.m_pIDisplay, AEE_FONT_NORMAL, &nAscent, &nDescent);
@@ -221,6 +221,25 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
        return FALSE;
    }
 
+   {
+		IDBMgr * pDBMgr = NULL;
+
+		// Create the IDBMgr object
+		if(ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_DBMGR, (void**)(&pDBMgr)) != SUCCESS)
+		return FALSE;
+
+		// Open the ExpenseTracker database.  If it does not exist then create it.
+		// Once the database is opened, the IDBMgr is not longer needed so it is released.
+		if((pme->m_pDatabase = IDBMGR_OpenDatabase(pDBMgr, DESTINATION_DB_FILE, TRUE)) == NULL) {
+		IDBMGR_Release(pDBMgr);
+		return FALSE;
+		}
+		else
+		{
+		IDBMGR_Release(pDBMgr);
+		}
+	}
+
    return TRUE;
 }
 
@@ -260,6 +279,9 @@ static void CTopSoupApp_FreeAppData(IApplet* po)
 	//Tel
 	TS_RELEASEIF(pme->m_pCallMgr);
 	
+	//DataBase
+	TS_RELEASEIF( pme->m_pDatabase);
+
 	CTopSoupApp_ReleaseRes(pme);
 }
 
@@ -418,6 +440,8 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 
          case EVT_KEY:	            // Process key event
 			 {
+				 DBGPRINTF("eCode:%x Key:%x", eCode, wParam);
+
 				//FOR SMS & TEL TEST
 				if (wParam == AVK_0)
 				{
@@ -439,8 +463,9 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 					CTopSoupApp_EndSOSCall(pme);
 				}
 			 }
-
+		 case EVT_KEY_PRESS:
          case EVT_COMMAND:          // Process menu command event
+		 case EVT_CTL_SEL_CHANGED:  // Process Sel Changed event
          case EVT_COPYRIGHT_END:    // Copyright dialog ended
             if (pme->m_pWin)
                return IWINDOW_HandleEvent(pme->m_pWin, eCode, wParam, dwParam);
@@ -509,18 +534,38 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 
    switch (eWin)
    {
+
+	  //1
       case TSW_MAIN:       
          pme->m_pWin = CMainWin_New(pme); 
          break;
 
+	  //2
 	  case TSW_WHERE:   
 		  pme->m_pWin = CWhereWin_New(pme); 
 		  break;
 		  
-	  case TSW_NAVIGATE:     
-		  pme->m_pWin = CNavigateWin_New(pme, (Coordinate*)(dwParam)); 
+	  case TSW_NAVIGATE_DEST:     
+		  pme->m_pWin = CNavigateDestWin_New(pme); 
 		  break;
-		  
+	
+	  case TSW_SOS:
+		  pme->m_pWin = CSOSWin_New(pme); 
+	      break;
+
+	  //3
+	  case TSW_DEST_LIST:     
+		  pme->m_pWin = CDestListWin_New(pme); 
+	      break;
+
+	  case TSW_DEST_NEW:
+		  pme->m_pWin = CNewDestWin_New(pme); 
+	      break;
+
+	  case TSW_DEST_INFO:
+		  pme->m_pWin = CDestInfoWin_New(pme); 
+	      break;
+
       case TSW_NONE:       
          return TRUE; 
          break;

@@ -63,17 +63,22 @@ MYLIBS =
 
 LOCAL_OBJS =$(OBJSDIR)\AEEAppGen.o\
 			$(OBJSDIR)\AEEModGen.o\
-			$(OBJSDIR)\AEEMediaUtil.o\
 			$(OBJSDIR)\wincontrol.o \
 			$(OBJSDIR)\window.o \
 			$(OBJSDIR)\navigate.o \
 			$(OBJSDIR)\logicmacro.o \
 			$(OBJSDIR)\mainwindow.o \
-			$(OBJSDIR)\navigatewindow.o \
+			$(OBJSDIR)\navigatedestwindow.o \
 			$(OBJSDIR)\wherewindow.o \
+			$(OBJSDIR)\navigatewindow.o \
+			$(OBJSDIR)\destlistwindow.o \
+			$(OBJSDIR)\newdestwindow.o \
+			$(OBJSDIR)\destinfowindow.o \
+			$(OBJSDIR)\soswindow.o \
+			$(OBJSDIR)\dbfunc.o \
 			$(OBJSDIR)\e_asin.o \
 			$(OBJSDIR)\location.o \
-			$(OBJSDIR)\transform.o \
+			$(OBJSDIR)\transform.o
 
 
 #-------------------------------------------------------------------------------
@@ -82,7 +87,8 @@ LOCAL_OBJS =$(OBJSDIR)\AEEAppGen.o\
 MYINC =	-I $(BREWDIR)\inc \
 		-I $(BREWDIR)\sdk\inc \
 		-I . \
-		-I .\location
+		-I .\location \
+		-I .\db
 						
 #------------------------------------------------------------------------------
 # Common make file
@@ -109,6 +115,12 @@ RULE2 = .\location
 	$(ARMCC) $(CFLAGS) $(INC) $(OBJ_FILE)  $(RULE2)\$(SRC_FILE)
 	@echo ---------------------------------------------------------------
 
+RULE3 = .\db
+{$(RULE3)}.c.o:
+	@echo ---------------------------------------------------------------
+	@echo OBJECT $(@F)
+	$(ARMCC) $(CFLAGS) $(INC) $(OBJ_FILE)  $(RULE3)\$(SRC_FILE)
+	@echo ---------------------------------------------------------------
 	
 #------------------------------------------------------------------------------
 # Dependencies

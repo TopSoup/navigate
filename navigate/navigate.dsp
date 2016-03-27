@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MEDIAPLAYER_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "$(BREWDIR)\inc" /I "$(BREWDIR)\sdk\inc" /I "." /I ".\location" /D "AEE_SIMULATOR" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "$(BREWDIR)\inc" /I "$(BREWDIR)\sdk\inc" /I "." /I ".\location" /I ".\db" /D "AEE_SIMULATOR" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -100,6 +100,14 @@ SOURCE=.\AEEModGen.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\destinfowindow.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\destlistwindow.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\logicmacro.c
 # End Source File
 # Begin Source File
@@ -112,7 +120,19 @@ SOURCE=.\navigate.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\navigatedestwindow.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\navigatewindow.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\newdestwindow.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\soswindow.c
 # End Source File
 # Begin Source File
 
@@ -144,6 +164,14 @@ SOURCE=..\..\inc\AEEModGen.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\destinfowindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\destlistwindow.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\logicmacro.h
 # End Source File
 # Begin Source File
@@ -164,11 +192,23 @@ SOURCE=.\navigate.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\navigatedestwindow.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\navigatepch.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\navigatewindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\newdestwindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\soswindow.h
 # End Source File
 # Begin Source File
 
@@ -281,6 +321,18 @@ SOURCE=.\location\transform.c
 # Begin Source File
 
 SOURCE=.\location\transform.h
+# End Source File
+# End Group
+# Begin Group "db"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\db\dbfunc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\db\dbfunc.h
 # End Source File
 # End Group
 # End Target

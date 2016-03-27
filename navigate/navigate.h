@@ -8,13 +8,52 @@ typedef struct _IWindow  IWindow;
 //string TODO solove include file problem, put it in logimacro mode
 #define TS_MAX_STRLEN         64
 
+/*  DataBase */
+#define EXPENSE_LIST_ID             1000                  // Base ID of expense items displayed in the menu control
+#define REPORT_LIST_ID              2000                  // Base ID of report file names displayed in the menu control
+
+#define DESTINATION_DB_FILE       "destination.db"         // Base database file name
+#define MAX_RES_STRING_BUF_SIZE      256                  // Max buffer size for string buffers
+#define MAX_AMOUNT_DIGITS            8                    // Max digits for amount strings                
+#define AMOUNT_BUFFER_SIZE           10                   // Max string buffer size for amount strings
+#define MAX_DESC_SIZE                32
+
 //TODO how to add annotate
 typedef enum TSWindow
 {
 	TSW_NONE,
-	TSW_MAIN,
-	TSW_WHERE,
-	TSW_NAVIGATE,
+
+	/* First Level */
+	TSW_MAIN,			//主页面
+
+	/* Second Level */
+	TSW_WHERE,				//1 我在哪
+	TSW_NAVIGATE_DEST,		//2 目标领航
+	TSW_SOS,				//3 SOS
+
+	/* Third Level */
+	//2
+	TSW_DEST_LIST,	//目的地列表
+	TSW_DEST_NEW,	//新建目的地
+	TSW_DEST_INFO,	//功能说明
+
+	//3 
+	//目的地列表项内容
+	TSW_DEST_LIST_ITEM,	//列表项内容
+
+	//SOS和发送短信复用界面
+	TSW_SEND_NUM,		//接收电话号码
+	
+
+	/* Interval */
+	//1
+	TSW_LOCATING,		//定位中...
+	TSW_NAVIGATE,		//领航
+	
+	//3 
+	TSW_ADDRBOOK,		//联系人界面
+	TSW_SMSBOX,			//短信收件箱
+	
 	TSW_LAST
 } TSWindow;
 
@@ -33,6 +72,7 @@ struct CTopSoupApp
 	IWindow *         m_pWin; 
 	flg               m_bRedraw:1;
 
+	int               m_nFontHeight;  // Stores the height of the AEE_FONT_BOLD font.  This will
 	//XXX to add code here
 	IImage *          m_pHdrImage;
 	AEERect           m_rectHdr;
@@ -68,6 +108,9 @@ struct CTopSoupApp
 	ICallMgr *m_pCallMgr;
 	ICall *m_pOutgoingCall;
     CallListener callListener;
+
+	//Destination DataBse
+	IDatabase*		m_pDatabase;		// Database
 };
 
 typedef struct CTopSoupApp  CTopSoupApp;

@@ -16,7 +16,9 @@ void       TS_FreeWin(IWindow ** ppif);
 #define TS_ISEVTKEY(e)                 ((e) == EVT_KEY)
 #define TS_ISCLR(e)                    (TS_ISEVTKEY(e) && wParam == AVK_CLR)
 #define TS_ISEVTCMD(e)                 ((e) == EVT_COMMAND)
-#define TS_ISCMD(e, c)                 (TS_ISEVTCMD(e) && (c) == wParam)
+#define TS_ISCMD(e, c)                 (TS_ISEVTCMD(e) && (c) == wParam)	//TODO?
 #define TS_ISSOFT(e)					(TS_ISEVTKEY(e) && ( wParam == AVK_SOFT1 || wParam == AVK_SOFT2 ) )
+#define TS_ISSELCHG(e)                 ((e) == EVT_CTL_SEL_CHANGED)
+#define TS_ISSEL(e, c)                 ((e) == EVT_KEY_PRESS && (c) == AVK_SELECT)
 
 #endif

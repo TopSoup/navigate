@@ -12,7 +12,7 @@ struct CWhereWin
 	IStatic *		m_pTitle;
 
 	AECHAR          m_szMode[MP_MAX_STRLEN];
-	
+
 	IStatic *		m_pTextMethod;	//定位方式
 	IStatic *		m_pTextTime;	//定位时间
 	IStatic *		m_pTextLon;		//纬度
@@ -24,6 +24,7 @@ struct CWhereWin
 
 	IImageCtl *		m_pImageCtl;	//过渡图片
 
+	AEEGPSMode		m_gpsMode;
 	struct _GetGPSInfo		m_gpsInfo;	//
 };
 
@@ -34,6 +35,8 @@ static void       CWhereWin_Delete(IWindow * po);
 static void       CWhereWin_Enable(IWindow * po, boolean bEnable);
 static void       CWhereWin_Redraw(IWindow * po);
 static boolean    CWhereWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam);
+static void		  CWhereWin_LocStart ( IWindow *po );
+static void		  CWhereWin_LocStop ( IWindow *po );
 static void		  CWhereWin_GetGPSInfo_SecondTicker( IWindow *po );
 static void		  CWhereWin_GetGPSInfo_Callback( IWindow *po );
 
@@ -145,35 +148,12 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 		ISTATIC_SetRect(pme->m_pTextInfo, &rect);
 
 		//默认为网络测试模式
-		STRTOWSTR("NETWORK", pme->m_szMode, sizeof(pme->m_szMode));
+		STRTOWSTR("Mode: NETWORK", pme->m_szMode, sizeof(pme->m_szMode));
 	}
 
 	//初始化定位信息
-	{
-		int nErr = SUCCESS;
-		struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
-		ZEROAT( pGetGPSInfo );
-		
-		pGetGPSInfo->theInfo.server.svrType = AEEGPS_SERVER_DEFAULT;//pMe->gpsSettings.server;
-		pGetGPSInfo->theInfo.qos = 16;//pMe->gpsSettings.qos;
-		pGetGPSInfo->theInfo.optim = 1;//pMe->gpsSettings.optim;
-		
-		if( ISHELL_CreateInstance( pme->m_pIShell, AEECLSID_POSDET,(void **)&pGetGPSInfo->pPosDet ) == SUCCESS ) {
-			
-			CALLBACK_Init( &pGetGPSInfo->cbPosDet, CWhereWin_GetGPSInfo_Callback, pme );
-			CALLBACK_Init( &pGetGPSInfo->cbProgressTimer, CWhereWin_GetGPSInfo_SecondTicker, pme );
-			
-			nErr = Loc_Init( pme->m_pIShell, pGetGPSInfo->pPosDet, &pGetGPSInfo->cbPosDet, &pGetGPSInfo->pts );
-			nErr = Loc_Start( pGetGPSInfo->pts, LOC_NETWORK, 0, 0, &pGetGPSInfo->theInfo );
-			if( nErr != SUCCESS ) {
-				pGetGPSInfo->theInfo.nErr = nErr;
-				DBGPRINTF("Loc_Start Failed! Err:%d", nErr);
-			}
-			else {
-				ISHELL_SetTimerEx( pme->m_pIShell, 1000, &pGetGPSInfo->cbProgressTimer );
-			}
-		}
-	}
+	pme->m_gpsMode = AEEGPS_MODE_TRACK_NETWORK;	
+	CWhereWin_LocStart((IWindow *)pme);
 
 
    return (IWindow *)pme;
@@ -184,19 +164,10 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 ===========================================================================*/
 static void CWhereWin_Delete(IWindow * po)
 {
-CWhereWin *  pme = (CWhereWin *)po;
-	
-	struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
-	
+	CWhereWin *  pme = (CWhereWin *)po;	
+
 	//释放定位模块
-	if (pGetGPSInfo->pPosDet)
-	{
-		Loc_Stop(pGetGPSInfo->pts);
-		
-		CALLBACK_Cancel( &pGetGPSInfo->cbProgressTimer );
-		CALLBACK_Cancel( &pGetGPSInfo->cbPosDet );
-		TS_RELEASEIF( pGetGPSInfo->pPosDet );
-	}
+	CWhereWin_LocStop(po);
 	
 	//定位结果相关控件
 	TS_RELEASEIF(pme->m_pTextMethod);
@@ -218,8 +189,6 @@ CWhereWin *  pme = (CWhereWin *)po;
 ===========================================================================*/
 static void CWhereWin_Enable(IWindow * po, boolean bEnable)
 {
-	CWhereWin *  pme = (CWhereWin *)po;
-	
 	if (!CWindow_ProcessEnable(po, bEnable))
 		return;
 }
@@ -254,8 +223,9 @@ static void CWhereWin_Redraw(IWindow * po)
 			AECHAR bufLat[32], bufLon[32], bufVel[32], bufHeading[32];
 			ts_time_t now;
 
-			STRTOWSTR("Method: NetWork", pme->m_szText, sizeof(pme->m_szText));
-			TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextMethod, AEE_FONT_NORMAL, pme->m_szText);
+			//STRTOWSTR("Method: NetWork", pme->m_szText, sizeof(pme->m_szText));
+			//TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextMethod, AEE_FONT_NORMAL, pme->m_szText);
+			TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextMethod, AEE_FONT_NORMAL, pme->m_szMode);
 
 			get_time_now(&now);
 			
@@ -317,14 +287,22 @@ static boolean CWhereWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam
 			break;
 
 		case AVK_1:
-			DBGPRINTF("NETWORK MODE");
+			DBGPRINTF("Mode: NETWORK");
+			pme->m_gpsMode = AEEGPS_MODE_TRACK_NETWORK;
+			CWhereWin_LocStop((IWindow*)pme);
+			CWhereWin_LocStart((IWindow*)pme);
 			STRTOWSTR("NETWORK", pme->m_szMode, sizeof(pme->m_szMode));
+			CWhereWin_Redraw((IWindow*)pme);
 			bRet = TRUE;
 			break;
 
 		case AVK_2:
 			DBGPRINTF("STANDALONE MODE");
-			STRTOWSTR("STANDALONE", pme->m_szMode, sizeof(pme->m_szMode));
+			pme->m_gpsMode = AEEGPS_MODE_TRACK_STANDALONE;
+			CWhereWin_LocStop((IWindow*)pme);
+			CWhereWin_LocStart((IWindow*)pme);
+			STRTOWSTR("Mode: STANDALONE", pme->m_szMode, sizeof(pme->m_szMode));
+			CWhereWin_Redraw((IWindow*)pme);
 			bRet = TRUE;
 			break;
 
@@ -343,6 +321,53 @@ static boolean CWhereWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam
 /*===========================================================================
    This function called by location modoule.
 ===========================================================================*/
+static void CWhereWin_LocStart( IWindow *po )
+{
+	CWhereWin *pme = (CWhereWin*)po;
+	int nErr = SUCCESS;
+	struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
+	ZEROAT( pGetGPSInfo );
+
+	pGetGPSInfo->theInfo.gpsConfig.server.svrType = AEEGPS_SERVER_DEFAULT;
+	pGetGPSInfo->theInfo.gpsConfig.qos = 16;
+	pGetGPSInfo->theInfo.gpsConfig.optim = 1;
+	pGetGPSInfo->theInfo.gpsConfig.mode = pme->m_gpsMode;
+	pGetGPSInfo->theInfo.gpsConfig.nFixes = 0;
+	pGetGPSInfo->theInfo.gpsConfig.nInterval = 0;
+	
+	if( ISHELL_CreateInstance( pme->m_pIShell, AEECLSID_POSDET,(void **)&pGetGPSInfo->pPosDet ) == SUCCESS ) {
+		
+		CALLBACK_Init( &pGetGPSInfo->cbPosDet, CWhereWin_GetGPSInfo_Callback, pme );
+		CALLBACK_Init( &pGetGPSInfo->cbProgressTimer, CWhereWin_GetGPSInfo_SecondTicker, pme );
+		
+		nErr = Loc_Init( pme->m_pIShell, pGetGPSInfo->pPosDet, &pGetGPSInfo->cbPosDet, &pGetGPSInfo->pts );
+		nErr = Loc_Start( pGetGPSInfo->pts, &pGetGPSInfo->theInfo );
+		if( nErr != SUCCESS ) {
+			pGetGPSInfo->theInfo.nErr = nErr;
+			DBGPRINTF("Loc_Start Failed! Err:%d", nErr);
+			CWhereWin_Redraw((IWindow*)pme);
+		}
+		else {
+			ISHELL_SetTimerEx( pme->m_pIShell, 1000, &pGetGPSInfo->cbProgressTimer );
+		}
+	}
+}
+
+static void CWhereWin_LocStop( IWindow *po )
+{
+	CWhereWin *pme = (CWhereWin*)po;
+	struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
+
+	if (pGetGPSInfo->pPosDet)
+	{
+		Loc_Stop(pGetGPSInfo->pts);
+		
+		CALLBACK_Cancel( &pGetGPSInfo->cbProgressTimer );
+		CALLBACK_Cancel( &pGetGPSInfo->cbPosDet );
+		TS_RELEASEIF( pGetGPSInfo->pPosDet );
+	}
+}
+
 static void CWhereWin_GetGPSInfo_Callback( IWindow *po )
 {
 	CWhereWin *pme = (CWhereWin*)po;
@@ -368,16 +393,8 @@ static void CWhereWin_GetGPSInfo_Callback( IWindow *po )
 		pGetGPSInfo->dwTimeout++;
 	}
 	else {
-		//释放定位模块
-		if (pGetGPSInfo->pPosDet)
-		{
-			Loc_Stop(pGetGPSInfo->pts);
-			
-			CALLBACK_Cancel( &pGetGPSInfo->cbProgressTimer );
-			CALLBACK_Cancel( &pGetGPSInfo->cbPosDet );
-			TS_RELEASEIF( pGetGPSInfo->pPosDet );
-		}
-
+		
+		CWhereWin_LocStop((IWindow*)pme);
 		DBGPRINTF("@Something is not right here. Requires corrective action. Bailout");
 		
 		/* Something is not right here. Requires corrective action. Bailout */
