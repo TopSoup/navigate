@@ -43,6 +43,16 @@
 	<String Id="14" Name="IDS_STRING_NAME">
 		<Text>名称: </Text>
 	</String>
+	<String Id="15" Name="IDS_STRING_EDIT_LAT">
+		<Text>经度</Text>
+	</String>
+	<String Id="16" Name="IDS_STRING_EDIT_LON">
+		<Text>纬度</Text>
+	</String>
+	<String Id="17" Name="IDS_STRING_EDIT_DESC">
+		<Text>目的地名称</Text>
+	</String>
+
 </Strings>
 <Strings Encoding="Unicode">
   <String Id="501" Name="IDS_STRING_DESTINATION">
