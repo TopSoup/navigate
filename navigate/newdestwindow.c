@@ -5,6 +5,8 @@
 
 #define MAX_CONTENT_SIZE 30
 
+#define NET_DEST_LIST_ID 3
+
 
 // NewDestination window: Displays main menu.
 struct CNewDestWin
@@ -12,6 +14,8 @@ struct CNewDestWin
 	INHERIT_CWindow(IWindow);
 
 	AECHAR				m_szText[MP_MAX_STRLEN];
+	IMenuCtl *			m_pMainMenu;
+
 
 	IStatic *			m_pStaticLat;	  // 经度
 	IStatic *			m_pStaticLon;	  // 纬度
@@ -20,6 +24,9 @@ struct CNewDestWin
 	ITextCtl*			m_pTextLat;       // 经度
     ITextCtl*			m_pTextLon;       // 纬度
 	ITextCtl*			m_pTextDesc;      // 描述
+
+	CAmountCtl*             m_pAmount;      // Amount Custom Control
+	ITextCtl			*m_pText;
 };
 
 typedef struct CNewDestWin CNewDestWin;
@@ -51,9 +58,30 @@ IWindow * CNewDestWin_New(CTopSoupApp * pOwner)
 		int      cx = pme->m_pOwner->m_cxWidth;
 		int      cy = pme->m_pOwner->m_cyHeight;
 		int		 dy = MP_NEW_DEST_CY;
-		AEERect  rect;
+		AEERect  rect, rRect;
+		AEEItemStyle rNormalStyle;
+		AEEItemStyle rSelStyle;
 	   
+		if (ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_MENUCTL, (void **)&pme->m_pMainMenu))
+			TS_WINERR_RETURN(pme);
+		
+		SETAEERECT( &rRect, 0, pme->m_pOwner->m_nFontHeight, cx, cy - ( 3 * pme->m_pOwner->m_nFontHeight ) );
+		IMENUCTL_SetRect( pme->m_pMainMenu, &rRect );
+		
+		// Set the style of the menu control so that all the icons are displayed as
+		// transparent.  This is set based on the default menu styles.
+		ISHELL_GetItemStyle( pme->m_pIShell, AEE_IT_MENU, &rNormalStyle, &rSelStyle );
+		rNormalStyle.roImage = AEE_RO_TRANSPARENT;
+		rSelStyle.roImage = AEE_RO_TRANSPARENT;
+		IMENUCTL_SetStyle( pme->m_pMainMenu, &rNormalStyle, &rSelStyle );
+	
+		  // Create the CAmountCtl control.
+		if(((pme->m_pAmount = CAMOUNTCTL_CreateInstance(pme->m_pIShell)) == NULL) || 
+			(ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_TEXTCTL, (void**)(&pme->m_pText)) != SUCCESS ) )
+			TS_WINERR_RETURN(pme);
+
 		//XXX __begin
+		/*
 		if ((ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void**)(&pme->m_pStaticLat)) != SUCCESS) ||
 		   (ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void**)(&pme->m_pStaticLon)) != SUCCESS) ||
 		   (ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void**)(&pme->m_pStaticDesc)) != SUCCESS) ||
@@ -84,6 +112,16 @@ IWindow * CNewDestWin_New(CTopSoupApp * pOwner)
 		ISTATIC_SetRect(pme->m_pStaticDesc, &rect);
 		
 		TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
+		*/
+		
+		//if ((ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_TEXTCTL, (void**)(&pme->m_pTextLat)) != SUCCESS))
+		//   TS_WINERR_RETURN(pme);
+
+
+		// Let's reset text control size so on subsequent this won't misbehave by erasing screen
+		SETAEERECT(&rect, 0, 0, 0, 0);
+		ITEXTCTL_SetRect(pme->m_pText, &rect);
+
 		//XXX __end
 	   
 	   
@@ -106,6 +144,13 @@ static void CNewDestWin_Delete(IWindow * po)
    TS_RELEASEIF(pme->m_pTextLat);
    TS_RELEASEIF(pme->m_pTextLon);
    TS_RELEASEIF(pme->m_pTextDesc);
+
+   TS_RELEASEIF(pme->m_pText);
+
+   if (pme->m_pAmount)
+	CAMOUNTCTL_Release(pme->m_pAmount);
+
+   TS_RELEASEIF(pme->m_pMainMenu);
    //XXX _end
 
    FREE(pme);
@@ -122,13 +167,26 @@ static void CNewDestWin_Enable(IWindow * po, boolean bEnable)
 	   return;
 
    //XXX __begin
-   ISTATIC_SetActive(pme->m_pStaticLat, bEnable);
+   /*ISTATIC_SetActive(pme->m_pStaticLat, bEnable);
    ISTATIC_SetActive(pme->m_pStaticLon, bEnable);
    ISTATIC_SetActive(pme->m_pStaticDesc, bEnable);
+   */
    //ITEXTCTL_SetActive(pme->m_pTextLat, bEnable);
    //ITEXTCTL_SetActive(pme->m_pTextLon, bEnable);
    //ITEXTCTL_SetActive(pme->m_pTextDesc, bEnable);
    //XXX __end
+
+   //XXX __begin
+   if (!pme->m_bActive)
+   {
+      IMENUCTL_SetActive(pme->m_pMainMenu, FALSE);
+      return;
+   }
+
+   IMENUCTL_SetActive(pme->m_pMainMenu, TRUE);
+   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMainWin);
+   //XXX __end
+
 }
 
 /*===========================================================================
@@ -145,7 +203,60 @@ static void CNewDestWin_Redraw(IWindow * po)
 	
 	//XXX __begin
 	IDISPLAY_ClearScreen(pme->m_pIDisplay);
-	//TS_DrawBackgroud(po);
+
+	{
+		CtlAddItem  ai;
+
+		// Fill in the CtlAddItem structure values
+		ai.pText = L"Lat: 0.0";
+		ai.pImage = NULL;
+		ai.pszResImage = NULL;//KITIMG_RES_FILE;
+		ai.pszResText = NULL;//NAVIGATE_RES_FILE;
+		ai.wText = 0;//wTextID;
+		ai.wFont = AEE_FONT_LARGE;
+		ai.wImage = 0;//wImageID;
+		ai.wItemID = 0;//wItemID;
+		ai.dwData = 0;//dwData;
+
+		// Add the item to the menu control
+		IMENUCTL_AddItemEx( pme->m_pMainMenu, &ai );
+
+
+				// Fill in the CtlAddItem structure values
+		ai.pText = L"Lon: 0.0";
+		ai.pImage = NULL;
+		ai.pszResImage = NULL;//KITIMG_RES_FILE;
+		ai.pszResText = NULL;//NAVIGATE_RES_FILE;
+		ai.wText = 0;//wTextID;
+		ai.wFont = AEE_FONT_LARGE;
+		ai.wImage = 0;//wImageID;
+		ai.wItemID = 1;//wItemID;
+		ai.dwData = 0;//dwData;
+
+		// Add the item to the menu control
+		IMENUCTL_AddItemEx( pme->m_pMainMenu, &ai );
+
+
+
+				// Fill in the CtlAddItem structure values
+		ai.pText = L"Dest: 0.0";
+		ai.pImage = NULL;
+		ai.pszResImage = NULL;//KITIMG_RES_FILE;
+		ai.pszResText = NULL;//NAVIGATE_RES_FILE;
+		ai.wText = 0;//wTextID;
+		ai.wFont = AEE_FONT_LARGE;
+		ai.wImage = 0;//wImageID;
+		ai.wItemID = 2;//wItemID;
+		ai.dwData = 0;//dwData;
+
+		// Add the item to the menu control
+		IMENUCTL_AddItemEx( pme->m_pMainMenu, &ai );
+	}
+    // Active Menu
+   IMENUCTL_SetActive( pme->m_pMainMenu, TRUE);
+   IMENUCTL_Redraw(pme->m_pMainMenu);
+
+/*	TS_DrawBackgroud(po);
 	
 	STRTOWSTR("Lat: ", pme->m_szText, sizeof(pme->m_szText));
 	TS_FitStaticText(pme->m_pIDisplay, pme->m_pStaticLat, AEE_FONT_NORMAL, pme->m_szText);
@@ -156,33 +267,53 @@ static void CNewDestWin_Redraw(IWindow * po)
 	STRTOWSTR("Name: ", pme->m_szText, sizeof(pme->m_szText));
 	TS_FitStaticText(pme->m_pIDisplay, pme->m_pStaticDesc, AEE_FONT_NORMAL, pme->m_szText);
 
+*/
+
 
 	// 1 Display lat input text
-	ISTATIC_GetRect(pme->m_pStaticLat, &rRect );
-    ITEXTCTL_Reset( pme->m_pTextLat );
-	ITEXTCTL_SetTitle(pme->m_pTextLat,NAVIGATE_RES_FILE,IDS_STRING_LAT,NULL);
-    ITEXTCTL_SetProperties( pme->m_pTextLat, TP_FRAME );
+	//ISTATIC_GetRect(pme->m_pStaticLat, &rRect );
+//    ITEXTCTL_Reset( pme->m_pTextLat );
+//	ITEXTCTL_SetTitle(pme->m_pTextLat,NAVIGATE_RES_FILE,IDS_STRING_LAT,NULL);
+//    ITEXTCTL_SetProperties( pme->m_pTextLat, TP_FRAME );
+//
+//    // Set the starting X coordinate position of the control and its width (screen width
+//    // minus the width of the label string).
+//    rRect.x = 2 + rRect.dx;
+//    rRect.dx = pme->m_pOwner->m_cxWidth - rRect.x -2;
+//	
+//	SETAEERECT(&rRect, 0, dy, pme->m_pOwner->m_cxWidth/2, MP_NEW_DEST_CY);
+//
+//	DBGPRINTF("latRect:(%d %d, %d-%d)", rRect.x, rRect.y, rRect.dx, rRect.dy);
+//
+//    ITEXTCTL_SetRect(pme->m_pTextLat, &rRect );
+//    ITEXTCTL_SetInputMode( pme->m_pTextLat, AEE_TM_NUMBERS );
+//    //pMe->m_nInputMode = IMT_LITTLE_CASE_LETTER;
+//    ITEXTCTL_SetMaxSize( pme->m_pTextLat, 16 );
+//    ITEXTCTL_SetActive( pme->m_pTextLat, FALSE );
+//    ITEXTCTL_Redraw( pme->m_pTextLat);
 
-    // Set the starting X coordinate position of the control and its width (screen width
-    // minus the width of the label string).
-    rRect.x = 2 + rRect.dx;
-    rRect.dx = pme->m_pOwner->m_cxWidth - rRect.x -2;
+   /****
+	SETAEERECT(&rRect, 0, MP_NEW_DEST_CY, pme->m_pOwner->m_cxWidth/2, MP_NEW_DEST_CY);
 
-	SETAEERECT(&rRect, pme->m_pOwner->m_cxWidth/4+2, dy, pme->m_pOwner->m_cxWidth/2, dy);
-	ISTATIC_SetRect(pme->m_pStaticLat, &rRect);
-
-	ITEXTCTL_SetText(pme->m_pTextLat, L"0.0",  MAX_CONTENT_SIZE);
-	SETAEERECT(&rRect, 0, dy, pme->m_pOwner->m_cxWidth/2, MP_NEW_DEST_CY);
-	DBGPRINTF("latRect:(%d %d, %d-%d)", rRect.x, rRect.y, rRect.dx, rRect.dy);
-
-    ITEXTCTL_SetRect(pme->m_pTextLat, &rRect );
-    ITEXTCTL_SetInputMode( pme->m_pTextLat, AEE_TM_T9 );
-    //pMe->m_nInputMode = IMT_LITTLE_CASE_LETTER;
-    ITEXTCTL_SetMaxSize( pme->m_pTextLat, 16 );
-    ITEXTCTL_SetActive( pme->m_pTextLat, TRUE );
-    ITEXTCTL_Redraw( pme->m_pTextLat);
+	// Display Description Control
+	ITEXTCTL_Reset( pme->m_pText );
+	ITEXTCTL_SetProperties( pme->m_pText, TP_FRAME );
+	ITEXTCTL_SetInputMode( pme->m_pText, AEE_TM_PINYIN );
+	ITEXTCTL_SetMaxSize( pme->m_pText, MAX_DESC_SIZE );
+	ICONTROL_SetRect( (IControl *)pme->m_pText, &rRect );
+	ICONTROL_Redraw( (IControl *)pme->m_pText );
+	ICONTROL_SetActive( (IControl *)pme->m_pText, TRUE );
 
 
+	SETAEERECT(&rRect, 0, MP_NEW_DEST_CY*2, pme->m_pOwner->m_cxWidth/2, MP_NEW_DEST_CY);
+
+	CAMOUNTCTL_SetValue( pme->m_pAmount, 0 );
+	CAMOUNTCTL_SetRect( pme->m_pAmount, &rRect );
+    CAMOUNTCTL_Redraw( pme->m_pAmount );
+	CAMOUNTCTL_SetActive( pme->m_pAmount, FALSE);
+	***/
+
+/*
 	// 2 Display lon input text
 	ISTATIC_GetRect(pme->m_pStaticLon, &rRect );
     ITEXTCTL_Reset( pme->m_pTextLon );
@@ -193,12 +324,12 @@ static void CNewDestWin_Redraw(IWindow * po)
     // minus the width of the label string).
     rRect.x = 2 + rRect.dx;
     rRect.dx = pme->m_pOwner->m_cxWidth - rRect.x -2;
-	ITEXTCTL_SetText(pme->m_pTextLon, L"0.0",  MAX_CONTENT_SIZE);
+	//ITEXTCTL_SetText(pme->m_pTextLon, L"0.0",  MAX_CONTENT_SIZE);
 	dy += MP_NEW_DEST_CY;
 	SETAEERECT(&rRect, 0, dy, pme->m_pOwner->m_cxWidth/2, MP_NEW_DEST_CY);
 	DBGPRINTF("lonRect:(%d %d, %d-%d)", rRect.x, rRect.y, rRect.dx, rRect.dy);
     ITEXTCTL_SetRect(pme->m_pTextLon, &rRect );
-    ITEXTCTL_SetInputMode( pme->m_pTextLon, AEE_TM_T9 );
+    ITEXTCTL_SetInputMode( pme->m_pTextLon, AEE_TM_NUMBERS );
     //pMe->m_nInputMode = IMT_LITTLE_CASE_LETTER;
     ITEXTCTL_SetMaxSize( pme->m_pTextLon, 16 );
     ITEXTCTL_SetActive( pme->m_pTextLon, FALSE );
@@ -215,18 +346,18 @@ static void CNewDestWin_Redraw(IWindow * po)
     // minus the width of the label string).
     rRect.x = 2 + rRect.dx;
     rRect.dx = pme->m_pOwner->m_cxWidth - rRect.x -2;
-	ITEXTCTL_SetText(pme->m_pTextDesc, L"0.0",  MAX_CONTENT_SIZE);
+	//ITEXTCTL_SetText(pme->m_pTextDesc, L"0.0",  MAX_CONTENT_SIZE);
 	dy += MP_NEW_DEST_CY;
 	SETAEERECT(&rRect, 0, dy, pme->m_pOwner->m_cxWidth/2, MP_NEW_DEST_CY);
 	DBGPRINTF("descRect:(%d %d, %d-%d)", rRect.x, rRect.y, rRect.dx, rRect.dy);
     ITEXTCTL_SetRect(pme->m_pTextDesc, &rRect );
-    ITEXTCTL_SetInputMode( pme->m_pTextDesc, AEE_TM_T9 );
+    ITEXTCTL_SetInputMode( pme->m_pTextDesc, AEE_TM_NUMBERS );
     //pMe->m_nInputMode = IMT_LITTLE_CASE_LETTER;
     ITEXTCTL_SetMaxSize( pme->m_pTextDesc, 16 );
     ITEXTCTL_SetActive( pme->m_pTextDesc, FALSE );
     ITEXTCTL_Redraw( pme->m_pTextDesc);
 
-
+*/
 
 	IDISPLAY_Update(pme->m_pIDisplay);
 	//XXX _end
@@ -239,10 +370,61 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 {
 	CNewDestWin *  pme = (CNewDestWin *)po;
 	boolean     bRet = TRUE;
-	
+	int len;
+	int32 curPos;
+
 	DBGPRINTF("eCode:%x key:%x", eCode, wParam);
 
-	//*
+	//When receive sel changed event, update menu title with cur item desc.
+   if (TS_ISSEL(eCode, wParam))
+   {            
+	   AECHAR psTitle[ MAX_DESC_SIZE + 1 ];            
+	   uint16 nID = IMENUCTL_GetSel(pme->m_pMainMenu);
+	   DBGPRINTF("SEL:%d", nID);
+	   return TRUE;
+   }
+
+   if (TS_ISEVTKEY(eCode)) 
+   {
+      return IMENUCTL_HandleEvent(pme->m_pMainMenu, eCode, wParam, dwParam);
+   }
+
+	// Allow the left and right arrow keys to be used to move from Description field 
+	// to other fields, if the cursor is at the start or end of the Description field
+	curPos = ITEXTCTL_GetCursorPos(pme->m_pText);
+	len = WSTRLEN(ITEXTCTL_GetTextPtr(pme->m_pText));
+	if (ITEXTCTL_HandleEvent(pme->m_pText, eCode, wParam, dwParam))
+	{
+		// If there is text, then make sure the cursor is at the start or end
+		if (len)
+		{
+			// If the cursor is anywhere between the start and end, let the control handle
+			// the event
+			if (curPos >= TC_CURSORSTART + 1 &&    // cursor beyond start
+				curPos <= len - 1)             // cursor before end
+				return TRUE;
+			
+			// Check the left and right arrow and CLR key events
+			switch( wParam)
+			{
+			case AVK_RIGHT:
+				if (curPos == TC_CURSORSTART || curPos == (len - 1))
+					return TRUE;
+				break;
+			case AVK_LEFT:
+				if (curPos == (TC_CURSORSTART + 1) || curPos == len)
+					return TRUE;
+				break;
+			case AVK_CLR:
+				return TRUE;
+			}
+		}
+	}
+
+	if (CAMOUNTCTL_HandleEvent(pme->m_pAmount, eCode, wParam, dwParam))
+      return TRUE;
+
+	/*	
 	// text控件处理DOWN键后，后面程序继续处理
     if (ITEXTCTL_HandleEvent(pme->m_pTextLat, eCode, wParam, dwParam))
     {
@@ -257,7 +439,7 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 		DBGPRINTF("LAT eCode:%x key:%x", eCode, wParam);
 		return TRUE;
     }
-	
+
     // text控件处理DOWN键后，后面程序继续处理
     if (ITEXTCTL_HandleEvent(pme->m_pTextLon, eCode, wParam, dwParam))
     {
@@ -345,7 +527,8 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	case EVT_KEY:
 		// Add your code here...
 		switch(wParam)
-		{			
+		{		
+			/*
 			case AVK_UP:  // Handle 'UP' button presses if the text control has focus.
 				{
 					// focus switch
@@ -418,8 +601,9 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 						ITEXTCTL_Redraw(pme->m_pTextLat);
 						return TRUE;
 					}
-				break;
+				break;*/
 			}
+			
 	   }
 	return bRet;
 }

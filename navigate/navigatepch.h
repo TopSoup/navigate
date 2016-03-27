@@ -13,6 +13,7 @@
 #include "AEEFile.h"		  // AEE File Services
 #include "AEEText.h"		  // AEE Text Ctrl
 
+#include "amountctl.h"
 #include "nmdef.h"
 
 #include "logicmacro.h"

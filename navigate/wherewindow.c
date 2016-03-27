@@ -12,7 +12,7 @@ struct CWhereWin
 	IStatic *		m_pTitle;
 
 	AECHAR          m_szMode[MP_MAX_STRLEN];
-	
+
 	IStatic *		m_pTextMethod;	//定位方式
 	IStatic *		m_pTextTime;	//定位时间
 	IStatic *		m_pTextLon;		//纬度

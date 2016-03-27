@@ -79,6 +79,7 @@ LOCAL_OBJS =$(OBJSDIR)\AEEAppGen.o\
 			$(OBJSDIR)\e_asin.o \
 			$(OBJSDIR)\location.o \
 			$(OBJSDIR)\transform.o \
+			$(OBJSDIR)\amountctl.o
 
 
 #-------------------------------------------------------------------------------
@@ -89,6 +90,7 @@ MYINC =	-I $(BREWDIR)\inc \
 		-I . \
 		-I .\location \
 		-I .\db \
+		-I .\amountctl
 						
 #------------------------------------------------------------------------------
 # Common make file
@@ -121,6 +123,14 @@ RULE3 = .\db
 	@echo OBJECT $(@F)
 	$(ARMCC) $(CFLAGS) $(INC) $(OBJ_FILE)  $(RULE3)\$(SRC_FILE)
 	@echo ---------------------------------------------------------------
+
+RULE4 = .\amountctl
+{$(RULE4)}.c.o:
+	@echo ---------------------------------------------------------------
+	@echo OBJECT $(@F)
+	$(ARMCC) $(CFLAGS) $(INC) $(OBJ_FILE)  $(RULE4)\$(SRC_FILE)
+	@echo ---------------------------------------------------------------
+
 
 	
 #------------------------------------------------------------------------------

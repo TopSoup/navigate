@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MEDIAPLAYER_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "$(BREWDIR)\inc" /I "$(BREWDIR)\sdk\inc" /I "." /I ".\location" /I ".\db" /D "AEE_SIMULATOR" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "$(BREWDIR)\inc" /I "$(BREWDIR)\sdk\inc" /I "." /I ".\location" /I ".\db" /I ".\amountctl" /D "AEE_SIMULATOR" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -333,6 +333,18 @@ SOURCE=.\db\dbfunc.c
 # Begin Source File
 
 SOURCE=.\db\dbfunc.h
+# End Source File
+# End Group
+# Begin Group "amountctl"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\amountctl\amountctl.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\amountctl\amountctl.h
 # End Source File
 # End Group
 # End Target

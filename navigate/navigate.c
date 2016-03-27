@@ -463,7 +463,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 					CTopSoupApp_EndSOSCall(pme);
 				}
 			 }
-
+		 case EVT_KEY_PRESS:
          case EVT_COMMAND:          // Process menu command event
 		 case EVT_CTL_SEL_CHANGED:  // Process Sel Changed event
          case EVT_COPYRIGHT_END:    // Copyright dialog ended
