@@ -142,7 +142,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="E:\BREW3.1.5\sdk\inc;E:\BREW3.1.5\inc;..\..\inc;&quot;$(BREWDIR)\inc&quot;"
+				AdditionalIncludeDirectories="E:\BREW3.1.5\sdk\inc;E:\BREW3.1.5\inc;..\..\inc;&quot;$(BREWDIR)\inc&quot;;.\location;.\db;.\"
 				PreprocessorDefinitions="AEE_SIMULATOR;WIN32;_DEBUG;_WINDOWS;_USRDLL"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -224,6 +224,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\destinfowindow.c"
+				>
+			</File>
+			<File
+				RelativePath=".\destlistwindow.c"
+				>
+			</File>
+			<File
 				RelativePath=".\logicmacro.c"
 				>
 			</File>
@@ -236,6 +244,26 @@
 				>
 			</File>
 			<File
+				RelativePath=".\navigatedestwindow.c"
+				>
+			</File>
+			<File
+				RelativePath=".\navigatewindow.c"
+				>
+			</File>
+			<File
+				RelativePath=".\newdestwindow.c"
+				>
+			</File>
+			<File
+				RelativePath=".\soswindow.c"
+				>
+			</File>
+			<File
+				RelativePath=".\wherewindow.c"
+				>
+			</File>
+			<File
 				RelativePath=".\wincontrol.c"
 				>
 			</File>
@@ -243,6 +271,30 @@
 				RelativePath=".\window.c"
 				>
 			</File>
+			<Filter
+				Name="db"
+				>
+				<File
+					RelativePath=".\db\dbfunc.c"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="location"
+				>
+				<File
+					RelativePath=".\location\e_asin.c"
+					>
+				</File>
+				<File
+					RelativePath=".\location\location.c"
+					>
+				</File>
+				<File
+					RelativePath=".\location\transform.c"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -250,6 +302,14 @@
 			>
 			<File
 				RelativePath=".\backimg.brh"
+				>
+			</File>
+			<File
+				RelativePath=".\destinfowindow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\destlistwindow.h"
 				>
 			</File>
 			<File
@@ -277,7 +337,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\navigatedestwindow.h"
+				>
+			</File>
+			<File
 				RelativePath=".\navigatepch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\navigatewindow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\newdestwindow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\soswindow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\wherewindow.h"
 				>
 			</File>
 			<File
@@ -288,6 +368,26 @@
 				RelativePath=".\window.h"
 				>
 			</File>
+			<Filter
+				Name="db"
+				>
+				<File
+					RelativePath=".\db\dbfunc.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="loacation"
+				>
+				<File
+					RelativePath=".\location\location.h"
+					>
+				</File>
+				<File
+					RelativePath=".\location\transform.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -309,9 +409,9 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="&#22312;&#29983;&#25104;bar&#36164;&#28304;&#25991;&#20214;"
-						CommandLine="$(BREWDIR)\tools\ResourceEditor\brewrc.exe -s -o ./navigate.bar -h ./navigate_res.h .\navigate.brx&#x0D;&#x0A;"
-						Outputs="navigate.bar"
+						Description=""
+						CommandLine=""
+						Outputs=""
 					/>
 				</FileConfiguration>
 			</File>
