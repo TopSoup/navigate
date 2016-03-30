@@ -228,6 +228,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\destlistfuctionwindow.c"
+				>
+			</File>
+			<File
 				RelativePath=".\destlistwindow.c"
 				>
 			</File>
@@ -249,6 +253,10 @@
 			</File>
 			<File
 				RelativePath=".\navigatewindow.c"
+				>
+			</File>
+			<File
+				RelativePath=".\newdestfuctionwindow.c"
 				>
 			</File>
 			<File
@@ -313,6 +321,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\destlistfuctionwindow.h"
+				>
+			</File>
+			<File
 				RelativePath=".\destlistwindow.h"
 				>
 			</File>
@@ -350,6 +362,10 @@
 			</File>
 			<File
 				RelativePath=".\navigatewindow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\newdestwherefuctionwindow.h"
 				>
 			</File>
 			<File

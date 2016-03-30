@@ -79,6 +79,27 @@
 	<String Id="1004" Name="IDS_STRING_LOCATION_INFO">
 		<Text>文本位置信息说明</Text>
 	</String>
+	<String Id="1005" Name="IDS_STRING_SMS">
+		<Text>短信发送</Text>
+	</String>
+	<String Id="1006" Name="IDS_STRING_DEST_LOCATION_INFO">
+		<Text>位置信息</Text>
+	</String>
+	<String Id="1007" Name="IDS_STRING_EDIT">
+		<Text>编辑</Text>
+	</String>
+	<String Id="1008" Name="IDS_STRING_DELETE">
+		<Text>删除</Text>
+	</String>
+	<String Id="1009" Name="IDS_STRING_DELETE_ALL">
+		<Text>全部删除</Text>
+	</String>
+	<String Id="1010" Name="IDS_STRING_DEST_NAVIGATE">
+		<Text>领航</Text>
+	</String>
+	<String Id="1011" Name="IDS_STRING_INFO">
+		<Text>信息说明</Text>
+	</String>
 </Strings>
 <Objects MimeType="image/png">
 	<Object Id="1000" Name="IDP_NAVIGATOR">
