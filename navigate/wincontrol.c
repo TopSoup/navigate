@@ -253,20 +253,30 @@ void TS_SetSoftButtonText(CTopSoupApp * pme,uint16 wTextLeftID, uint16 wTextRigh
 		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,wTextMidID,pme->m_pMidSoftText,sizeof(pme->m_pMidSoftText));
 }
 
+static void CTopSoupApp_onSplashDrawOver(void * po) 
+{
+	CTopSoupApp* pme = (CTopSoupApp*)po;
+
+	if(pme->m_pWin)
+		CTopSoupApp_Redraw(pme, TRUE);
+
+}
 
 /*===========================================================================
    This function draws the splash screen and brings up the main window
    after the splash timer runs out.
 ===========================================================================*/
-void   TS_DrawSplash(CTopSoupApp * pme,int msTimeout)
+void  TS_DrawSplash(CTopSoupApp * pme,AECHAR* prompt,int msTimeout)
 {
+	if( NULL == prompt )
+		return;
+	
 	if (pme->m_pWin)
 		CTopSoupApp_DisableWin(pme);
    
-   // Draw the splash screen, set the timer.
-   // The timer callback calls this function and redraws the main window.
    {
-      IImage * pi = ISHELL_LoadResImage(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDB_LOCATION);
+      IImage * pi = ISHELL_LoadResImage(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDJ_OBJECT_PROMPT);
+	  IStatic * pInfoStatic = NULL;
 
       if (pi)
       {
@@ -279,8 +289,15 @@ void   TS_DrawSplash(CTopSoupApp * pme,int msTimeout)
 		 y = pme->m_rectWin.y + ( pme->m_rectWin.dy - info.cy ) / 2;
          SETAEERECT(&rect,x,y,info.cx,info.cy);
          TS_DrawImage(pi, &rect, TRUE);
-         
+
+
+		 ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_STATIC, (void **)&pInfoStatic);
+		 ISTATIC_SetRect(pInfoStatic, &rect);
+		 ISTATIC_SetProperties(pInfoStatic,  ST_MIDDLETEXT | ST_CENTERTEXT | ST_NOSCROLL);
+         TS_FitStaticText(pme->a.m_pIDisplay, pInfoStatic, AEE_FONT_LARGE, prompt);
+
          TS_RELEASEIF(pi);
+		 TS_RELEASEIF(pInfoStatic);
       }
 
       // start the timer.

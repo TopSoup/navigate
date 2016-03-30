@@ -108,5 +108,8 @@
 	<Object Id="1001" Name="IDB_LOCATION" MimeType="image/bmp">
 		<File>.\images\256color\idb_stop.bmp</File>
 	</Object>
+	<Object Id="5001" Name="IDJ_OBJECT_PROMPT" MimeType="image/jpg">
+		<File>.\images\prompt.jpg</File>
+	</Object>
 </Objects>
 </BREWRes>

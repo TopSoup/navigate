@@ -902,14 +902,7 @@ static void CTopSoupApp_EndSOSCall(CTopSoupApp * pme)
 	}
 }
 
-void CTopSoupApp_onSplashDrawOver(void * po) 
-{
-	CTopSoupApp* pme = (CTopSoupApp*)po;
 
-	if(pme->m_pWin)
-		CTopSoupApp_Redraw(pme, TRUE);
-
-}
 
 
 

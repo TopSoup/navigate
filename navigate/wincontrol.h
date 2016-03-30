@@ -23,7 +23,7 @@ void       TS_FrameRect(IDisplay * pd, AEERect * pRect);
 
 //dlg
 void       TS_ErrorDlg(CTopSoupApp * pme, uint16 wResErrID);
-void       TS_DrawSplash(CTopSoupApp * pme,int msTimeout);
+void       TS_DrawSplash(CTopSoupApp * pme,AECHAR* info,int msTimeout);
 
 //file
 char *     TS_GetFileName(const char * psz);
