@@ -9,7 +9,6 @@ struct CWhereWin
 	INHERIT_CWindow(IWindow);
 	
 	AECHAR          m_szText[MP_MAX_STRLEN];
-	IStatic *		m_pTitle;
 
 	AECHAR          m_szMode[MP_MAX_STRLEN];
 
@@ -20,7 +19,7 @@ struct CWhereWin
 	IStatic *		m_pTextVel;		//速度
 	IStatic *		m_pTextHeading;	//方向角度
 	IStatic *		m_pTextHeight;	//海拔
-	IStatic *		m_pTextInfo;	//信息
+	//IStatic *		m_pTextInfo;	//信息
 
 	IImageCtl *		m_pImageCtl;	//过渡图片
 
@@ -96,20 +95,11 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
       return NULL;
 
 {
-		int      cx = pme->m_pOwner->m_cxWidth;
-		int      cy = pme->m_pOwner->m_cyHeight;
-		int		 dy = MP_WHERE_CY;
-		AEERect  rectTitle, rect;
+		int      cx = pme->m_pOwner->m_rectWin.dx;
+		int		 y = pme->m_pOwner->m_rectWin.y;
+		int      dy = MP_WHERE_CY;
+		AEERect  rect;
 		
-		// Create IStatic for file name
-		SETAEERECT(&rectTitle, 0, 0, cx, 16);
-		
-		if (ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pTitle))
-			TS_WINERR_RETURN(pme);
-		
-		ISTATIC_SetRect(pme->m_pTitle, &rectTitle);
-		ISTATIC_SetProperties(pme->m_pTitle, ST_CENTERTEXT | ST_NOSCROLL);
-
 		//定位过渡提示信息显示
 
 		//定位结果提示信息
@@ -119,33 +109,33 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 			ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pTextLat) != SUCCESS ||
 			ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pTextVel) != SUCCESS ||
 			ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pTextHeading) != SUCCESS ||
-			ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pTextHeight) != SUCCESS ||
-			ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pTextInfo) != SUCCESS) {
+			ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pTextHeight) != SUCCESS ){
+		//	ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pTextInfo) != SUCCESS) {
 		   return FALSE;
 		}
-		SETAEERECT(&rect, 0, dy, cx, dy);
+		SETAEERECT(&rect, 0, y, cx, dy);
 		ISTATIC_SetRect(pme->m_pTextMethod, &rect);
-		dy += MP_WHERE_CY;
-		SETAEERECT(&rect, 0, dy, cx, dy);
+		y += MP_WHERE_CY;
+		SETAEERECT(&rect, 0, y, cx, dy);
 		ISTATIC_SetRect(pme->m_pTextTime, &rect);
-		dy += MP_WHERE_CY;
-		SETAEERECT(&rect, 0, dy, cx, dy);
+		y += MP_WHERE_CY;
+		SETAEERECT(&rect, 0, y, cx, dy);
 		ISTATIC_SetRect(pme->m_pTextLon, &rect);
-		dy += MP_WHERE_CY;
-		SETAEERECT(&rect, 0, dy, cx, dy);
+		y += MP_WHERE_CY;
+		SETAEERECT(&rect, 0, y, cx, dy);
 		ISTATIC_SetRect(pme->m_pTextLat, &rect);
-		dy += MP_WHERE_CY;
-		SETAEERECT(&rect, 0, dy, cx, dy);
+		y += MP_WHERE_CY;
+		SETAEERECT(&rect, 0, y, cx, dy);
 		ISTATIC_SetRect(pme->m_pTextVel, &rect);
-		dy += MP_WHERE_CY;
-		SETAEERECT(&rect, 0, dy, cx, dy);
+		y += MP_WHERE_CY;
+		SETAEERECT(&rect, 0, y, cx, dy);
 		ISTATIC_SetRect(pme->m_pTextHeading, &rect);
-		dy += MP_WHERE_CY;
-		SETAEERECT(&rect, 0, dy, cx, dy);
+		y += MP_WHERE_CY;
+		SETAEERECT(&rect, 0, y, cx, dy);
 		ISTATIC_SetRect(pme->m_pTextHeight, &rect);
-		dy += MP_WHERE_CY*2;
-		SETAEERECT(&rect, 0, dy, cx, dy);
-		ISTATIC_SetRect(pme->m_pTextInfo, &rect);
+		//y += MP_WHERE_CY*2;
+		//SETAEERECT(&rect, 0, y, cx, dy);
+		//ISTATIC_SetRect(pme->m_pTextInfo, &rect);
 
 		//默认为网络测试模式
 		STRTOWSTR("Mode: NETWORK", pme->m_szMode, sizeof(pme->m_szMode));
@@ -155,6 +145,9 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 	pme->m_gpsMode = AEEGPS_MODE_TRACK_NETWORK;	
 	CWhereWin_LocStart((IWindow *)pme);
 
+
+	ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MY_LOCATION,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
+	TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,0);
 
    return (IWindow *)pme;
 }
@@ -177,9 +170,8 @@ static void CWhereWin_Delete(IWindow * po)
 	TS_RELEASEIF(pme->m_pTextVel);
 	TS_RELEASEIF(pme->m_pTextHeading);
 	TS_RELEASEIF(pme->m_pTextHeight);
-	TS_RELEASEIF(pme->m_pTextInfo);
+	//TS_RELEASEIF(pme->m_pTextInfo);
 	TS_RELEASEIF(pme->m_pImageCtl);
-	TS_RELEASEIF(pme->m_pTitle);
 	
 	FREE(pme);
 }
@@ -206,14 +198,9 @@ static void CWhereWin_Redraw(IWindow * po)
 	DBGPRINTF("@CWhereWin_Redraw in");
 
 	IDISPLAY_ClearScreen(pme->m_pIDisplay);
-	
-	if (pme->m_pTitle)
-	{
-		// File name (title) text
-		STRTOWSTR("Where", pme->m_szText, sizeof(pme->m_szText));
-		TS_FitStaticText(pme->m_pIDisplay, pme->m_pTitle, AEE_FONT_NORMAL, pme->m_szText);
-	}
 
+	TS_DrawBackgroud(po);
+	
 	//当取得定位结果时更新显示
 	//if (pme->m_gpsInfo.pPosDet)
 	{
@@ -255,8 +242,8 @@ static void CWhereWin_Redraw(IWindow * po)
 		}
 	}
 	
-	WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"Pro: %d nErr:%u", pme->m_gpsInfo.wProgress,  pme->m_gpsInfo.theInfo.nErr);
-	TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextInfo, AEE_FONT_NORMAL, pme->m_szText);	
+	//WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"Pro: %d nErr:%u", pme->m_gpsInfo.wProgress,  pme->m_gpsInfo.theInfo.nErr);
+	//TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextInfo, AEE_FONT_NORMAL, pme->m_szText);	
 
 
 	IDISPLAY_Update(pme->m_pIDisplay);
