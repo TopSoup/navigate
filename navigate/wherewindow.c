@@ -278,7 +278,8 @@ static boolean CWhereWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam
 		switch (wParam)
 		{
 		case AVK_SOFT1:
-			bRet = FALSE;
+			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE_FUCTION, 0);
+			bRet = TRUE;
 			break;
 
 		case AVK_SOFT2:

@@ -1,9 +1,9 @@
-#include "mainwindow.h"
+#include "wherefuctionwindow.h"
 
 
 
 // Main window: Displays main menu.
-struct CMainWin
+struct CWhereFuctionWin
 {
 	INHERIT_CWindow(IWindow);
 
@@ -11,31 +11,30 @@ struct CMainWin
 	IMenuCtl *     m_pMainMenu;
 };
 
-typedef struct CMainWin CMainWin;
+typedef struct CWhereFuctionWin CWhereFuctionWin;
 
 
-static void       CMainWin_Delete(IWindow * po);
-static void       CMainWin_Enable(IWindow * po, boolean bEnable);
-static void       CMainWin_Redraw(IWindow * po);
-static boolean    CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam);
+static void       CWhereFuctionWin_Delete(IWindow * po);
+static void       CWhereFuctionWin_Enable(IWindow * po, boolean bEnable);
+static void       CWhereFuctionWin_Redraw(IWindow * po);
+static boolean    CWhereFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam);
 
-static void       CMainWin_About(IWindow * po);
 
 /*===============================================================================
 
-                     CMainWin Functions
+                     CWhereFuctionWin Functions
 
 =============================================================================== */
 /*===========================================================================
    This function constucts the main window.
 ===========================================================================*/
-IWindow * CMainWin_New(CTopSoupApp * pOwner)
+IWindow * CWhereFuctionWin_New(CTopSoupApp * pOwner)
 {
-   CMainWin *        pme;
+   CWhereFuctionWin *        pme;
    VTBL(IWindow)     vtbl;
    
-   IWINDOW_SETVTBL(&vtbl, CMainWin_Enable, CMainWin_Redraw, CMainWin_HandleEvent, CMainWin_Delete);
-   pme = (CMainWin *)CWindow_New(sizeof(CMainWin), pOwner, &vtbl);
+   IWINDOW_SETVTBL(&vtbl, CWhereFuctionWin_Enable, CWhereFuctionWin_Redraw, CWhereFuctionWin_HandleEvent, CWhereFuctionWin_Delete);
+   pme = (CWhereFuctionWin *)CWindow_New(sizeof(CWhereFuctionWin), pOwner, &vtbl);
    if (!pme)
       return NULL;
 
@@ -46,11 +45,11 @@ IWindow * CMainWin_New(CTopSoupApp * pOwner)
          TS_WINERR_RETURN(pme);
 
       TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth,&((CTopSoupApp*)pme->m_pOwner)->m_rectWin , 0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_MY_LOCATION, NULL, IDI_OBJECT_15201, IDS_STRING_MY_LOCATION, 0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_NAVIGATE,   NULL, IDI_OBJECT_15202, IDS_STRING_NAVIGATE,   0);
-	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SOS,   NULL, IDI_OBJECT_15203, IDS_STRING_SOS,   0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_APPINFO,    NULL, IDI_OBJECT_15204, IDS_STRING_APPINFO,    0);
+      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SAVE_LOCATION, NULL, IDI_OBJECT_15201, IDS_STRING_MY_LOCATION, 0);
+      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_REPORT_LOCATION,   NULL, IDI_OBJECT_15202, IDS_STRING_NAVIGATE,   0);
+	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_LOCATION_INFO,   NULL, IDI_OBJECT_15203, IDS_STRING_SOS,   0);
 
+	  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_FUCTION,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
 	  TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
 	  //XXX __end
 
@@ -63,9 +62,9 @@ IWindow * CMainWin_New(CTopSoupApp * pOwner)
 /*===========================================================================
    This function deletes the main window.
 ===========================================================================*/
-static void CMainWin_Delete(IWindow * po)
+static void CWhereFuctionWin_Delete(IWindow * po)
 {
-   CMainWin *  pme = (CMainWin *)po;
+   CWhereFuctionWin *  pme = (CWhereFuctionWin *)po;
 
    //XXX __begin
    if (pme->m_pMainMenu)
@@ -79,9 +78,9 @@ static void CMainWin_Delete(IWindow * po)
 /*===========================================================================
    This function enables/disables the main window.
 ===========================================================================*/
-static void CMainWin_Enable(IWindow * po, boolean bEnable)
+static void CWhereFuctionWin_Enable(IWindow * po, boolean bEnable)
 {
-   CMainWin *  pme = (CMainWin *)po;
+   CWhereFuctionWin *  pme = (CWhereFuctionWin *)po;
  
 
    if (!CWindow_ProcessEnable(po, bEnable))
@@ -103,9 +102,9 @@ static void CMainWin_Enable(IWindow * po, boolean bEnable)
 /*===========================================================================
    This function redraws the main window.
 ===========================================================================*/
-static void CMainWin_Redraw(IWindow * po)
+static void CWhereFuctionWin_Redraw(IWindow * po)
 {
-   CMainWin *  pme = (CMainWin *)po;
+   CWhereFuctionWin *  pme = (CWhereFuctionWin *)po;
 
    if (!pme->m_bActive)
       return;
@@ -125,9 +124,9 @@ static void CMainWin_Redraw(IWindow * po)
 /*===========================================================================
    This function processes events routed to main window.
 ===========================================================================*/
-static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam)
+static boolean CWhereFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam)
 {
-   CMainWin *  pme = (CMainWin *)po;
+   CWhereFuctionWin *  pme = (CWhereFuctionWin *)po;
    boolean     bRet = TRUE;
 
    //XXX __begin
@@ -136,10 +135,9 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
 		   return IMENUCTL_HandleEvent(pme->m_pMainMenu, EVT_KEY, AVK_SELECT, 0);
 	   }
 
-	   //ÍË³ö³ÌÐò
 	   if( AVK_SOFT2 == wParam )
 	   {
-			ISHELL_CloseApplet(pme->m_pIShell, FALSE);
+			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE, 0);
 			return TRUE;
 	   }
    }
@@ -153,21 +151,14 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
 
    switch (wParam)
    {
-      case IDS_STRING_MY_LOCATION:
-		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE, 0);
+      case IDS_STRING_SAVE_LOCATION:
          break;
 
-      case IDS_STRING_NAVIGATE:
-		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_DEST, 0);
+      case IDS_STRING_REPORT_LOCATION:
 		  break;
 
-	  case IDS_STRING_SOS:
-		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_SOS, 0);
+	  case IDS_STRING_LOCATION_INFO:
 		  break;
-
-      case IDS_STRING_APPINFO:
-         CMainWin_About((IWindow*)pme);
-		 break;
 	 
       default:
          bRet = FALSE;
@@ -178,16 +169,3 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
    return bRet;
 }
 
-/*===========================================================================
-   This function displays the About dialog of the app.
-===========================================================================*/
-static void CMainWin_About(IWindow * po)
-{
-   CMainWin *  pme = (CMainWin *)po;
-
-	CTopSoupApp_DisableWin(pme->m_pOwner);
-
-   IDISPLAY_ClearScreen(pme->m_pIDisplay);
-   TS_DrawBackgroud(po);
-   ISHELL_ShowCopyright(pme->m_pIShell);
-}

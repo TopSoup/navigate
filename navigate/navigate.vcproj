@@ -260,6 +260,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\wherefuctionwindow.c"
+				>
+			</File>
+			<File
 				RelativePath=".\wherewindow.c"
 				>
 			</File>
@@ -354,6 +358,10 @@
 			</File>
 			<File
 				RelativePath=".\soswindow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\wherefuctionwindow.h"
 				>
 			</File>
 			<File

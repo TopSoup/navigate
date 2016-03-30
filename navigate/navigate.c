@@ -566,6 +566,10 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 		  pme->m_pWin = CDestInfoWin_New(pme); 
 	      break;
 
+	  case TSW_WHERE_FUCTION:
+		  pme->m_pWin = CWhereFuctionWin_New(pme);
+		  break;
+
       case TSW_NONE:       
          return TRUE; 
          break;

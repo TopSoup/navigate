@@ -37,6 +37,19 @@ typedef enum TSWindow
 	TSW_DEST_NEW,	//新建目的地
 	TSW_DEST_INFO,	//功能说明
 
+	//TSW_WHERE-选项
+	TSW_WHERE_FUCTION, //我在哪选项窗口
+
+	/* Fouth Level */
+    TSW_WHERE_FUCTION_SAVE, //保存位置窗口
+    TSW_DEST_LIST_FUCTION,  //目的地列表-选项窗口
+    TSW_DEST_NEW_FUCTION, //新建目的地-选项窗口
+
+	/* Fifth Level */
+	TSW_DEST_LIST_FUCTION_INFO, //目的地信息
+	TSW_DEST_LIST_FUCTION_EDIT, //目的地重命名
+
+
 	//3 
 	//目的地列表项内容
 	TSW_DEST_LIST_ITEM,	//列表项内容
