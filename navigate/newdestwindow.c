@@ -275,6 +275,12 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 		if ( TS_ISSOFT(eCode)){
 			if( AVK_SOFT1 == wParam )
 			{
+				CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DEST_NEW_FUCTION, 0);
+				return TRUE;
+			}
+			
+			//{
+
 			/*
 			//保存到数据库文件记录中
 			AECHAR * pTextLat=NULL;
@@ -310,10 +316,9 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 					return TRUE;
 					}
 				*/
-				return TRUE;
-			}
+				//return TRUE;
+			//}
 			
-			//退出程序
 			if( AVK_SOFT2 == wParam )
 			{
 				CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_DEST, 0);

@@ -195,9 +195,11 @@ static boolean CDestListWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPa
    //XXX __begin
    if ( TS_ISSOFT(eCode)){
 	   if( AVK_SOFT1 == wParam )
+	   {
+		   CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DEST_LIST_FUCTION, 0);
 		   return TRUE;
+	   }
 
-	   //ÍË³ö³ÌÐò
 	   if( AVK_SOFT2 == wParam )
 	   {
 			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_DEST, 0);

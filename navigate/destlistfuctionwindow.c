@@ -45,12 +45,14 @@ IWindow * CDestlistFuctionWin_New(CTopSoupApp * pOwner)
          TS_WINERR_RETURN(pme);
 
       TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth,&((CTopSoupApp*)pme->m_pOwner)->m_rectWin , 0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SAVE_LOCATION, NULL, IDI_OBJECT_15201, IDS_STRING_MY_LOCATION, 0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_REPORT_LOCATION,   NULL, IDI_OBJECT_15202, IDS_STRING_NAVIGATE,   0);
-	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_LOCATION_INFO,   NULL, IDI_OBJECT_15203, IDS_STRING_SOS,   0);
+      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SMS, NULL, IDI_OBJECT_15201, IDS_STRING_SMS, 0);
+      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_DEST_LOCATION_INFO,   NULL, IDI_OBJECT_15202, IDS_STRING_DEST_LOCATION_INFO,   0);
+	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_EDIT,   NULL, IDI_OBJECT_15203, IDS_STRING_EDIT,   0);
+	  TS_AddMenuItem(pme->m_pMainMenu,IDS_STRING_DELETE,   NULL, IDI_OBJECT_15204, IDS_STRING_DELETE,   0);
+      TS_AddMenuItem(pme->m_pMainMenu,IDS_STRING_DELETE_ALL,   NULL, IDI_OBJECT_15205, IDS_STRING_DELETE_ALL,   0);
 
 	  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_FUCTION,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
-	  TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,IDS_STRING_SELECT);
+	  TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,IDS_STRING_SELECT);
 	  //XXX __end
 
 
@@ -132,12 +134,12 @@ static boolean CDestlistFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uin
    //XXX __begin
    if ( TS_ISSOFT(eCode)){
 	   if( AVK_SOFT1 == wParam ) {
-		   return IMENUCTL_HandleEvent(pme->m_pMainMenu, EVT_KEY, AVK_SELECT, 0);
+		   return FALSE;
 	   }
 
 	   if( AVK_SOFT2 == wParam )
 	   {
-			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE, 0);
+			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DEST_LIST, 0);
 			return TRUE;
 	   }
    }
@@ -151,13 +153,19 @@ static boolean CDestlistFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uin
 
    switch (wParam)
    {
-      case IDS_STRING_SAVE_LOCATION:
+      case IDS_STRING_SMS:
          break;
 
-      case IDS_STRING_REPORT_LOCATION:
+      case IDS_STRING_LOCATION_INFO:
 		  break;
 
-	  case IDS_STRING_LOCATION_INFO:
+	  case IDS_STRING_EDIT:
+		  break;
+
+	  case IDS_STRING_DELETE:
+		  break;
+
+	  case IDS_STRING_DELETE_ALL:
 		  break;
 	 
       default:

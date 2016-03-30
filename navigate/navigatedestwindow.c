@@ -132,7 +132,9 @@ static boolean CNavigateDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16
    //XXX __begin
    if ( TS_ISSOFT(eCode)){
 	   if( AVK_SOFT1 == wParam )
-		   return TRUE;
+	   {
+		   return IMENUCTL_HandleEvent(pme->m_pMainMenu, EVT_KEY, AVK_SELECT, 0);
+	   }
 
 	   //ÍË³ö³ÌÐò
 	   if( AVK_SOFT2 == wParam )
