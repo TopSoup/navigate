@@ -135,5 +135,6 @@ typedef struct CTopSoupApp  CTopSoupApp;
 
 void CTopSoupApp_Redraw(CTopSoupApp * pme, boolean bDefer);
 boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam);
+void CTopSoupApp_onSplashDrawOver(void * po);
 
 #endif

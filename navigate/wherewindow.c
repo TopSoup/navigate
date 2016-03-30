@@ -99,8 +99,6 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 		int		 y = pme->m_pOwner->m_rectWin.y;
 		int      dy = MP_WHERE_CY;
 		AEERect  rect;
-		
-		//定位过渡提示信息显示
 
 		//定位结果提示信息
 		if (ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pTextMethod) != SUCCESS ||
@@ -148,6 +146,7 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 
 	ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MY_LOCATION,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
 	TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,0);
+
 
    return (IWindow *)pme;
 }
@@ -247,6 +246,14 @@ static void CWhereWin_Redraw(IWindow * po)
 
 
 	IDISPLAY_Update(pme->m_pIDisplay);
+
+	{
+		static i = 0;
+		if ( 0 == i ){
+			TS_DrawSplash(pme->m_pOwner,2000);
+			i++;
+		}
+	}
 
 	DBGPRINTF("@CWhereWin_Redraw in");
 }

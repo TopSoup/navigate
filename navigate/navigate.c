@@ -28,11 +28,6 @@ static boolean    CTopSoupApp_ReceiveSMSMessage(CTopSoupApp *pme, uint32 uMsgId)
 static void		  CTopSoupApp_MakeSOSCall(CTopSoupApp * pme, char* szNumber);
 static void		  CTopSoupApp_EndSOSCall(CTopSoupApp * pme);
 
-//XXX
-//#define MP_SPLASH_TIMER       750
-//static void       CTopSoupApp_DrawSplash(CTopSoupApp * pme);
-
-
 //
 // navigate app can either be statically built into BREW or dynamically linked during run-time.
 // If AEE_STATIC is defined, then navigate app will be a static app.
@@ -475,41 +470,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
     return FALSE;
 }
 
-/*===========================================================================
-   This function draws the splash screen and brings up the main window
-   after the splash timer runs out.
-===========================================================================*/
-/*
-static void CTopSoupApp_DrawSplash(CTopSoupApp * pme)
-{
-   // The following 'If statement' is entered only after the splash timer runs out...
-   if (pme->m_eActiveWin == TSW_MAIN)
-   {
-      CTopSoupApp_SetWindow(pme, TSW_MAIN, 0);
-      return;
-   }
 
-   // Draw the splash screen, set the timer.
-   // The timer callback calls this function and redraws the main window.
-   {
-      IImage * pi = ISHELL_LoadResImage(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDB_LOGO);
-
-      if (pi)
-      {
-         AEERect  rect;
-
-         IDISPLAY_ClearScreen(pme->a.m_pIDisplay);
-         SETAEERECT(&rect, 0, 0, pme->m_cxWidth, pme->m_cyHeight);
-         TS_DrawImage(pi, &rect, TRUE);
-         IDISPLAY_Update(pme->a.m_pIDisplay);
-         TS_RELEASEIF(pi);
-      }
-
-      // Set main window as active and start the timer.
-      pme->m_eActiveWin = TSW_MAIN;
-      ISHELL_SetTimer(pme->a.m_pIShell, MP_SPLASH_TIMER, (PFNNOTIFY)CTopSoupApp_DrawSplash, pme); }  
-}
-*/
 
 /*===========================================================================
    This function switches from one window to another:
@@ -941,7 +902,14 @@ static void CTopSoupApp_EndSOSCall(CTopSoupApp * pme)
 	}
 }
 
+void CTopSoupApp_onSplashDrawOver(void * po) 
+{
+	CTopSoupApp* pme = (CTopSoupApp*)po;
 
+	if(pme->m_pWin)
+		CTopSoupApp_Redraw(pme, TRUE);
+
+}
 
 
 
