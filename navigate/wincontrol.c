@@ -253,7 +253,7 @@ void TS_SetSoftButtonText(CTopSoupApp * pme,uint16 wTextLeftID, uint16 wTextRigh
 		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,wTextMidID,pme->m_pMidSoftText,sizeof(pme->m_pMidSoftText));
 }
 
-static void CTopSoupApp_onSplashDrawOver(void * po) 
+void CTopSoupApp_onSplashDrawOver(void * po) 
 {
 	CTopSoupApp* pme = (CTopSoupApp*)po;
 

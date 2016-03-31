@@ -121,7 +121,8 @@ static void CWhereFuctionWin_Redraw(IWindow * po)
    //XXX _end
 }
 
-static void CTopSoupApp_onSplashDrawOver(void * po) 
+/*
+void CTopSoupApp_onSplashDrawOver(void * po) 
 {
 	CTopSoupApp* pme = (CTopSoupApp*)po;
 
@@ -129,6 +130,7 @@ static void CTopSoupApp_onSplashDrawOver(void * po)
 		CTopSoupApp_Redraw(pme, TRUE);
 
 }
+*/
 
 /*===========================================================================
    This function processes events routed to main window.
