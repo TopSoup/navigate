@@ -13,11 +13,14 @@
       <UniqueIdentifier>{a41d6f1f-c3c0-4fcc-8965-2c2fc7c689c5}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
+    <Filter Include="db">
+      <UniqueIdentifier>{ebd73065-af95-468c-954b-d09529f25cb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="location">
+      <UniqueIdentifier>{8e60c207-1a8f-404d-9ec9-4e5115ebca7c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="mediaplayer.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AEEAppGen.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -25,6 +28,66 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AEEModGen.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="navigate.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="location\e_asin.c">
+      <Filter>location</Filter>
+    </ClCompile>
+    <ClCompile Include="location\location.c">
+      <Filter>location</Filter>
+    </ClCompile>
+    <ClCompile Include="location\transform.c">
+      <Filter>location</Filter>
+    </ClCompile>
+    <ClCompile Include="db\dbfunc.c">
+      <Filter>db</Filter>
+    </ClCompile>
+    <ClCompile Include="destlistfuctionwindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="newdestfuctionwindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="textctlwindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wherefuctionwindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wincontrol.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="window.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="destinfowindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="destlistwindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="logicmacro.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mainwindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="navigatedestwindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="navigatewindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="newdestwindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="soswindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wherewindow.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,10 +104,79 @@
     <ClInclude Include="mediaplayer_res.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="location\location.h">
+      <Filter>location</Filter>
+    </ClInclude>
+    <ClInclude Include="location\transform.h">
+      <Filter>location</Filter>
+    </ClInclude>
+    <ClInclude Include="db\dbfunc.h">
+      <Filter>db</Filter>
+    </ClInclude>
+    <ClInclude Include="destlistfuctionwindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="newdestwherefuctionwindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="textctlwindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wherefuctionwindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wincontrol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="destinfowindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="destlistwindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="logicmacro.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mainwindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="navigate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="navigatedestwindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="navigatepch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="navigatewindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="newdestwindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="soswindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wherewindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="mediaplayer.bid">
-      <Filter>Header Files</Filter>
+    <None Include="navigate.bid" />
+    <None Include="backimg.brx">
+      <Filter>Resource Files</Filter>
     </None>
+    <None Include="kitimg.brx">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="navigate.brx">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

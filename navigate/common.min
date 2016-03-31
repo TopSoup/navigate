@@ -119,6 +119,8 @@ LD      = "$(ARMBIN)\armlink" #     # ARM ADS linker
 HEXTOOL = "$(ARMBIN)\fromelf" #     # ARM ADS utility to create hex file from image
 ARMAR   = "$(ARMBIN)\armar" #       # ARM ADS library archiver
 
+BREW_RES = "$(BREWDIR)\tools\ResourceEditor\brewrc.exe"
+
 OBJ_CMD = -o#                       # Command line option to specify output filename
 
 
@@ -255,12 +257,12 @@ SRC_CPP_FILE = $(@F:.o=.cpp)#           # Input source file specification
 OBJ_FILE = $(OBJ_CMD) $(@)#             # Output object file specification
 
 .SUFFIXES :
-.SUFFIXES : .o .dep .c .cpp
+.SUFFIXES : .o .c .cpp .bar .brx
 
 #----------------------------------------------------------------------------
 # default rule - place this early in file so it is picked up first
 #----------------------------------------------------------------------------
-all : $(OBJSDIR)\exist $(TARGETDIR)\exist $(TARGET).$(MODULE)
+all : $(OBJSDIR)\exist $(TARGETDIR)\exist $(TARGET).bar $(TARGET).$(MODULE)
 
 
 #--------------------------------------------------------------------------
@@ -295,6 +297,15 @@ all : $(OBJSDIR)\exist $(TARGETDIR)\exist $(TARGET).$(MODULE)
        @echo OBJECT $(@F)
        $(APP_DIR_CC) -S -fs $(CFLAGS) $(OBJ_CMD) $@ $<
        @echo ---------------------------------------------------------------
+
+#--------------------------------------------------------------------------
+# BAR code inference rules
+#----------------------------------------------------------------------------
+$(TARGET).bar:
+	@echo ---------------------------------------------------------------
+	@echo OBJECT $@
+	$(BREW_RES) -s -o ./$(TARGET).bar -h ./$(TARGET).brh $(TARGET).brx
+	@echo ---------------------------------------------------------------
 
 #----------------------------------------------------------------------------
 # Shared object targets

@@ -95,7 +95,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(BREWDIR)\sdk\inc;$(BREWDIR)\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(BREWDIR)\sdk\inc;$(BREWDIR)\inc;.;.\db;.\location;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>AEE_SIMULATOR;WIN32;_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -134,6 +134,15 @@
     <ClCompile Include="AEEAppGen.c" />
     <ClCompile Include="AEEMediaUtil.c" />
     <ClCompile Include="AEEModGen.c" />
+    <ClCompile Include="db\dbfunc.c" />
+    <ClCompile Include="destinfowindow.c" />
+    <ClCompile Include="destlistfuctionwindow.c" />
+    <ClCompile Include="destlistwindow.c" />
+    <ClCompile Include="location\e_asin.c" />
+    <ClCompile Include="location\location.c" />
+    <ClCompile Include="location\transform.c" />
+    <ClCompile Include="logicmacro.c" />
+    <ClCompile Include="mainwindow.c" />
     <ClCompile Include="navigate.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AEE_SIMULATOR;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL</PreprocessorDefinitions>
@@ -141,15 +150,53 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AEE_SIMULATOR;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;MEDIAPLAYER_EXPORTS</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="navigatedestwindow.c" />
+    <ClCompile Include="navigatewindow.c" />
+    <ClCompile Include="newdestfuctionwindow.c" />
+    <ClCompile Include="newdestwindow.c" />
+    <ClCompile Include="soswindow.c" />
+    <ClCompile Include="textctlwindow.c" />
+    <ClCompile Include="wherefuctionwindow.c" />
+    <ClCompile Include="wherewindow.c" />
+    <ClCompile Include="wincontrol.c" />
+    <ClCompile Include="window.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\AEEAppGen.h" />
     <ClInclude Include="..\..\inc\AEEMediaUtil.h" />
     <ClInclude Include="..\..\inc\AEEModGen.h" />
+    <ClInclude Include="db\dbfunc.h" />
+    <ClInclude Include="destinfowindow.h" />
+    <ClInclude Include="destlistfuctionwindow.h" />
+    <ClInclude Include="destlistwindow.h" />
+    <ClInclude Include="location\location.h" />
+    <ClInclude Include="location\transform.h" />
+    <ClInclude Include="logicmacro.h" />
+    <ClInclude Include="mainwindow.h" />
     <ClInclude Include="mediaplayer_res.h" />
+    <ClInclude Include="navigate.h" />
+    <ClInclude Include="navigatedestwindow.h" />
+    <ClInclude Include="navigatepch.h" />
+    <ClInclude Include="navigatewindow.h" />
+    <ClInclude Include="newdestwherefuctionwindow.h" />
+    <ClInclude Include="newdestwindow.h" />
+    <ClInclude Include="soswindow.h" />
+    <ClInclude Include="textctlwindow.h" />
+    <ClInclude Include="wherefuctionwindow.h" />
+    <ClInclude Include="wherewindow.h" />
+    <ClInclude Include="wincontrol.h" />
+    <ClInclude Include="window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="backimg.brx" />
+    <None Include="kitimg.brx" />
     <None Include="navigate.bid" />
+    <CustomBuild Include="navigate.brx">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cmd /s $(BREWDIR)\tools\ResourceEditor\brewrc.exe -s -o navigate.bar -h navigate.brh  $(InputPath)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">navigate.bar;navigate.brh;</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">BREW RES Build Tools</Message>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
