@@ -248,11 +248,10 @@ static void CWhereWin_Redraw(IWindow * po)
 	IDISPLAY_Update(pme->m_pIDisplay);
 
 	{
-		static i = 0;
-		if ( 0 == i ){
-			TS_DrawSplash(pme->m_pOwner,"正在定位...",2000,NULL);
-			i++;
-		}
+		AECHAR prompt[TS_MAX_STRLEN];
+
+		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATING,prompt,sizeof(prompt));
+		TS_DrawSplash(pme->m_pOwner,prompt,2000,NULL);
 	}
 
 	DBGPRINTF("@CWhereWin_Redraw in");

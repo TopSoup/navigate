@@ -115,6 +115,12 @@
 	<String Id="1016" Name="IDS_STRING_SEND">
 		<Text>发送</Text>
 	</String>
+	<String Id="1017" Name="IDS_STRING_LOCATING">
+		<Text>正在定位...</Text>
+	</String>
+	<String Id="1018" Name="IDS_STRING_PROMPT_ALREADY_SAVE">
+		<Text>已保存到目的地列表！</Text>
+	</String>
 </Strings>
 <Objects MimeType="image/png">
 	<Object Id="1000" Name="IDP_NAVIGATOR">

@@ -528,19 +528,19 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 	      break;
 
 	  case TSW_WHERE_FUCTION:
-		  pme->m_pWin = CWhereFuctionWin_New(pme);
+		  pme->m_pWin = (IWindow*)CWhereFuctionWin_New(pme);
 		  break;
 
 	  case TSW_DEST_NEW_FUCTION:
-		  pme->m_pWin = CNewdestFuctionWin_New(pme);
+		  pme->m_pWin = (IWindow*)CNewdestFuctionWin_New(pme);
 		  break;
 
 	  case TSW_DEST_LIST_FUCTION:
-		  pme->m_pWin = CDestlistFuctionWin_New(pme);
+		  pme->m_pWin = (IWindow*)CDestlistFuctionWin_New(pme);
 		  break;
 
 	  case TSW_TEXTCTL:
-		  pme->m_pWin = CTextCtlWin_New(pme);
+		  pme->m_pWin = (IWindow*)CTextCtlWin_New(pme);
 		  break;
 
       case TSW_NONE:       
