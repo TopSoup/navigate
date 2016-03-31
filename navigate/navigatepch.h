@@ -31,7 +31,13 @@
 #include "newdestwindow.h"
 #include "destinfowindow.h"
 
+#include "wherefuctionwindow.h"
+#include "newdestwherefuctionwindow.h"
+#include "destlistfuctionwindow.h"
+#include "textctlwindow.h"
 
+
+#include "gmenuctl.h"
 #include "location.h"
 #include "dbfunc.h"
 

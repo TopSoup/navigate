@@ -92,7 +92,8 @@ MYINC =	-I $(BREWDIR)\inc \
 		-I $(BREWDIR)\sdk\inc \
 		-I . \
 		-I .\location \
-		-I .\db
+		-I .\db \
+		-I .\controls
 						
 #------------------------------------------------------------------------------
 # Common make file

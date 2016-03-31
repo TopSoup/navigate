@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MEDIAPLAYER_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "$(BREWDIR)\inc" /I "$(BREWDIR)\sdk\inc" /I "." /I ".\location" /I ".\db" /D "AEE_SIMULATOR" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "$(BREWDIR)\inc" /I "$(BREWDIR)\sdk\inc" /I "." /I ".\location" /I ".\db" /I ".\controls" /D "AEE_SIMULATOR" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -96,11 +96,19 @@ SOURCE=.\AEEAppGen.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\AEEMediaUtil.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\AEEModGen.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\destinfowindow.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\destlistfuctionwindow.c
 # End Source File
 # Begin Source File
 
@@ -128,11 +136,23 @@ SOURCE=.\navigatewindow.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\newdestfuctionwindow.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\newdestwindow.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\soswindow.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\textctlwindow.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\wherefuctionwindow.c
 # End Source File
 # Begin Source File
 
@@ -165,6 +185,10 @@ SOURCE=..\..\inc\AEEModGen.h
 # Begin Source File
 
 SOURCE=.\destinfowindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\destlistfuctionwindow.h
 # End Source File
 # Begin Source File
 
@@ -204,11 +228,23 @@ SOURCE=.\navigatewindow.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\newdestwherefuctionwindow.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\newdestwindow.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\soswindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\textctlwindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\wherefuctionwindow.h
 # End Source File
 # Begin Source File
 
@@ -333,6 +369,26 @@ SOURCE=.\db\dbfunc.c
 # Begin Source File
 
 SOURCE=.\db\dbfunc.h
+# End Source File
+# End Group
+# Begin Group "controls"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\controls\gmenuctl.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\controls\gmenuctl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\controls\TQueueList.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\controls\TQueueList.h
 # End Source File
 # End Group
 # End Target

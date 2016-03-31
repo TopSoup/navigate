@@ -1,7 +1,9 @@
 #include "wherewindow.h"
 
-#define MP_MAX_STRLEN         64
+#define MP_MAX_STRLEN         32
 #define MP_WHERE_CY			  32
+
+#define WIN_FONT	AEE_FONT_LARGE
 
 // Where window: Displays main menu.
 struct CWhereWin
@@ -19,9 +21,9 @@ struct CWhereWin
 	IStatic *		m_pTextVel;		//速度
 	IStatic *		m_pTextHeading;	//方向角度
 	IStatic *		m_pTextHeight;	//海拔
-	//IStatic *		m_pTextInfo;	//信息
+	//IStatic *		m_pTextInfo;	//信息[debug]
 
-	IImageCtl *		m_pImageCtl;	//过渡图片
+	boolean			m_bGetGpsInfo;
 
 	AEEGPSMode		m_gpsMode;
 	struct _GetGPSInfo		m_gpsInfo;	//
@@ -144,9 +146,11 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 	CWhereWin_LocStart((IWindow *)pme);
 
 
+	pme->m_bGetGpsInfo = FALSE;
+	
 	ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MY_LOCATION,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
-	TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,0);
-
+	//TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,0);
+	TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,0);
 
    return (IWindow *)pme;
 }
@@ -170,8 +174,7 @@ static void CWhereWin_Delete(IWindow * po)
 	TS_RELEASEIF(pme->m_pTextHeading);
 	TS_RELEASEIF(pme->m_pTextHeight);
 	//TS_RELEASEIF(pme->m_pTextInfo);
-	TS_RELEASEIF(pme->m_pImageCtl);
-	
+
 	FREE(pme);
 }
 
@@ -183,6 +186,109 @@ static void CWhereWin_Enable(IWindow * po, boolean bEnable)
 	if (!CWindow_ProcessEnable(po, bEnable))
 		return;
 }
+
+//绘制文字
+static void DrawText(CWhereWin *pMe, AECHAR* pText, AEERect *rect)
+{
+	
+	RGBVAL oldColor;
+	
+
+	oldColor = IDISPLAY_SetColor(pMe->m_pIDisplay, CLR_USER_TEXT, MAKE_RGB(255, 255, 255));
+	
+	IDISPLAY_DrawText(pMe->m_pIDisplay, WIN_FONT, pText, -1, rect->x, rect->y, rect, IDF_TEXT_TRANSPARENT);
+	
+	IDISPLAY_SetColor(pMe->m_pIDisplay, CLR_USER_TEXT, oldColor);
+}
+
+//格式化浮点数
+static AECHAR* FLT2SZ(AECHAR* szBuf, double val)
+{
+	double tmp = 0, tt = 0, min = 0;
+	int d = 0, m = 0;
+	
+	if (szBuf == NULL)
+		return NULL;
+
+	tmp = FABS(val);
+	if (FCMP_GE(tmp, 0.000001))
+	{
+		tt = FFLOOR(tmp);
+		d = FLTTOINT(tt);
+		m = FLTTOINT(FMUL(FSUB(tmp, tt), 10000000.0));
+		m = (m % 10 >= 5) ? (m + 10) / 10 : m / 10;
+	}
+	else
+	{
+		d = 0;
+		m = 0;
+	}
+	
+	WSPRINTF(szBuf, 32, L"%d.%d", d, m);
+	return szBuf;
+}
+
+//格式化浮点数
+static AECHAR* FLT2RAD(AECHAR* szBuf, double val)
+{
+	AEEApplet* pApp = (AEEApplet*)GETAPPINSTANCE();
+	double tmp = 0, tt = 0, min = 0;
+	int d = 0, m = 0, s = 0;
+	AECHAR szD[3], szM[3];
+	
+	if (szBuf == NULL)
+		return NULL;
+
+	ISHELL_LoadResString(pApp->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DEGREE, szD, sizeof(szD));
+	ISHELL_LoadResString(pApp->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MINUTE, szM, sizeof(szM));
+
+	tmp = FABS(val);
+	tt = FFLOOR(tmp);
+	d = FLTTOINT(tt);
+	m = FLTTOINT(FMUL(FSUB(tmp, tt), 600000.0));
+	m = (m % 10 >= 5) ? (m + 10) / 10 : m / 10;
+	s = m % 1000;
+	m /= 1000;
+	
+	WSPRINTF(szBuf, 32, L"%d%s %02d.%03d%s", d, szD, m, s, szM);
+	return szBuf;
+}
+
+//格式化浮点数
+static int FORMATFLT(AECHAR* szLon, AECHAR* szLat, double lon, double lat)
+{
+	AECHAR eFlag[3], nFlag[3];
+	AECHAR szBuf[32];
+
+	if (szBuf == NULL)
+		return -1;
+
+	//东经/西经
+	if (FCMP_GE(lon, 0))
+	{
+		WSTRCPY(eFlag, L"E");
+	}
+	else
+	{
+		WSTRCPY(eFlag, L"W");
+	}
+
+	//南纬/北纬
+	if (FCMP_GE(lat, 0))
+	{
+		WSTRCPY(nFlag, L"N");
+	}
+	else
+	{
+		WSTRCPY(nFlag, L"S");
+	}
+
+	WSPRINTF(szLon, 32, L"%s, %s", eFlag, FLT2RAD(szBuf, lon));
+	WSPRINTF(szLat, 32, L"%s, %s", nFlag, FLT2RAD(szBuf, lat));
+
+	return 0;
+}
+
 
 /*===========================================================================
    This function redraws the Where window.
@@ -198,64 +304,143 @@ static void CWhereWin_Redraw(IWindow * po)
 
 	IDISPLAY_ClearScreen(pme->m_pIDisplay);
 
+	//更新底部文字
+	if (pme->m_bGetGpsInfo)
+	{
+		TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,0);
+	}
+	else
+	{
+		TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,0);
+	}
+
+	//绘制背景及框架
 	TS_DrawBackgroud(po);
-	
+
+
 	//当取得定位结果时更新显示
-	//if (pme->m_gpsInfo.pPosDet)
+	if (pme->m_gpsInfo.pPosDet 
+		&& pme->m_bGetGpsInfo)
 	{
 		//if (pme->m_gpsInfo.theInfo.nErr == SUCCESS)
 		{
-			char szBuf[MP_MAX_STRLEN];
-			AECHAR bufLat[32], bufLon[32], bufVel[32], bufHeading[32];
+			AECHAR wBuf[MP_MAX_STRLEN], wBuf2[MP_MAX_STRLEN];
+			AECHAR bufRes[MP_MAX_STRLEN], bufRes2[MP_MAX_STRLEN], bufRes3[MP_MAX_STRLEN];
+			AECHAR bufLat[MP_MAX_STRLEN], bufLon[MP_MAX_STRLEN], bufVel[MP_MAX_STRLEN], bufHeading[MP_MAX_STRLEN];
 			ts_time_t now;
-
-			//STRTOWSTR("Method: NetWork", pme->m_szText, sizeof(pme->m_szText));
-			//TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextMethod, AEE_FONT_NORMAL, pme->m_szText);
-			TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextMethod, AEE_FONT_NORMAL, pme->m_szMode);
-
+			int a = 0, b = 0;
+			int h = 0, xx = 0, yy = 0, dxx = 0, dyy = 0;
+			AEERect rect;
+			int xMargin = 4;
+			
+			//定位类型
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_STATUS, bufRes, sizeof(bufRes));
+			h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 12;
+			xx = xMargin;
+			yy = 64;
+			dxx = pme->m_pOwner->m_cxWidth - 2;
+			dyy = h;
+			SETAEERECT(&rect, xx, yy, dxx, dyy);
+			DrawText(pme, bufRes, &rect);
+			
+			//时间
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_TIME, bufRes, sizeof(bufRes));
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MONTH, bufRes2, sizeof(bufRes));
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DAY, bufRes3, sizeof(bufRes));
+			
 			get_time_now(&now);
 			
-			SNPRINTF(szBuf, sizeof(szBuf), "Time: %d-%d %d:%d:%d", now.month, now.day, now.hour, now.minute, now.second);
-			STRTOWSTR(szBuf, pme->m_szText, sizeof(pme->m_szText));
-			TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextTime, AEE_FONT_NORMAL, pme->m_szText);
+			WSPRINTF(wBuf, sizeof(wBuf), L"%02d%s%02d%s ", now.month, bufRes2, now.day, bufRes3);
+			WSPRINTF(wBuf2, sizeof(wBuf2), L"%02d:%02d:%02d", now.hour, now.minute, now.second);
+			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s%s", bufRes, wBuf, wBuf2);
+			xx = xMargin;
+			yy += h;
+			dxx = pme->m_pOwner->m_cxWidth - 2;
+			dyy = h;
+			SETAEERECT(&rect, xx, yy, dxx, dyy);
+			DrawText(pme, pme->m_szText, &rect);
 
-			FLOATTOWSTR(pme->m_gpsInfo.theInfo.lon, bufLon, 32);
-			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"Lon: %s", bufLon);
-			TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextLon, AEE_FONT_NORMAL, pme->m_szText);
+			//格式化经纬度
+			//For Test Hack
+			pme->m_gpsInfo.theInfo.lat = 38.0422378880;
+			pme->m_gpsInfo.theInfo.lon = 114.4925141047;
+			FORMATFLT(bufLon, bufLat, pme->m_gpsInfo.theInfo.lon, pme->m_gpsInfo.theInfo.lat);
 
-			FLOATTOWSTR(pme->m_gpsInfo.theInfo.lat, bufLat, 32);
-			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"Lat: %s", bufLat);
-			TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextLat, AEE_FONT_NORMAL, pme->m_szText);
+			//经度
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LON, bufRes, sizeof(bufRes));
+			//FLOATTOWSTR(pme->m_gpsInfo.theInfo.lon, bufLon, 32);
+			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, bufLon);
+			xx = xMargin;
+			yy += h;
+			dxx = pme->m_pOwner->m_cxWidth - 2;
+			dyy = h;
+			SETAEERECT(&rect, xx, yy, dxx, dyy);
+			DrawText(pme, pme->m_szText, &rect);
 
-			FLOATTOWSTR(pme->m_gpsInfo.theInfo.velocityHor, bufVel, 32);
-			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"Vel: %s", bufVel);
-			TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextVel, AEE_FONT_NORMAL, pme->m_szText);
+			//纬度		
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LAT, bufRes, sizeof(bufRes));
+			//FLOATTOWSTR(pme->m_gpsInfo.theInfo.lat, bufLat, 32);
+			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, bufLat);
+			xx = xMargin;
+			yy += h;
+			dxx = pme->m_pOwner->m_cxWidth - 2;
+			dyy = h;
+			SETAEERECT(&rect, xx, yy, dxx, dyy);
+			DrawText(pme, pme->m_szText, &rect);
 
-			FLOATTOWSTR(pme->m_gpsInfo.theInfo.heading, bufHeading, 32);
-			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"Heading: %s", bufHeading);
-			TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextHeading, AEE_FONT_NORMAL, pme->m_szText);
 			
-			SNPRINTF(szBuf, sizeof(szBuf), "Height: %d", pme->m_gpsInfo.theInfo.height);
-			STRTOWSTR(szBuf, pme->m_szText, sizeof(pme->m_szText));
-			TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextHeight, AEE_FONT_NORMAL, pme->m_szText);
+			//速度
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_VEL, bufRes, sizeof(bufRes));
+			//FLOATTOWSTR(pme->m_gpsInfo.theInfo.velocityHor, bufVel, 32);
+			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, FLT2SZ(bufVel, pme->m_gpsInfo.theInfo.velocityHor));
+			xx = xMargin;
+			yy += h;
+			dxx = pme->m_pOwner->m_cxWidth - 2;
+			dyy = h;
+			SETAEERECT(&rect, xx, yy, dxx, dyy);
+			DrawText(pme, pme->m_szText, &rect);
+		
+			//方向
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_HEADING, bufRes, sizeof(bufRes));
+			//FLOATTOWSTR(pme->m_gpsInfo.theInfo.heading, bufHeading, 32);
+			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, FLT2SZ(bufHeading, pme->m_gpsInfo.theInfo.heading));
+			xx = xMargin;
+			yy += h;
+			dxx = pme->m_pOwner->m_cxWidth - 2;
+			dyy = h;
+			SETAEERECT(&rect, xx, yy, dxx, dyy);
+			DrawText(pme, pme->m_szText, &rect);
+			
+			//海拔
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_ALT, bufRes, sizeof(bufRes));
+			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %d.0", bufRes, pme->m_gpsInfo.theInfo.height);
+			xx = xMargin;
+			yy += h;
+			dxx = pme->m_pOwner->m_cxWidth - 2;
+			dyy = h;
+			SETAEERECT(&rect, xx, yy, dxx, dyy);
+			DrawText(pme, pme->m_szText, &rect);
 		}
 	}
-	
+	else
+	{
+		{
+			AECHAR prompt[TS_MAX_STRLEN];
+			
+			ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATING,prompt,sizeof(prompt));
+			TS_DrawSplash(pme->m_pOwner,prompt,2000,NULL);
+		}
+	}
+
 	//WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"Pro: %d nErr:%u", pme->m_gpsInfo.wProgress,  pme->m_gpsInfo.theInfo.nErr);
 	//TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextInfo, AEE_FONT_NORMAL, pme->m_szText);	
 
 
 	IDISPLAY_Update(pme->m_pIDisplay);
 
-	{
-		AECHAR prompt[TS_MAX_STRLEN];
-
-		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATING,prompt,sizeof(prompt));
-		TS_DrawSplash(pme->m_pOwner,prompt,2000,NULL);
-	}
-
 	DBGPRINTF("@CWhereWin_Redraw in");
 }
+
 
 /*===========================================================================
    This function processes events routed to Where window.
@@ -271,7 +456,9 @@ static boolean CWhereWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam
 		switch (wParam)
 		{
 		case AVK_SOFT1:
-			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE_FUCTION, 0);
+			if (pme->m_bGetGpsInfo)
+				CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE_FUCTION, 0);
+
 			bRet = TRUE;
 			break;
 
@@ -327,7 +514,7 @@ static void CWhereWin_LocStart( IWindow *po )
 	pGetGPSInfo->theInfo.gpsConfig.optim = 1;
 	pGetGPSInfo->theInfo.gpsConfig.mode = pme->m_gpsMode;
 	pGetGPSInfo->theInfo.gpsConfig.nFixes = 0;
-	pGetGPSInfo->theInfo.gpsConfig.nInterval = 0;
+	pGetGPSInfo->theInfo.gpsConfig.nInterval = 10;
 	
 	if( ISHELL_CreateInstance( pme->m_pIShell, AEECLSID_POSDET,(void **)&pGetGPSInfo->pPosDet ) == SUCCESS ) {
 		
@@ -342,7 +529,7 @@ static void CWhereWin_LocStart( IWindow *po )
 			CWhereWin_Redraw((IWindow*)pme);
 		}
 		else {
-			ISHELL_SetTimerEx( pme->m_pIShell, 1000, &pGetGPSInfo->cbProgressTimer );
+			ISHELL_SetTimerEx( pme->m_pIShell, 10000, &pGetGPSInfo->cbProgressTimer );
 		}
 	}
 }
@@ -376,11 +563,13 @@ static void CWhereWin_GetGPSInfo_Callback( IWindow *po )
 		pGetGPSInfo->wProgress = 0;
 		DBGPRINTF("@GetGPSInfo fix:%d", pGetGPSInfo->dwFixNumber);
 
+		pme->m_bGetGpsInfo = TRUE;
 		CWhereWin_Redraw(po);
 	}
 	else if( pGetGPSInfo->theInfo.nErr == EIDLE ) {
 		/* End of tracking */
 		DBGPRINTF("@End of tracking");
+		pGetGPSInfo->dwFixNumber = 0;
 	}
 	else if( pGetGPSInfo->theInfo.nErr == AEEGPS_ERR_TIMEOUT ) {
 		/* Record the timeout and perhaps re-try. */
@@ -394,6 +583,8 @@ static void CWhereWin_GetGPSInfo_Callback( IWindow *po )
 		/* Something is not right here. Requires corrective action. Bailout */
 		pGetGPSInfo->bAbort = TRUE;
 
+		pGetGPSInfo->dwFixNumber = 0;
+		
 		CWhereWin_Redraw(po);
 	}
 }
@@ -413,7 +604,7 @@ static void CWhereWin_GetGPSInfo_SecondTicker( IWindow *po )
 	}
 
 	if( pGetGPSInfo->bAbort == FALSE ) {
-	  ISHELL_SetTimerEx( pme->m_pIShell, 1000, &pGetGPSInfo->cbProgressTimer );
+	  ISHELL_SetTimerEx( pme->m_pIShell, 10000, &pGetGPSInfo->cbProgressTimer );
 	}
 }
 

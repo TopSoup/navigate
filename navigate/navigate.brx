@@ -34,14 +34,14 @@
 	<String Id="11" Name="IDS_STRING_DEST_INFO">
 		<Text>功能介绍</Text>
 	</String>
-	<String Id="12" Name="IDS_STRING_LAT">
-		<Text>经度: </Text>
+	<String Id="12" Name="IDS_STRING_STATUS">
+		<Text>状态: 卫星</Text>
 	</String>
-	<String Id="13" Name="IDS_STRING_LON">
-		<Text>纬度: </Text>
+	<String Id="13" Name="IDS_STRING_TIME">
+		<Text>时间</Text>
 	</String>
 	<String Id="14" Name="IDS_STRING_NAME">
-		<Text>名称: </Text>
+		<Text>名称</Text>
 	</String>
 	<String Id="15" Name="IDS_STRING_EDIT_LAT">
 		<Text>经度</Text>
@@ -51,6 +51,27 @@
 	</String>
 	<String Id="17" Name="IDS_STRING_EDIT_DESC">
 		<Text>目的地名称</Text>
+	</String>
+	<String Id="18" Name="IDS_STRING_VEL">
+		<Text>速度</Text>
+	</String>
+	<String Id="19" Name="IDS_STRING_HEADING">
+		<Text>方向</Text>
+	</String>
+	<String Id="20" Name="IDS_STRING_ALT">
+		<Text>海拔</Text>
+	</String>
+	<String Id="21" Name="IDS_STRING_MONTH">
+		<Text>月</Text>
+	</String>
+	<String Id="22" Name="IDS_STRING_DAY">
+		<Text>日</Text>
+	</String>
+	<String Id="23" Name="IDS_STRING_DEGREE">
+		<Text>°</Text>
+	</String>
+	<String Id="24" Name="IDS_STRING_MINUTE">
+		<Text>′</Text>
 	</String>
 	<String Id="501" Name="IDS_STRING_DESTINATION">
 		<Text>目的地列表</Text>
@@ -64,9 +85,9 @@
 	<String Id="504" Name="IDS_TOTAL_STRING">
 		<Text>总共:</Text>
 	</String>
-	<STRING Id="505" Name="IDS_MO_TEXT_UNICODE">
+	<String Id="505" Name="IDS_MO_TEXT_UNICODE">
 		<Text>目标位置:北京天安门#经度:E,114.111000#纬度:N,33.222222</Text>
-	</STRING>
+	</String>
 	<String Id="1001" Name="IDS_STRING_FUCTION">
 		<Text>选项</Text>
 	</String>
