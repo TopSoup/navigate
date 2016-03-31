@@ -100,6 +100,15 @@
 	<String Id="1011" Name="IDS_STRING_INFO">
 		<Text>信息说明</Text>
 	</String>
+	<String Id="1012" Name="IDS_STRING_RENAME">
+		<Text>重命名</Text>
+	</String>
+	<String Id="1013" Name="IDS_STRING_SAVE">
+		<Text>储存</Text>
+	</String>
+	<String Id="1014" Name="IDS_STRING_EREASE">
+		<Text>清除</Text>
+	</String>
 </Strings>
 <Objects MimeType="image/png">
 	<Object Id="1000" Name="IDP_NAVIGATOR">

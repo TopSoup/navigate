@@ -66,6 +66,9 @@ typedef enum TSWindow
 	//3 
 	TSW_ADDRBOOK,		//联系人界面
 	TSW_SMSBOX,			//短信收件箱
+
+	//ctl
+	TSW_TEXTCTL,
 	
 	TSW_LAST
 } TSWindow;
@@ -124,6 +127,13 @@ struct CTopSoupApp
 
 	//Destination DataBse
 	IDatabase*		m_pDatabase;		// Database
+
+
+	//textctl
+	AECHAR          m_pTextctlText[TS_MAX_STRLEN];
+	int             m_pTextctlMode;     //input mode
+	TSWindow        m_pTextctlWin;      
+
 };
 
 typedef struct CTopSoupApp  CTopSoupApp;

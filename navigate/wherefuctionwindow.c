@@ -45,7 +45,7 @@ IWindow * CWhereFuctionWin_New(CTopSoupApp * pOwner)
          TS_WINERR_RETURN(pme);
 
       TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth,&((CTopSoupApp*)pme->m_pOwner)->m_rectWin , 0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SAVE_LOCATION, NULL, IDI_OBJECT_15201, IDS_STRING_MY_LOCATION, 0);
+      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SAVE_LOCATION, NULL, IDI_OBJECT_15201, IDS_STRING_SAVE_LOCATION, 0);
       TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_REPORT_LOCATION,   NULL, IDI_OBJECT_15202, IDS_STRING_REPORT_LOCATION,   0);
 	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_LOCATION_INFO,   NULL, IDI_OBJECT_15203, IDS_STRING_LOCATION_INFO,   0);
 
@@ -121,6 +121,15 @@ static void CWhereFuctionWin_Redraw(IWindow * po)
    //XXX _end
 }
 
+static void CTopSoupApp_onSplashDrawOver(void * po) 
+{
+	CTopSoupApp* pme = (CTopSoupApp*)po;
+
+	if(pme->m_pWin)
+		CTopSoupApp_Redraw(pme, TRUE);
+
+}
+
 /*===========================================================================
    This function processes events routed to main window.
 ===========================================================================*/
@@ -152,6 +161,10 @@ static boolean CWhereFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16
    switch (wParam)
    {
       case IDS_STRING_SAVE_LOCATION:
+		  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SAVE_LOCATION,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
+		  pme->m_pOwner->m_pTextctlMode = AEE_TM_PINYIN;
+		  pme->m_pOwner->m_pTextctlWin = TSW_WHERE;
+		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_TEXTCTL, 0);
          break;
 
       case IDS_STRING_REPORT_LOCATION:

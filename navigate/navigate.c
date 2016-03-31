@@ -539,6 +539,10 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 		  pme->m_pWin = CDestlistFuctionWin_New(pme);
 		  break;
 
+	  case TSW_TEXTCTL:
+		  pme->m_pWin = CTextCtlWin_New(pme);
+		  break;
+
       case TSW_NONE:       
          return TRUE; 
          break;

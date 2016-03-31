@@ -23,7 +23,8 @@ void       TS_FrameRect(IDisplay * pd, AEERect * pRect);
 
 //dlg
 void       TS_ErrorDlg(CTopSoupApp * pme, uint16 wResErrID);
-void       TS_DrawSplash(CTopSoupApp * pme,AECHAR* info,int msTimeout);
+//PFNNOTIFY is null,use default func;
+void       TS_DrawSplash(CTopSoupApp * pme,AECHAR* info,int msTimeout,PFNNOTIFY on_splashOver);
 
 //file
 char *     TS_GetFileName(const char * psz);
