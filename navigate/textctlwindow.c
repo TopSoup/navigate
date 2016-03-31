@@ -165,7 +165,7 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	   if ( 0 == WSTRICMP(title,pme->m_pOwner->m_pHdrText) ){
 		    //发送短信
 	   } else {
-			TS_DrawSplash(pme->m_pOwner,L"已保存到目的地列表！",3000,CTextCtlWin_onSplashDrawOver);
+			TS_DrawSplash(pme->m_pOwner,"已保存到目的地列表！",3000,CTextCtlWin_onSplashDrawOver);
 	   }
    }
    //XXX __end

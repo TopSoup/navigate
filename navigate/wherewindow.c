@@ -250,7 +250,7 @@ static void CWhereWin_Redraw(IWindow * po)
 	{
 		static i = 0;
 		if ( 0 == i ){
-			TS_DrawSplash(pme->m_pOwner,L"正在定位...",2000,NULL);
+			TS_DrawSplash(pme->m_pOwner,"正在定位...",2000,NULL);
 			i++;
 		}
 	}
