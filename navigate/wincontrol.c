@@ -275,7 +275,7 @@ void  TS_DrawSplash(CTopSoupApp * pme,AECHAR* prompt,int msTimeout,PFNNOTIFY on_
 		CTopSoupApp_DisableWin(pme);
    
    {
-      IImage * pi = ISHELL_LoadResImage(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDJ_OBJECT_PROMPT);
+      IImage * pi = ISHELL_LoadResImage(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDP_OBJECT_PROMPT);
 	  IStatic * pInfoStatic = NULL;
 
       if (pi)
