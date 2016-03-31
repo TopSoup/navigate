@@ -168,6 +168,11 @@ static boolean CWhereFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16
          break;
 
       case IDS_STRING_REPORT_LOCATION:
+		  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_RECIPIENT,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
+		  pme->m_pOwner->m_pTextctlMode = AEE_TM_NUMBERS;
+		  pme->m_pOwner->m_pTextctlWin = TSW_WHERE;
+		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_TEXTCTL, 0);
+		  TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_STRING_SEND);
 		  break;
 
 	  case IDS_STRING_LOCATION_INFO:

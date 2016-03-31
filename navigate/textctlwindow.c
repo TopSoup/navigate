@@ -149,6 +149,9 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
    //使用KEY_SELECT打开编辑页面
    if (TS_ISSEL(eCode, wParam))
    {
+	   
+	   AECHAR title[TS_MAX_STRLEN];
+
 	   //取得当前编辑内容,校验成功后切回主页面
 	   AECHAR * pText=NULL;
 	   char	szBuf[64];
@@ -158,7 +161,12 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	   MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
 	   WSTRCPY(pme->m_pOwner->m_pTextctlText, pText);
 
-	   TS_DrawSplash(pme->m_pOwner,L"已保存到目的地列表！",3000,CTextCtlWin_onSplashDrawOver);
+	   ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_RECIPIENT,&title,sizeof(title));
+	   if ( 0 == WSTRICMP(title,pme->m_pOwner->m_pHdrText) ){
+		    //发送短信
+	   } else {
+			TS_DrawSplash(pme->m_pOwner,L"已保存到目的地列表！",3000,CTextCtlWin_onSplashDrawOver);
+	   }
    }
    //XXX __end
 

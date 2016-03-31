@@ -109,6 +109,12 @@
 	<String Id="1014" Name="IDS_STRING_EREASE">
 		<Text>清除</Text>
 	</String>
+	<String Id="1015" Name="IDS_STRING_RECIPIENT">
+		<Text>收件人</Text>
+	</String>
+	<String Id="1016" Name="IDS_STRING_SEND">
+		<Text>发送</Text>
+	</String>
 </Strings>
 <Objects MimeType="image/png">
 	<Object Id="1000" Name="IDP_NAVIGATOR">
