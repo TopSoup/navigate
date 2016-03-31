@@ -29,7 +29,6 @@
 *.opt
 */Debug/
 *.bar
-*.brh
 *.mak
 *.exe
 
