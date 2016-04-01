@@ -31,7 +31,7 @@ static boolean    CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 w
 /*===========================================================================
    This function constucts the main window.
 ===========================================================================*/
-IWindow * CTextCtlWin_New(CTopSoupApp * pOwner, int op)
+IWindow * CTextCtlWin_New(CTopSoupApp * pOwner)
 {
    CTextCtlWin *        pme;
    VTBL(IWindow)     vtbl;
