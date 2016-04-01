@@ -480,7 +480,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 ===========================================================================*/
 boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 {
- 	// If same window, then redraw and return.
+	// If same window, then redraw and return.
    if (pme->m_pWin && pme->m_eActiveWin == eWin && eWin != TSW_NONE)
    {
       CTopSoupApp_Redraw(pme, TRUE);
@@ -488,6 +488,7 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
    }
 
    TS_RELEASEWIN(pme->m_pWin);
+
    //reset res
    MEMSET(pme->m_pLeftSoftText,0,sizeof(pme->m_pLeftSoftText));
    MEMSET(pme->m_pRightSoftText,0,sizeof(pme->m_pRightSoftText));

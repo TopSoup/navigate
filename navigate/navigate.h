@@ -3,6 +3,8 @@
 
 #include "navigatepch.h"
 
+#include "location.h"
+
 typedef struct _IWindow  IWindow;
 
 //string TODO solove include file problem, put it in logimacro mode
@@ -113,6 +115,8 @@ struct CTopSoupApp
 
 	uint16            m_wMainWin;    // CurSel of CMainWin
 
+	//GPS
+	GetGPSInfo		  m_gpsInfo;	//
 
 	//SMS
 	ISMS              *m_pISMS;      

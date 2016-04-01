@@ -12,6 +12,8 @@ typedef struct _IWindow  IWindow;
 void       TS_FreeIF(IBase ** ppif);
 void       TS_FreeWin(IWindow ** ppif);
 
+AECHAR*	   TS_FLT2SZ(AECHAR* szBuf, double val);
+
 //key
 #define TS_ISEVTKEY(e)                 ((e) == EVT_KEY)
 #define TS_ISCLR(e)                    (TS_ISEVTKEY(e) && wParam == AVK_CLR)

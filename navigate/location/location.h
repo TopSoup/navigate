@@ -52,7 +52,7 @@ typedef struct {
 
 }PositionData;
 
-struct _GetGPSInfo {
+typedef struct _GetGPSInfo {
    PositionData theInfo;
    IPosDet      *pPosDet;
    AEECallback  cbPosDet;
@@ -66,7 +66,7 @@ struct _GetGPSInfo {
    uint16       wMainMenuEntry;
    boolean      bAbort;
    LocState		*pts;
-};
+}GetGPSInfo;
 
 #ifdef __cplusplus
 extern "C" {

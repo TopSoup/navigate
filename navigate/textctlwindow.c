@@ -9,6 +9,9 @@ struct CTextCtlWin
 
 	//XXX
 	ITextCtl			*m_pTextCtl;
+
+	int					m_op;			//0: 保存位置到数据库 1: 短信发送
+	
 };
 
 typedef struct CTextCtlWin CTextCtlWin;
@@ -28,7 +31,7 @@ static boolean    CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 w
 /*===========================================================================
    This function constucts the main window.
 ===========================================================================*/
-IWindow * CTextCtlWin_New(CTopSoupApp * pOwner)
+IWindow * CTextCtlWin_New(CTopSoupApp * pOwner, int op)
 {
    CTextCtlWin *        pme;
    VTBL(IWindow)     vtbl;
@@ -154,20 +157,53 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	   AECHAR prompt[TS_MAX_STRLEN];
 
 	   //取得当前编辑内容,校验成功后切回主页面
-	   AECHAR * pText=NULL;
-	   char	szBuf[64];
-	   pText = ITEXTCTL_GetTextPtr( pme->m_pTextCtl );  
-	   WSTRTOSTR(pText, szBuf, WSTRLEN(pText) + 1);
+	   AECHAR * pTextDesc=NULL;
+	   AECHAR textLat[32], textLon[32];
+	   char	szBuf[32];
 
+	   pTextDesc = ITEXTCTL_GetTextPtr( pme->m_pTextCtl );  
+	   WSTRTOSTR(pTextDesc, szBuf, WSTRLEN(pTextDesc) + 1);
+	   DBGPRINTF("Desc: %s", szBuf);
+
+	   if (pme->m_op == 0)	//保存位置
+	   {
+			TS_FLT2SZ(textLat, pme->m_pOwner->m_gpsInfo.theInfo.lat);
+			WSTRTOSTR(textLat, szBuf, WSTRLEN(textLat) + 1);
+			DBGPRINTF("Lat: %s", szBuf);
+
+			TS_FLT2SZ(textLon, pme->m_pOwner->m_gpsInfo.theInfo.lon);
+			WSTRTOSTR(textLon, szBuf, WSTRLEN(textLon) + 1);
+			DBGPRINTF("Lon: %s", szBuf);
+
+			//保存到数据库
+			if (WSTRLEN(textLat) == 0 || WSTRLEN(textLon) == 0 || WSTRLEN(pTextDesc) == 0)
+			{
+			DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
+			return TRUE;
+			}
+
+			if (!TS_AddExpenseItem(pme->m_pOwner, pTextDesc, textLat, textLon))
+			{
+			DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
+			return TRUE;
+			}  
+	   }
+	   else if (pme->m_op == 1)	//短信发送
+	   {
+
+	   }
+
+
+	   //过渡显示
 	   MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
-	   WSTRCPY(pme->m_pOwner->m_pTextctlText, pText);
+	   WSTRCPY(pme->m_pOwner->m_pTextctlText, pTextDesc);
 
 	   ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_RECIPIENT,title,sizeof(title));
 	   ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
 	   if ( 0 == WSTRICMP(title,pme->m_pOwner->m_pHdrText) ){
 		    //发送短信
 	   } else {
-			TS_DrawSplash(pme->m_pOwner,prompt,3000,(PFNNOTIFY)CTextCtlWin_onSplashDrawOver);
+			TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CTextCtlWin_onSplashDrawOver);
 	   }
    }
    //XXX __end

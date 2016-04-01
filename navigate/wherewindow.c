@@ -26,7 +26,6 @@ struct CWhereWin
 	boolean			m_bGetGpsInfo;
 
 	AEEGPSMode		m_gpsMode;
-	struct _GetGPSInfo		m_gpsInfo;	//
 };
 
 typedef struct CWhereWin CWhereWin;
@@ -202,33 +201,6 @@ static void DrawText(CWhereWin *pMe, AECHAR* pText, AEERect *rect)
 }
 
 //格式化浮点数
-static AECHAR* FLT2SZ(AECHAR* szBuf, double val)
-{
-	double tmp = 0, tt = 0, min = 0;
-	int d = 0, m = 0;
-	
-	if (szBuf == NULL)
-		return NULL;
-
-	tmp = FABS(val);
-	if (FCMP_GE(tmp, 0.000001))
-	{
-		tt = FFLOOR(tmp);
-		d = FLTTOINT(tt);
-		m = FLTTOINT(FMUL(FSUB(tmp, tt), 10000000.0));
-		m = (m % 10 >= 5) ? (m + 10) / 10 : m / 10;
-	}
-	else
-	{
-		d = 0;
-		m = 0;
-	}
-	
-	WSPRINTF(szBuf, 32, L"%d.%d", d, m);
-	return szBuf;
-}
-
-//格式化浮点数
 static AECHAR* FLT2RAD(AECHAR* szBuf, double val)
 {
 	AEEApplet* pApp = (AEEApplet*)GETAPPINSTANCE();
@@ -296,7 +268,7 @@ static int FORMATFLT(AECHAR* szLon, AECHAR* szLat, double lon, double lat)
 static void CWhereWin_Redraw(IWindow * po)
 {
 	CWhereWin *  pme = (CWhereWin *)po;
-	
+	struct _GetGPSInfo *pGetGpsInfo = &pme->m_pOwner->m_gpsInfo;
 	if (!pme->m_bActive)
 		return;
 	
@@ -319,10 +291,10 @@ static void CWhereWin_Redraw(IWindow * po)
 
 
 	//当取得定位结果时更新显示
-	if (pme->m_gpsInfo.pPosDet 
+	if (pGetGpsInfo->pPosDet 
 		&& pme->m_bGetGpsInfo)
 	{
-		//if (pme->m_gpsInfo.theInfo.nErr == SUCCESS)
+		//if (pGetGpsInfo->theInfo.nErr == SUCCESS)
 		{
 			AECHAR wBuf[MP_MAX_STRLEN], wBuf2[MP_MAX_STRLEN];
 			AECHAR bufRes[MP_MAX_STRLEN], bufRes2[MP_MAX_STRLEN], bufRes3[MP_MAX_STRLEN];
@@ -362,13 +334,15 @@ static void CWhereWin_Redraw(IWindow * po)
 
 			//格式化经纬度
 			//For Test Hack
-			pme->m_gpsInfo.theInfo.lat = 38.0422378880;
-			pme->m_gpsInfo.theInfo.lon = 114.4925141047;
-			FORMATFLT(bufLon, bufLat, pme->m_gpsInfo.theInfo.lon, pme->m_gpsInfo.theInfo.lat);
+#ifdef AEE_SIMULATOR
+			pGetGpsInfo->theInfo.lat = 38.0422378880;
+			pGetGpsInfo->theInfo.lon = 114.4925141047;
+#endif
+			FORMATFLT(bufLon, bufLat, pGetGpsInfo->theInfo.lon, pGetGpsInfo->theInfo.lat);
 
 			//经度
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LON, bufRes, sizeof(bufRes));
-			//FLOATTOWSTR(pme->m_gpsInfo.theInfo.lon, bufLon, 32);
+			//FLOATTOWSTR(pGetGpsInfo->theInfo.lon, bufLon, 32);
 			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, bufLon);
 			xx = xMargin;
 			yy += h;
@@ -379,7 +353,7 @@ static void CWhereWin_Redraw(IWindow * po)
 
 			//纬度		
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LAT, bufRes, sizeof(bufRes));
-			//FLOATTOWSTR(pme->m_gpsInfo.theInfo.lat, bufLat, 32);
+			//FLOATTOWSTR(pGetGpsInfo->theInfo.lat, bufLat, 32);
 			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, bufLat);
 			xx = xMargin;
 			yy += h;
@@ -391,8 +365,8 @@ static void CWhereWin_Redraw(IWindow * po)
 			
 			//速度
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_VEL, bufRes, sizeof(bufRes));
-			//FLOATTOWSTR(pme->m_gpsInfo.theInfo.velocityHor, bufVel, 32);
-			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, FLT2SZ(bufVel, pme->m_gpsInfo.theInfo.velocityHor));
+			//FLOATTOWSTR(pGetGpsInfo->theInfo.velocityHor, bufVel, 32);
+			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, TS_FLT2SZ(bufVel, pGetGpsInfo->theInfo.velocityHor));
 			xx = xMargin;
 			yy += h;
 			dxx = pme->m_pOwner->m_cxWidth - 2;
@@ -402,8 +376,8 @@ static void CWhereWin_Redraw(IWindow * po)
 		
 			//方向
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_HEADING, bufRes, sizeof(bufRes));
-			//FLOATTOWSTR(pme->m_gpsInfo.theInfo.heading, bufHeading, 32);
-			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, FLT2SZ(bufHeading, pme->m_gpsInfo.theInfo.heading));
+			//FLOATTOWSTR(pGetGpsInfo->theInfo.heading, bufHeading, 32);
+			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, TS_FLT2SZ(bufHeading, pGetGpsInfo->theInfo.heading));
 			xx = xMargin;
 			yy += h;
 			dxx = pme->m_pOwner->m_cxWidth - 2;
@@ -413,7 +387,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			
 			//海拔
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_ALT, bufRes, sizeof(bufRes));
-			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %d.0", bufRes, pme->m_gpsInfo.theInfo.height);
+			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %d.0", bufRes, pGetGpsInfo->theInfo.height);
 			xx = xMargin;
 			yy += h;
 			dxx = pme->m_pOwner->m_cxWidth - 2;
@@ -432,7 +406,7 @@ static void CWhereWin_Redraw(IWindow * po)
 		}
 	}
 
-	//WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"Pro: %d nErr:%u", pme->m_gpsInfo.wProgress,  pme->m_gpsInfo.theInfo.nErr);
+	//WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"Pro: %d nErr:%u", pGetGpsInfo->wProgress,  pGetGpsInfo->theInfo.nErr);
 	//TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextInfo, AEE_FONT_NORMAL, pme->m_szText);	
 
 
@@ -506,7 +480,7 @@ static void CWhereWin_LocStart( IWindow *po )
 {
 	CWhereWin *pme = (CWhereWin*)po;
 	int nErr = SUCCESS;
-	struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
+	struct _GetGPSInfo *pGetGPSInfo = &pme->m_pOwner->m_gpsInfo;
 	ZEROAT( pGetGPSInfo );
 
 	pGetGPSInfo->theInfo.gpsConfig.server.svrType = AEEGPS_SERVER_DEFAULT;
@@ -537,7 +511,7 @@ static void CWhereWin_LocStart( IWindow *po )
 static void CWhereWin_LocStop( IWindow *po )
 {
 	CWhereWin *pme = (CWhereWin*)po;
-	struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
+	struct _GetGPSInfo *pGetGPSInfo = &pme->m_pOwner->m_gpsInfo;
 
 	if (pGetGPSInfo->pPosDet)
 	{
@@ -552,7 +526,7 @@ static void CWhereWin_LocStop( IWindow *po )
 static void CWhereWin_GetGPSInfo_Callback( IWindow *po )
 {
 	CWhereWin *pme = (CWhereWin*)po;
-	struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
+	struct _GetGPSInfo *pGetGPSInfo = &pme->m_pOwner->m_gpsInfo;
 
 	DBGPRINTF("CWhereWin_GetGPSInfo_Callback in nErr:%d", pGetGPSInfo->theInfo.nErr);
 
@@ -595,7 +569,7 @@ static void CWhereWin_GetGPSInfo_Callback( IWindow *po )
 static void CWhereWin_GetGPSInfo_SecondTicker( IWindow *po )
 {
 	CWhereWin *pme = (CWhereWin*)po;
-	struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
+	struct _GetGPSInfo *pGetGPSInfo = &pme->m_pOwner->m_gpsInfo;
 
 	if( pGetGPSInfo->bPaused == FALSE ) {
 	  pGetGPSInfo->wProgress++;
