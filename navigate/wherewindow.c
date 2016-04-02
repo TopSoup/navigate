@@ -299,7 +299,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
-			TS_DrawText(pme->m_pIDisplay, bufRes, &rect);
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  bufRes, &rect);
 			
 			//时间
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_TIME, bufRes, sizeof(bufRes));
@@ -316,7 +316,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
-			TS_DrawText(pme->m_pIDisplay, pme->m_szText, &rect);
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  pme->m_szText, &rect);
 
 			//格式化经纬度
 			//For Test Hack
@@ -335,7 +335,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
-			TS_DrawText(pme->m_pIDisplay, pme->m_szText, &rect);
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  pme->m_szText, &rect);
 
 			//纬度		
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LAT, bufRes, sizeof(bufRes));
@@ -346,7 +346,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
-			TS_DrawText(pme->m_pIDisplay, pme->m_szText, &rect);
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  pme->m_szText, &rect);
 
 			
 			//速度
@@ -358,7 +358,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
-			TS_DrawText(pme->m_pIDisplay, pme->m_szText, &rect);
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  pme->m_szText, &rect);
 		
 			//方向
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_HEADING, bufRes, sizeof(bufRes));
@@ -369,7 +369,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
-			TS_DrawText(pme->m_pIDisplay, pme->m_szText, &rect);
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  pme->m_szText, &rect);
 			
 			//海拔
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_ALT, bufRes, sizeof(bufRes));
@@ -379,7 +379,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
-			TS_DrawText(pme->m_pIDisplay, pme->m_szText, &rect);
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  pme->m_szText, &rect);
 		}
 	}
 	else

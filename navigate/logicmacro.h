@@ -15,7 +15,7 @@ void       TS_FreeWin(IWindow ** ppif);
 AECHAR*	   TS_FLT2SZ(AECHAR* szBuf, double val);
 
 //»æÖÆÎÄ×Ö
-void       TS_DrawText(IDisplay* pIDisplay, AECHAR* pText, AEERect *rect);
+void       TS_DrawText(IDisplay* pIDisplay, AEEFont nFont, AECHAR* pText, AEERect *rect);
 
 //key
 #define TS_ISEVTKEY(e)                 ((e) == EVT_KEY)

@@ -140,6 +140,8 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
    CTextCtlWin *  pme = (CTextCtlWin *)po;
    boolean     bRet = TRUE;
 
+   DBGPRINTF("eCode:%x wParam:%x", eCode, wParam);
+   
     //XXX __begin
    if (ITEXTCTL_HandleEvent( pme->m_pTextCtl, eCode, wParam, dwParam ))
 	   return TRUE;
@@ -200,6 +202,17 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 
 		   ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SEND,prompt,sizeof(prompt));
 	   }
+
+		//XXX __begin
+		IDISPLAY_ClearScreen(pme->m_pIDisplay);
+
+		TS_DrawBackgroud(po);
+		ITEXTCTL_SetActive(pme->m_pTextCtl, FALSE);
+		//ITEXTCTL_Redraw(pme->m_pTextCtl);
+
+
+		IDISPLAY_Update(pme->m_pIDisplay);
+		//XXX _end
 
 	   //ÌáÊ¾´°¿Ú
 	   MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  

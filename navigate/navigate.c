@@ -442,26 +442,28 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				{
 					DBGPRINTF("SEND SMS TEST ...");
 					//CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_ASCII);
-					CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_UNICODE, L"TIANANMEN");
+					//CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_UNICODE, L"TIANANMEN");
 				}
 
 				//FOR TEL TEST
 				if (wParam == AVK_1)
 				{
 					DBGPRINTF("CALL TEST ...");
-					CTopSoupApp_MakeSOSCall(pme, "15511823090");
+					//CTopSoupApp_MakeSOSCall(pme, "15511823090");
 				}
 
 				if (wParam == AVK_2)
 				{
 					DBGPRINTF("CALL TEST END ...");
-					CTopSoupApp_EndSOSCall(pme);
+					//CTopSoupApp_EndSOSCall(pme);
 				}
 			 }
 		 case EVT_KEY_PRESS:
+		 case EVT_KEY_RELEASE:		// For '#' Switch Input Method
          case EVT_COMMAND:          // Process menu command event
 		 case EVT_CTL_SEL_CHANGED:  // Process Sel Changed event
          case EVT_COPYRIGHT_END:    // Copyright dialog ended
+		 default:
             if (pme->m_pWin)
                return IWINDOW_HandleEvent(pme->m_pWin, eCode, wParam, dwParam);
 

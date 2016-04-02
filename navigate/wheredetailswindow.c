@@ -3,7 +3,7 @@
 
 #define MP_MAX_STRLEN         64
 
-#define WIN_FONT	AEE_FONT_LARGE
+#define WIN_FONT	AEE_FONT_NORMAL
 
 // WhereDetails window: Displays main menu.
 struct CWhereDetailsWin
@@ -87,7 +87,7 @@ static void CWhereDetailsWin_Redraw(IWindow * po)
 		int a = 0, b = 0;
 		int h = 0, xx = 0, yy = 0, dxx = 0, dyy = 0;
 		AEERect rect;
-		int xMargin = 4;
+		int xMargin = 2;
 
 		ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_WHERE_DETAILS_0, bufRes, sizeof(bufRes));
 		h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 12;
@@ -96,7 +96,7 @@ static void CWhereDetailsWin_Redraw(IWindow * po)
 		dxx = pme->m_pOwner->m_cxWidth - 2;
 		dyy = h;
 		SETAEERECT(&rect, xx, yy, dxx, dyy);
-		TS_DrawText(pme->m_pIDisplay, bufRes, &rect);
+		TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
 
 		ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_WHERE_DETAILS_1, bufRes, sizeof(bufRes));
 		h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 12;
@@ -105,7 +105,7 @@ static void CWhereDetailsWin_Redraw(IWindow * po)
 		dxx = pme->m_pOwner->m_cxWidth - 2;
 		dyy = h;
 		SETAEERECT(&rect, xx, yy, dxx, dyy);
-		TS_DrawText(pme->m_pIDisplay, bufRes, &rect);
+		TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
 
 
 		ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_WHERE_DETAILS_2, bufRes, sizeof(bufRes));
@@ -115,7 +115,7 @@ static void CWhereDetailsWin_Redraw(IWindow * po)
 		dxx = pme->m_pOwner->m_cxWidth - 2;
 		dyy = h;
 		SETAEERECT(&rect, xx, yy, dxx, dyy);
-		TS_DrawText(pme->m_pIDisplay, bufRes, &rect);
+		TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
 
 
 		ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_WHERE_DETAILS_3, bufRes, sizeof(bufRes));
@@ -125,8 +125,7 @@ static void CWhereDetailsWin_Redraw(IWindow * po)
 		dxx = pme->m_pOwner->m_cxWidth - 2;
 		dyy = h;
 		SETAEERECT(&rect, xx, yy, dxx, dyy);
-		TS_DrawText(pme->m_pIDisplay, bufRes, &rect);
-
+		TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
 
 		ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_WHERE_DETAILS_4, bufRes, sizeof(bufRes));
 		h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 12;
@@ -135,7 +134,16 @@ static void CWhereDetailsWin_Redraw(IWindow * po)
 		dxx = pme->m_pOwner->m_cxWidth - 2;
 		dyy = h;
 		SETAEERECT(&rect, xx, yy, dxx, dyy);
-		TS_DrawText(pme->m_pIDisplay, bufRes, &rect);
+		TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+
+		ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_WHERE_DETAILS_5, bufRes, sizeof(bufRes));
+		h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 12;
+		xx = xMargin;
+		yy += h;
+		dxx = pme->m_pOwner->m_cxWidth - 2;
+		dyy = h;
+		SETAEERECT(&rect, xx, yy, dxx, dyy);
+		TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
    }
 
    IDISPLAY_Update(pme->m_pIDisplay);

@@ -149,19 +149,22 @@
 		<Text>已发送！</Text>
 	</String>
 	<String Id="1020" Name="IDS_STRING_WHERE_DETAILS_0">
-		<Text>1 经纬度数据为卫星定位结果</Text>
+		<Text>经纬度为卫星定位结果</Text>
 	</String>
 	<String Id="1021" Name="IDS_STRING_WHERE_DETAILS_1">
-		<Text>2 现在前进的速度用公里和节表示</Text>
+		<Text>当前速度用公里和节表示</Text>
 	</String>
 	<String Id="1022" Name="IDS_STRING_WHERE_DETAILS_2">
-		<Text>3 现在前进的方向用数字表示</Text>
+		<Text>当前前进方向用角度表示</Text>
 	</String>
 	<String Id="1023" Name="IDS_STRING_WHERE_DETAILS_3">
-		<Text> (0-正北,90-正东,180-正南,270-正西)</Text>
+		<Text> ( 0°-正北, 90°-正东</Text>
 	</String>
 	<String Id="1024" Name="IDS_STRING_WHERE_DETAILS_4">
-		<Text>4 海拔表示高度</Text>
+		<Text>   180°-正南, 270°-正西)</Text>
+	</String>
+	<String Id="1025" Name="IDS_STRING_WHERE_DETAILS_5">
+		<Text>海拔表示高度</Text>
 	</String>
 </Strings>
 <Objects MimeType="image/png">
