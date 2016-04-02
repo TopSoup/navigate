@@ -8,10 +8,7 @@ struct CTextCtlWin
 	INHERIT_CWindow(IWindow);
 
 	//XXX
-	ITextCtl			*m_pTextCtl;
-
-	int					m_op;			//0: 保存位置到数据库 1: 短信发送
-	
+	ITextCtl			*m_pTextCtl;	
 };
 
 typedef struct CTextCtlWin CTextCtlWin;
@@ -31,7 +28,7 @@ static boolean    CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 w
 /*===========================================================================
    This function constucts the main window.
 ===========================================================================*/
-IWindow * CTextCtlWin_New(CTopSoupApp * pOwner, int op)
+IWindow * CTextCtlWin_New(CTopSoupApp * pOwner)
 {
    CTextCtlWin *        pme;
    VTBL(IWindow)     vtbl;
@@ -49,7 +46,15 @@ IWindow * CTextCtlWin_New(CTopSoupApp * pOwner, int op)
 
 	   ITEXTCTL_SetRect( pme->m_pTextCtl, &pme->m_pOwner->m_rectWin);
 
-	   TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_EREASE,IDS_STRING_SAVE);
+	   if (pme->m_pOwner->m_op == 0)
+	   {
+			TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_EREASE,IDS_STRING_SAVE);	   
+	   }
+	   else
+	   {
+			TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_EREASE,IDS_STRING_SEND);
+	   }
+	   
 	   ITEXTCTL_SetInputMode( pme->m_pTextCtl, pme->m_pOwner->m_pTextctlMode );
 	   //XXX __end
 
@@ -152,8 +157,6 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
    //使用KEY_SELECT打开编辑页面
    if (TS_ISSEL(eCode, wParam))
    {
-	   
-	   AECHAR title[TS_MAX_STRLEN];
 	   AECHAR prompt[TS_MAX_STRLEN];
 
 	   //取得当前编辑内容,校验成功后切回主页面
@@ -165,7 +168,7 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	   WSTRTOSTR(pTextDesc, szBuf, WSTRLEN(pTextDesc) + 1);
 	   DBGPRINTF("Desc: %s", szBuf);
 
-	   if (pme->m_op == 0)	//保存位置
+	   if (pme->m_pOwner->m_op == 0)	//保存位置
 	   {
 			TS_FLT2SZ(textLat, pme->m_pOwner->m_gpsInfo.theInfo.lat);
 			WSTRTOSTR(textLat, szBuf, WSTRLEN(textLat) + 1);
@@ -187,24 +190,21 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
 			return TRUE;
 			}  
+
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
 	   }
-	   else if (pme->m_op == 1)	//短信发送
+	   else if (pme->m_pOwner->m_op == 1)	//短信发送
 	   {
 
+		   CTopSoupApp_SendSMSMessage(pme->m_pOwner, 0, pTextDesc);
+
+		   ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SEND,prompt,sizeof(prompt));
 	   }
 
-
-	   //过渡显示
+	   //提示窗口
 	   MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
-	   WSTRCPY(pme->m_pOwner->m_pTextctlText, pTextDesc);
-
-	   ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_RECIPIENT,title,sizeof(title));
-	   ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
-	   if ( 0 == WSTRICMP(title,pme->m_pOwner->m_pHdrText) ){
-		    //发送短信
-	   } else {
-			TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CTextCtlWin_onSplashDrawOver);
-	   }
+	   WSTRCPY(pme->m_pOwner->m_pTextctlText, pTextDesc);	   
+	   TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CTextCtlWin_onSplashDrawOver);
    }
    //XXX __end
 

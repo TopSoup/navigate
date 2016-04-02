@@ -35,7 +35,7 @@
 #include "newdestwherefuctionwindow.h"
 #include "destlistfuctionwindow.h"
 #include "textctlwindow.h"
-
+#include "wheredetailswindow.h"
 
 #include "gmenuctl.h"
 #include "location.h"

@@ -152,6 +152,10 @@ SOURCE=.\textctlwindow.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\wheredetailswindow.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\wherefuctionwindow.c
 # End Source File
 # Begin Source File
@@ -241,6 +245,10 @@ SOURCE=.\soswindow.h
 # Begin Source File
 
 SOURCE=.\textctlwindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\wheredetailswindow.h
 # End Source File
 # Begin Source File
 

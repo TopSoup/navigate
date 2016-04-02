@@ -14,8 +14,9 @@ static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
 /*===============================================================================
                         SMS & TELEPHONE TEST
 =============================================================================== */
-#define USAGE_SMS_TX_ASCII      100   
-#define USAGE_SMS_TX_UNICODE    101
+#define USAGE_SMS_TX_UNICODE    0
+#define USAGE_SMS_TX_ASCII      1
+
 
 // PHONE NUMBER
 #define DESTINATION_NUMBER "15511823090" 
@@ -23,7 +24,6 @@ static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
 // ascii 短信内容，对于unicode短信内容，必须由资源文件bar中获取，否则编码不对 
 #define MO_TEXT_ASCII "Destination:Beijing#lat:37.123456#lon:114.121345" 
 
-static void		  CTopSoupApp_SendSMSMessage(CTopSoupApp * pMe, uint16 wParam);
 static boolean    CTopSoupApp_ReceiveSMSMessage(CTopSoupApp *pme, uint32 uMsgId);
 static void		  CTopSoupApp_MakeSOSCall(CTopSoupApp * pme, char* szNumber);
 static void		  CTopSoupApp_EndSOSCall(CTopSoupApp * pme);
@@ -442,7 +442,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				{
 					DBGPRINTF("SEND SMS TEST ...");
 					//CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_ASCII);
-					CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_UNICODE);
+					CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_UNICODE, L"TIANANMEN");
 				}
 
 				//FOR TEL TEST
@@ -530,6 +530,10 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 
 	  case TSW_WHERE_FUCTION:
 		  pme->m_pWin = (IWindow*)CWhereFuctionWin_New(pme);
+		  break;
+
+	  case TSW_WHERE_DETAILS:
+		  pme->m_pWin = (IWindow*)CWhereDetailsWin_New(pme);
 		  break;
 
 	  case TSW_DEST_NEW_FUCTION:
@@ -696,8 +700,11 @@ static void SMSCallBack_Send(void *p)
    }   
 }
 
-static void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam)  
+void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDesc)
 {   
+	AECHAR textDest[32], textLat[32], textLon[32];
+	AECHAR szLat[32], szLon[32];
+	
 	// Make sure the pointers we'll be using are valid   
 	if (pme == NULL || pme->a.m_pIShell == NULL || pme->a.m_pIDisplay == NULL)   
 		return;
@@ -786,12 +793,31 @@ static void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam)
 			
 			/* unicode text to be send */   
 			awo[i].nId  = MSGOPT_PAYLOAD_WSZ ;   
+#if TEST_SMS
 			ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_MO_TEXT_UNICODE, pszBuf, sizeof(pszBuf));
 			{
 				char szbuf[128];
 				WSTRTOSTR(pszBuf, szbuf, WSTRLEN(pszBuf) + 1);
 				DBGPRINTF(szbuf);
 			}
+#else
+			ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_MO_TEXT_DEST, textDest, sizeof(textDest));
+			ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LAT, textLat, sizeof(textLat));
+			ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LON, textLon, sizeof(textLon));
+			
+			{
+				char szBuf[32];
+	   			TS_FLT2SZ(szLat, pme->m_gpsInfo.theInfo.lat);
+				WSTRTOSTR(szLat, szBuf, WSTRLEN(szLat) + 1);
+				DBGPRINTF("Lat: %s", szBuf);
+
+				TS_FLT2SZ(szLon, pme->m_gpsInfo.theInfo.lon);
+				WSTRTOSTR(szLon, szBuf, WSTRLEN(szLon) + 1);
+				DBGPRINTF("Lon: %s", szBuf);
+			}
+			
+			WSPRINTF(pszBuf, sizeof(pszBuf), L"%s:%s#%s:E,%s#%s:N,%s", textDest, szDesc, textLon, szLon, textLat, szLat);
+#endif
 			awo[i].pVal = (void *)pszBuf;   
 			i++;   
 			
@@ -830,10 +856,7 @@ static void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam)
 		
 	default:   
 		return;   
-    }   
-	
-    // Display above event.    
-    //DisplayEvent (pme, wParam);   
+    }
 	
     return;   
 }

@@ -52,3 +52,12 @@ AECHAR* TS_FLT2SZ(AECHAR* szBuf, double val)
 	WSPRINTF(szBuf, 32, L"%d.%d", d, m);
 	return szBuf;
 }
+
+//»æÖÆÎÄ×Ö
+void TS_DrawText(IDisplay* pIDisplay, AECHAR* pText, AEERect *rect)
+{
+	RGBVAL oldColor;
+	oldColor = IDISPLAY_SetColor(pIDisplay, CLR_USER_TEXT, MAKE_RGB(255, 255, 255));
+	IDISPLAY_DrawText(pIDisplay, AEE_FONT_LARGE, pText, -1, rect->x, rect->y, rect, IDF_TEXT_TRANSPARENT);
+	IDISPLAY_SetColor(pIDisplay, CLR_USER_TEXT, oldColor);
+}

@@ -154,6 +154,30 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
    switch (wParam)
    {
       case IDS_STRING_MY_LOCATION:
+		     	{
+	//	char szBuf[128];
+		char esn[64], meid[64], imsi[64], imei[64];
+		int size = 0;
+
+		size = 32;
+		ISHELL_GetDeviceInfoEx(pme->m_pIShell, AEE_DEVICEITEM_MEIDS, meid, &size);
+		DBGPRINTF("meid: %s size:%d", meid, size);
+
+		ISHELL_GetDeviceInfoEx(pme->m_pIShell, AEE_DEVICEITEM_ESN, esn, &size);
+		DBGPRINTF("esn: %s size:%d", esn, size);
+
+		size = 32;
+		ISHELL_GetDeviceInfoEx(pme->m_pIShell, AEE_DEVICEITEM_MOBILE_ID, imsi, &size);
+		DBGPRINTF("imsi: %s size:%d", imsi, size);
+
+		size = 32;
+		ISHELL_GetDeviceInfoEx(pme->m_pIShell, AEE_DEVICEITEM_IMEI, imei, &size);
+		DBGPRINTF("imei: %s size:%d", imei, size);
+
+		//SPRINTF(szBuf, "device_id esn:%s meid:%s imsi:%s imei:%s", esn, meid, imsi, imei);
+		//log_output(pme->m_file, szBuf);
+
+	}
 		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE, 0);
          break;
 

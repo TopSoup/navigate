@@ -60,6 +60,9 @@ typedef enum TSWindow
 	TSW_SEND_NUM,		//接收电话号码
 	
 
+	//位置信息说明
+	TSW_WHERE_DETAILS,	//我在哪选项->信息说明
+
 	/* Interval */
 	//1
 	TSW_LOCATING,		//定位中...
@@ -69,7 +72,8 @@ typedef enum TSWindow
 	TSW_ADDRBOOK,		//联系人界面
 	TSW_SMSBOX,			//短信收件箱
 
-	//ctl
+	
+	//输入信息[位置名称, 短信联系人, ]
 	TSW_TEXTCTL,
 	
 	TSW_LAST
@@ -136,7 +140,8 @@ struct CTopSoupApp
 	//textctl
 	AECHAR          m_pTextctlText[TS_MAX_STRLEN];
 	int             m_pTextctlMode;     //input mode
-	TSWindow        m_pTextctlWin;      
+	TSWindow        m_pTextctlWin; 
+	int				m_op;				//TEXTCTL OP: 0-保存到目的地列表 1-短信发送
 
 };
 
@@ -150,5 +155,8 @@ typedef struct CTopSoupApp  CTopSoupApp;
 void CTopSoupApp_Redraw(CTopSoupApp * pme, boolean bDefer);
 boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam);
 void CTopSoupApp_onSplashDrawOver(void * po);
+
+//发送位置短信
+void CTopSoupApp_SendSMSMessage(CTopSoupApp * pMe, uint16 wParam, AECHAR *szDesc);
 
 #endif

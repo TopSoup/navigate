@@ -186,20 +186,6 @@ static void CWhereWin_Enable(IWindow * po, boolean bEnable)
 		return;
 }
 
-//绘制文字
-static void DrawText(CWhereWin *pMe, AECHAR* pText, AEERect *rect)
-{
-	
-	RGBVAL oldColor;
-	
-
-	oldColor = IDISPLAY_SetColor(pMe->m_pIDisplay, CLR_USER_TEXT, MAKE_RGB(255, 255, 255));
-	
-	IDISPLAY_DrawText(pMe->m_pIDisplay, WIN_FONT, pText, -1, rect->x, rect->y, rect, IDF_TEXT_TRANSPARENT);
-	
-	IDISPLAY_SetColor(pMe->m_pIDisplay, CLR_USER_TEXT, oldColor);
-}
-
 //格式化浮点数
 static AECHAR* FLT2RAD(AECHAR* szBuf, double val)
 {
@@ -313,7 +299,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
-			DrawText(pme, bufRes, &rect);
+			TS_DrawText(pme->m_pIDisplay, bufRes, &rect);
 			
 			//时间
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_TIME, bufRes, sizeof(bufRes));
@@ -330,7 +316,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
-			DrawText(pme, pme->m_szText, &rect);
+			TS_DrawText(pme->m_pIDisplay, pme->m_szText, &rect);
 
 			//格式化经纬度
 			//For Test Hack
@@ -349,7 +335,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
-			DrawText(pme, pme->m_szText, &rect);
+			TS_DrawText(pme->m_pIDisplay, pme->m_szText, &rect);
 
 			//纬度		
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LAT, bufRes, sizeof(bufRes));
@@ -360,7 +346,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
-			DrawText(pme, pme->m_szText, &rect);
+			TS_DrawText(pme->m_pIDisplay, pme->m_szText, &rect);
 
 			
 			//速度
@@ -372,7 +358,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
-			DrawText(pme, pme->m_szText, &rect);
+			TS_DrawText(pme->m_pIDisplay, pme->m_szText, &rect);
 		
 			//方向
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_HEADING, bufRes, sizeof(bufRes));
@@ -383,7 +369,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
-			DrawText(pme, pme->m_szText, &rect);
+			TS_DrawText(pme->m_pIDisplay, pme->m_szText, &rect);
 			
 			//海拔
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_ALT, bufRes, sizeof(bufRes));
@@ -393,7 +379,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
-			DrawText(pme, pme->m_szText, &rect);
+			TS_DrawText(pme->m_pIDisplay, pme->m_szText, &rect);
 		}
 	}
 	else
@@ -429,6 +415,11 @@ static boolean CWhereWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam
 	case EVT_KEY:
 		switch (wParam)
 		{
+		case AVK_SELECT:
+			pme->m_bGetGpsInfo = TRUE;
+			bRet = TRUE;
+			CWhereWin_Redraw((IWindow*)pme);
+			break;
 		case AVK_SOFT1:
 			if (pme->m_bGetGpsInfo)
 				CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE_FUCTION, 0);

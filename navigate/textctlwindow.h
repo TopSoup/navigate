@@ -6,5 +6,5 @@
 typedef struct CTopSoupApp CTopSoupApp;
 
 // Main window
-IWindow *  CTextCtlWin_New(CTopSoupApp * pOwner, int op);
+IWindow *  CTextCtlWin_New(CTopSoupApp * pOwner);
 #endif
