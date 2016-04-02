@@ -142,7 +142,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="E:\BREW3.1.5\sdk\inc;E:\BREW3.1.5\inc;..\..\inc;&quot;$(BREWDIR)\inc&quot;;.\location;.\db;.\"
+				AdditionalIncludeDirectories="E:\BREW3.1.5\sdk\inc;E:\BREW3.1.5\inc;..\..\inc;&quot;$(BREWDIR)\inc&quot;;.\location;.\db;.\;.\controls"
 				PreprocessorDefinitions="AEE_SIMULATOR;WIN32;_DEBUG;_WINDOWS;_USRDLL"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -311,6 +311,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="controls"
+				>
+				<File
+					RelativePath=".\controls\gmenuctl.c"
+					>
+				</File>
+				<File
+					RelativePath=".\controls\TQueueList.c"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -417,6 +429,18 @@
 				</File>
 				<File
 					RelativePath=".\location\transform.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="controls"
+				>
+				<File
+					RelativePath=".\controls\gmenuctl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\controls\TQueueList.h"
 					>
 				</File>
 			</Filter>
