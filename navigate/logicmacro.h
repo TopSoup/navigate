@@ -3,6 +3,10 @@
 
 #include "navigatepch.h"
 
+#define TS_HEADER_Y           17
+#define TS_TITLE_Y	TS_HEADER_Y + 38	//38为标题图片高度
+
+
 typedef struct _IWindow  IWindow;
 
 #define TS_RELEASEIF(p)                TS_FreeIF((IBase **)&(p))
@@ -16,6 +20,8 @@ AECHAR*	   TS_FLT2SZ(AECHAR* szBuf, double val);
 
 //绘制文字
 void       TS_DrawText(IDisplay* pIDisplay, AEEFont nFont, AECHAR* pText, AEERect *rect);
+	
+
 
 //key
 #define TS_ISEVTKEY(e)                 ((e) == EVT_KEY)
