@@ -137,6 +137,11 @@ struct CTopSoupApp
 	IDatabase*		m_pDatabase;		// Database
 
 
+	//新建目的地使用的变量
+	AECHAR				m_szTextLat[32];
+	AECHAR				m_szTextLon[32];
+	AECHAR				m_szTextDesc[32];
+
 	//textctl
 	AECHAR          m_pTextctlText[TS_MAX_STRLEN];
 	int             m_pTextctlMode;     //input mode
