@@ -1,4 +1,4 @@
-#include "navigatedestdetailswindow.h"
+#include "destinfowindow.h"
 
 
 #define MP_MAX_STRLEN         64
@@ -88,10 +88,10 @@ static void CDestInfoWin_Redraw(IWindow * po)
       int a = 0, b = 0;
       int h = 0, xx = 0, yy = 0, dxx = 0, dyy = 0;
       AEERect rect;
-      int xMargin = 0;
+      int xMargin = 0, yMargin = 2;
 
       ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DEST_INFO_0, bufRes, sizeof(bufRes));
-      h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 12;
+      h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + yMargin;
       xx = xMargin;
       yy = 64;
       dxx = pme->m_pOwner->m_cxWidth - 2;
@@ -113,7 +113,24 @@ static void CDestInfoWin_Redraw(IWindow * po)
 			WSTRCPY(bufRes, extRes);
 		}
 		
+		IDISPLAY_MeasureTextEx(pme->m_pIDisplay, WIN_FONT, bufRes, -1, dxx,  &nFits);
 		if (nFits < len)
+		{
+			xx = xMargin;
+			  yy += h;
+			  dxx = pme->m_pOwner->m_cxWidth - 2;
+			  dyy = h;
+			  SETAEERECT(&rect, xx, yy, dxx, dyy);
+
+			WSTRCPY( extRes, &bufRes[nFits]);
+			bufRes[nFits] = 0;
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+
+			WSTRCPY(bufRes, extRes);
+		}
+
+		//IDISPLAY_MeasureTextEx(pme->m_pIDisplay, WIN_FONT, bufRes, -1, dxx,  &nFits);
+		//if (nFits < len)
 		{
 			xx = xMargin;
 			  yy += h;
@@ -123,9 +140,10 @@ static void CDestInfoWin_Redraw(IWindow * po)
 			TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
 		}
 	  }
-	  
+
+	  yMargin += 2;
       ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DEST_INFO_1, bufRes, sizeof(bufRes));
-      h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 12;
+      h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + yMargin;
       xx = xMargin;
       yy += h;
       dxx = pme->m_pOwner->m_cxWidth - 2;
@@ -147,7 +165,38 @@ static void CDestInfoWin_Redraw(IWindow * po)
 			WSTRCPY(bufRes, extRes);
 		}
 		
+		IDISPLAY_MeasureTextEx(pme->m_pIDisplay, WIN_FONT, bufRes, -1, dxx,  &nFits);
 		if (nFits < len)
+		{
+			xx = xMargin;
+			  yy += h;
+			  dxx = pme->m_pOwner->m_cxWidth - 2;
+			  dyy = h;
+			  SETAEERECT(&rect, xx, yy, dxx, dyy);
+
+			  	WSTRCPY( extRes, &bufRes[nFits]);
+			bufRes[nFits] = 0;
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+			WSTRCPY(bufRes, extRes);
+		}
+
+		IDISPLAY_MeasureTextEx(pme->m_pIDisplay, WIN_FONT, bufRes, -1, dxx,  &nFits);
+		if (nFits < len)
+		{
+			xx = xMargin;
+			  yy += h;
+			  dxx = pme->m_pOwner->m_cxWidth - 2;
+			  dyy = h;
+			  SETAEERECT(&rect, xx, yy, dxx, dyy);
+
+			  	WSTRCPY( extRes, &bufRes[nFits]);
+			bufRes[nFits] = 0;
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+			WSTRCPY(bufRes, extRes);
+		}
+
+		//IDISPLAY_MeasureTextEx(pme->m_pIDisplay, WIN_FONT, bufRes, -1, dxx,  &nFits);
+		//if (nFits < len)
 		{
 			xx = xMargin;
 			  yy += h;
@@ -156,10 +205,11 @@ static void CDestInfoWin_Redraw(IWindow * po)
 			  SETAEERECT(&rect, xx, yy, dxx, dyy);
 			TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
 		}
+
 	  }
 
       ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DEST_INFO_2, bufRes, sizeof(bufRes));
-      h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 12;
+      h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + yMargin;
       xx = xMargin;
       yy += h;
       dxx = pme->m_pOwner->m_cxWidth - 2;
@@ -181,7 +231,7 @@ static void CDestInfoWin_Redraw(IWindow * po)
 			WSTRCPY(bufRes, extRes);
 		}
 		
-		if (nFits < len)
+		//if (nFits < len)
 		{
 			xx = xMargin;
 			  yy += h;
