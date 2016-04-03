@@ -310,6 +310,10 @@
 					RelativePath=".\location\transform.c"
 					>
 				</File>
+				<File
+					RelativePath=".\wheredetailswindow.c"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="controls"
@@ -397,6 +401,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\wheredetailswindow.h"
+				>
+			</File>
+			<File
 				RelativePath=".\wherefuctionwindow.h"
 				>
 			</File>
@@ -421,7 +429,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="loacation"
+				Name="location"
 				>
 				<File
 					RelativePath=".\location\location.h"

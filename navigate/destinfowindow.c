@@ -1,4 +1,4 @@
-#include "navigatedestdetailswindow.h"
+#include "destinfowindow.h"
 
 
 #define MP_MAX_STRLEN         64
