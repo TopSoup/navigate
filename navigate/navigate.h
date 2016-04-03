@@ -61,7 +61,8 @@ typedef enum TSWindow
 	
 
 	//位置信息说明
-	TSW_WHERE_DETAILS,	//我在哪选项->信息说明
+	TSW_WHERE_DETAILS,			//我在哪选项->信息说明
+	TSW_LOCATION_RANGE_INFO,	//目的地经纬度范围说明
 
 	/* Interval */
 	//1

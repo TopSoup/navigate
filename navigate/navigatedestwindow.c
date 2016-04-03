@@ -159,6 +159,10 @@ static boolean CNavigateDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16
          break;
 
       case IDS_STRING_DEST_NEW:
+		  //打开新建目的地界面前,清空历史记录
+		  MEMSET(pme->m_pOwner->m_szTextLat, 0, sizeof(pme->m_pOwner->m_szTextLat));
+		  MEMSET(pme->m_pOwner->m_szTextLon, 0, sizeof(pme->m_pOwner->m_szTextLon));
+		  MEMSET(pme->m_pOwner->m_szTextDesc, 0, sizeof(pme->m_pOwner->m_szTextDesc));
 		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DEST_NEW, 0);
 		  break;
 

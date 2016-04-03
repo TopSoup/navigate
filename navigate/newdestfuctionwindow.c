@@ -47,7 +47,7 @@ IWindow * CNewdestFuctionWin_New(CTopSoupApp * pOwner)
       TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth,&((CTopSoupApp*)pme->m_pOwner)->m_rectWin , 0);
       TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_DEST_NAVIGATE, NULL, IDI_OBJECT_15201, IDS_STRING_DEST_NAVIGATE, 0);
 	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SAVE_LOCATION,   NULL, IDI_OBJECT_15202, IDS_STRING_SAVE_LOCATION, 0);
-	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_LOCATION_RANGE_INFO,   NULL, IDI_OBJECT_15203, IDS_STRING_INFO,   0);
+	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_LOCATION_RANGE_INFO,   NULL, IDI_OBJECT_15203, IDS_STRING_LOCATION_RANGE_INFO,   0);
 
 	  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_FUCTION,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
 	  TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
@@ -121,6 +121,13 @@ static void CNewdestFuctionWin_Redraw(IWindow * po)
    //XXX _end
 }
 
+static void CNewdestFuctionWin_onSplashDrawOver(void * po) 
+{
+	CTopSoupApp* pme = (CTopSoupApp*)po;
+
+	CTopSoupApp_SetWindow(pme, TSW_DEST_NEW_FUCTION, 0);
+}
+
 /*===========================================================================
    This function processes events routed to main window.
 ===========================================================================*/
@@ -155,10 +162,36 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
          break;
 
 	  case IDS_STRING_SAVE_LOCATION:
+		  {
+			AECHAR prompt[TS_MAX_STRLEN];
 
+			//保存位置信息到数据库
+			if (WSTRLEN(pme->m_pOwner->m_szTextLat) == 0 
+				|| WSTRLEN(pme->m_pOwner->m_szTextLon) == 0 
+				|| WSTRLEN(pme->m_pOwner->m_szTextDesc) == 0)
+			{
+				DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
+				return TRUE;
+			}
+
+			if (!TS_AddExpenseItem(pme->m_pOwner, pme->m_pOwner->m_szTextLat, pme->m_pOwner->m_szTextLon, pme->m_pOwner->m_szTextDesc))
+			{
+				DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
+				return TRUE;
+			}  
+
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
+
+			//提示窗口
+		   MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
+		   WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
+		   TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+
+		  }
 		  break;
 	 
 	  case IDS_STRING_LOCATION_RANGE_INFO:
+		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_LOCATION_RANGE_INFO, 0);
 		  break;
 
       default:
