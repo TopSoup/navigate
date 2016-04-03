@@ -567,6 +567,10 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 		  pme->m_pWin = (IWindow*)CLocinfoWin_New(pme,dwParam);
 		  break;
 
+	  case TSW_LOCATION_RANGE_INFO:
+		  pme->m_pWin = (IWindow*)CLocationInfoWin_New(pme);
+		  break;
+		  
       case TSW_NONE:       
          return TRUE; 
          break;
