@@ -142,7 +142,7 @@ struct CTopSoupApp
 	int             m_pTextctlMode;     //input mode
 	TSWindow        m_pTextctlWin; 
 	int				m_op;				//TEXTCTL OP: 0-保存到目的地列表 1-短信发送
-
+	boolean			m_opStatus;
 };
 
 typedef struct CTopSoupApp  CTopSoupApp;

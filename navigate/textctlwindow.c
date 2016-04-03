@@ -8,7 +8,7 @@ struct CTextCtlWin
 	INHERIT_CWindow(IWindow);
 
 	//XXX
-	ITextCtl			*m_pTextCtl;	
+	ITextCtl			*m_pTextCtl;
 };
 
 typedef struct CTextCtlWin CTextCtlWin;
@@ -116,6 +116,7 @@ static void CTextCtlWin_Redraw(IWindow * po)
    IDISPLAY_ClearScreen(pme->m_pIDisplay);
 
    TS_DrawBackgroud(po);
+   ITEXTCTL_SetInputMode( pme->m_pTextCtl, pme->m_pOwner->m_pTextctlMode );
    ITEXTCTL_Redraw(pme->m_pTextCtl);
    
 
@@ -128,7 +129,14 @@ static void CTextCtlWin_onSplashDrawOver(void * po)
 {
 	CTopSoupApp* pme = (CTopSoupApp*)po;
 
-    CTopSoupApp_SetWindow(pme, pme->m_pTextctlWin, 0);
+	if (pme->m_opStatus)
+	{	
+		CTopSoupApp_SetWindow(pme, pme->m_pTextctlWin, 0);
+	}
+	else
+	{
+		CTopSoupApp_SetWindow(pme, TSW_WHERE_FUCTION, 0);
+	}
 
 }
 
@@ -155,7 +163,6 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	   }
    }
 
-
    //使用KEY_SELECT打开编辑页面
    if (TS_ISSEL(eCode, wParam))
    {
@@ -169,6 +176,34 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	   pTextDesc = ITEXTCTL_GetTextPtr( pme->m_pTextCtl );  
 	   WSTRTOSTR(pTextDesc, szBuf, WSTRLEN(pTextDesc) + 1);
 	   DBGPRINTF("Desc: %s", szBuf);
+
+	   //XXX __begin
+	   //IDISPLAY_ClearScreen(pme->m_pIDisplay);
+	   //TS_DrawBackgroud(po);
+	   //IDISPLAY_Update(pme->m_pIDisplay);
+	   //XXX _end
+   
+	   if (WSTRLEN(pTextDesc) == 0)
+	   {
+			//提示窗口
+		    pme->m_pOwner->m_opStatus = FALSE;
+			MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
+			WSTRCPY(pme->m_pOwner->m_pTextctlText, pTextDesc);	   
+
+			if (pme->m_pOwner->m_op == 0)
+			{
+				ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_DESC,prompt,sizeof(prompt));				
+			}
+			else
+			{
+				ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_RECIPIENT,prompt,sizeof(prompt));	
+			}
+			TS_DrawSplash(pme->m_pOwner,prompt,1000,0);
+
+		   	return bRet;	   
+	   }
+
+	   pme->m_pOwner->m_opStatus = TRUE;
 
 	   if (pme->m_pOwner->m_op == 0)	//保存位置
 	   {
@@ -197,22 +232,9 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	   }
 	   else if (pme->m_pOwner->m_op == 1)	//短信发送
 	   {
-
 		   CTopSoupApp_SendSMSMessage(pme->m_pOwner, 0, pTextDesc);
-
 		   ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SEND,prompt,sizeof(prompt));
 	   }
-
-		//XXX __begin
-		IDISPLAY_ClearScreen(pme->m_pIDisplay);
-
-		TS_DrawBackgroud(po);
-		ITEXTCTL_SetActive(pme->m_pTextCtl, FALSE);
-		//ITEXTCTL_Redraw(pme->m_pTextCtl);
-
-
-		IDISPLAY_Update(pme->m_pIDisplay);
-		//XXX _end
 
 	   //提示窗口
 	   MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  

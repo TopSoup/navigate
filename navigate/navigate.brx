@@ -149,13 +149,13 @@
 		<Text>已发送！</Text>
 	</String>
 	<String Id="1020" Name="IDS_STRING_WHERE_DETAILS_0">
-		<Text>经纬度为卫星定位结果</Text>
+		<Text>1 经纬度为卫星定位结果</Text>
 	</String>
 	<String Id="1021" Name="IDS_STRING_WHERE_DETAILS_1">
-		<Text>当前速度用公里和节表示</Text>
+		<Text>2 当前速度用公里和节表示</Text>
 	</String>
 	<String Id="1022" Name="IDS_STRING_WHERE_DETAILS_2">
-		<Text>当前前进方向用角度表示</Text>
+		<Text>3 当前前进方向用角度表示</Text>
 	</String>
 	<String Id="1023" Name="IDS_STRING_WHERE_DETAILS_3">
 		<Text> ( 0°-正北, 90°-正东</Text>
@@ -164,7 +164,13 @@
 		<Text>   180°-正南, 270°-正西)</Text>
 	</String>
 	<String Id="1025" Name="IDS_STRING_WHERE_DETAILS_5">
-		<Text>海拔表示高度</Text>
+		<Text>4 海拔表示高度</Text>
+	</String>
+	<String Id="1026" Name="IDS_STRING_PROMPT_INVALID_DESC">
+		<Text>请输入有效地点名称!</Text>
+	</String>
+	<String Id="1027" Name="IDS_STRING_PROMPT_INVALID_RECIPIENT">
+		<Text>请输入有效电话号码!</Text>
 	</String>
 </Strings>
 <Objects MimeType="image/png">

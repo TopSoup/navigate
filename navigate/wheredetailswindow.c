@@ -87,7 +87,7 @@ static void CWhereDetailsWin_Redraw(IWindow * po)
 		int a = 0, b = 0;
 		int h = 0, xx = 0, yy = 0, dxx = 0, dyy = 0;
 		AEERect rect;
-		int xMargin = 2;
+		int xMargin = 0;
 
 		ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_WHERE_DETAILS_0, bufRes, sizeof(bufRes));
 		h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 12;
