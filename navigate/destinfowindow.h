@@ -5,6 +5,7 @@
 
 typedef struct CTopSoupApp CTopSoupApp;
 
-// DestInfoWin window
+// DestInfo window
 IWindow *  CDestInfoWin_New(CTopSoupApp * pOwner);
+
 #endif

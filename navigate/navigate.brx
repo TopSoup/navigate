@@ -172,6 +172,15 @@
 	<String Id="1027" Name="IDS_STRING_PROMPT_INVALID_RECIPIENT">
 		<Text>请输入有效电话号码!</Text>
 	</String>
+	<String Id="1028" Name="IDS_STRING_DEST_INFO_0">
+		<Text>使用[目标领航]功能需已知目的地的经纬度数据。目的地经纬度数据获取方式:</Text>
+	</String>
+	<String Id="1029" Name="IDS_STRING_DEST_INFO_1">
+		<Text>1在将来需要返回的位置, 选择[我在哪],定位成功后选择[保存位置],根据提示保存为目的地。</Text>
+	</String>
+	<String Id="1030" Name="IDS_STRING_DEST_INFO_2">
+		<Text>2在短信收件箱中选择含有经纬度的短信为目的地。</Text>
+	</String>
 </Strings>
 <Objects MimeType="image/png">
 	<Object Id="1000" Name="IDP_NAVIGATOR">

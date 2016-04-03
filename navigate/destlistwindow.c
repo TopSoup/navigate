@@ -1,6 +1,7 @@
 #include "destlistwindow.h"
 
 
+
 // Destination window: Displays main menu.
 struct CDestListWin
 {
@@ -39,9 +40,8 @@ IWindow * CDestListWin_New(CTopSoupApp * pOwner)
       return NULL;
 
    {
-	AEEItemStyle rNormalStyle;
-	AEEItemStyle rSelStyle;
-	AEERect rRect;
+	//AEEItemStyle rNormalStyle;
+	//AEEItemStyle rSelStyle;
 	int      cx = pme->m_pOwner->m_cxWidth;
 	int      cy = pme->m_pOwner->m_cyHeight;
 
@@ -50,8 +50,10 @@ IWindow * CDestListWin_New(CTopSoupApp * pOwner)
 	if (ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_MENUCTL, (void **)&pme->m_pMainMenu))
 		TS_WINERR_RETURN(pme);
 
-	SETAEERECT( &rRect, 0, pme->m_pOwner->m_nFontHeight, cx, cy - ( 3 * pme->m_pOwner->m_nFontHeight ) );
-	IMENUCTL_SetRect( pme->m_pMainMenu, &rRect );
+	TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth,&((CTopSoupApp*)pme->m_pOwner)->m_rectWin , 0);
+
+	/*
+	IMENUCTL_SetRect( pme->m_pMainMenu, &(pme->m_pOwner->m_rectWin));
 
 	// Set the style of the menu control so that all the icons are displayed as
 	// transparent.  This is set based on the default menu styles.
@@ -59,8 +61,9 @@ IWindow * CDestListWin_New(CTopSoupApp * pOwner)
 	rNormalStyle.roImage = AEE_RO_TRANSPARENT;
 	rSelStyle.roImage = AEE_RO_TRANSPARENT;
 	IMENUCTL_SetStyle( pme->m_pMainMenu, &rNormalStyle, &rSelStyle );
-
-	TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
+*/
+	ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DEST_LIST,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
+	TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,IDS_STRING_SELECT);
 	//XXX __end
 
 	//For Test

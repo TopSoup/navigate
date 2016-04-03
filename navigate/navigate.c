@@ -96,7 +96,6 @@ Comments:  None
 Side Effects: None
 
 ==============================================================================*/
-#define TS_HEADER_Y           17
 boolean CTopSoupApp_InitAppData(IApplet* po)
 {
    CTopSoupApp *    pme = (CTopSoupApp*)po;

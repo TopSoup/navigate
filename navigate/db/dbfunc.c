@@ -23,7 +23,7 @@ INITIALIZATION & SEQUENCING REQUIREMENTS:
 #include "navigate.brh"
 #include "nmdef.h"
 
-//使用图标替代序号
+//ITEM 使用图标
 #define USE_LIST_ICON
 
 static boolean TS_ParseExpenseRecord( IDBRecord* pRecord, AECHAR* psDesc, AECHAR* psLat, AECHAR* psLon );
@@ -469,7 +469,7 @@ boolean TS_GetExpenseList( CTopSoupApp * pApp, IMenuCtl* pMenu, uint32* pnTotal)
 #else
    ai.pszResImage = ai.pszResText = NULL;
 #endif
-   ai.wFont = AEE_FONT_NORMAL;
+   ai.wFont = AEE_FONT_LARGE;
    ai.dwData = 0;
 
   // Reset the database's record index

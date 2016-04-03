@@ -53,7 +53,7 @@ IWindow * CNavigateWin_New(CTopSoupApp * pOwner, void *pDest)
    pme = (CNavigateWin *)CWindow_New(sizeof(CNavigateWin), pOwner, &vtbl);
    if (!pme)
       return NULL;
-
+   
 	{
 		int      cx = pme->m_pOwner->m_cxWidth;
 		int      cy = pme->m_pOwner->m_cyHeight;

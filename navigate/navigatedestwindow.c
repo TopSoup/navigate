@@ -50,6 +50,7 @@ IWindow * CNavigateDestWin_New(CTopSoupApp * pOwner)
       TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_DEST_NEW,   NULL, IDI_OBJECT_15202, IDS_STRING_DEST_NEW,   0);
 	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_DEST_INFO,   NULL, IDI_OBJECT_15203, IDS_STRING_DEST_INFO,   0);
 
+	  ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NAVIGATE,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
 	  TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
 	  //XXX __end
 
