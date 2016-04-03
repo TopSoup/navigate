@@ -46,8 +46,8 @@ IWindow * CNewdestFuctionWin_New(CTopSoupApp * pOwner)
 
       TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth,&((CTopSoupApp*)pme->m_pOwner)->m_rectWin , 0);
       TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_DEST_NAVIGATE, NULL, IDI_OBJECT_15201, IDS_STRING_DEST_NAVIGATE, 0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_INFO,   NULL, IDI_OBJECT_15202, IDS_STRING_INFO,   0);
-	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SAVE_LOCATION,   NULL, IDI_OBJECT_15203, IDS_STRING_SAVE_LOCATION,   0);
+	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SAVE_LOCATION,   NULL, IDI_OBJECT_15202, IDS_STRING_SAVE_LOCATION, 0);
+	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_LOCATION_RANGE_INFO,   NULL, IDI_OBJECT_15203, IDS_STRING_INFO,   0);
 
 	  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_FUCTION,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
 	  TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
@@ -154,12 +154,13 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
       case IDS_STRING_DEST_NAVIGATE:
          break;
 
-      case IDS_STRING_INFO:
-		  break;
-
 	  case IDS_STRING_SAVE_LOCATION:
+
 		  break;
 	 
+	  case IDS_STRING_LOCATION_RANGE_INFO:
+		  break;
+
       default:
          bRet = FALSE;
          break;

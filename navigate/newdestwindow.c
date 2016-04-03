@@ -33,9 +33,9 @@ struct CNewDestWin
 	IMenuCtl *			m_pMainMenu;
 	ITextCtl			*m_pTextCtl;
 
-	AECHAR				m_szTextLat[MP_MAX_STRLEN];
-	AECHAR				m_szTextLon[MP_MAX_STRLEN];
-	AECHAR				m_szTextDesc[MP_MAX_STRLEN];
+	//AECHAR				m_szTextLat[MP_MAX_STRLEN];
+	//AECHAR				m_szTextLon[MP_MAX_STRLEN];
+	//AECHAR				m_szTextDesc[MP_MAX_STRLEN];
 
 	EEditType			m_eEditType;
 	EViewType			m_eViewType;
@@ -73,10 +73,7 @@ IWindow * CNewDestWin_New(CTopSoupApp * pOwner)
 		int      cx = pme->m_pOwner->m_cxWidth;
 		int      cy = pme->m_pOwner->m_cyHeight;
 		int		 dy = MP_NEW_DEST_CY;
-		AEERect  rRect;
-		//AEEItemStyle rNormalStyle;
-		//AEEItemStyle rSelStyle;
-	   
+			   
 		if ((ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_MENUCTL, (void **)&pme->m_pMainMenu)) ||
 			(ISHELL_CreateInstance( pme->m_pIShell, AEECLSID_TEXTCTL, (void **)&pme->m_pTextCtl)) )
 			TS_WINERR_RETURN(pme);
@@ -97,12 +94,11 @@ IWindow * CNewDestWin_New(CTopSoupApp * pOwner)
 		*/
 		
 		//³õÊ¼Îª0
-		SETAEERECT( &rRect, 0, 0, 0, 0);
-		ITEXTCTL_SetRect( pme->m_pTextCtl, &rRect);
+		ITEXTCTL_SetRect( pme->m_pTextCtl, &pme->m_pOwner->m_rectWin);
 
-		WSTRCPY(pme->m_szTextLat, L"  0.0");
-		WSTRCPY(pme->m_szTextLon, L"  0.0");
-		WSTRCPY(pme->m_szTextDesc, L"  Not Set");
+		WSTRCPY(pme->m_pOwner->m_szTextLat, L"0.0");
+		WSTRCPY(pme->m_pOwner->m_szTextLon, L"0.0");	
+		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_pOwner->m_szTextDesc,sizeof(pme->m_pOwner->m_szTextDesc));
 
 		pme->m_eViewType = VIEW_MAIN;
 
@@ -168,16 +164,19 @@ static void CNewDestWin_Redraw(IWindow * po)
 	{
 		CtlAddItem  ai;
 		AECHAR szText[MP_MAX_STRLEN];
-
-		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DEST_NEW,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
-		TS_DrawBackgroud(po);
-		TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,IDS_STRING_EDIT);
+		AECHAR szBuf[MP_MAX_STRLEN];
 		
-		ITEXTCTL_Reset(pme->m_pTextCtl);
+		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DEST_NEW,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
+		TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,IDS_STRING_EDIT);
+
+		TS_DrawBackgroud(po);
+		
+		//ITEXTCTL_Reset(pme->m_pTextCtl);
 
 		IMENUCTL_Reset(pme->m_pMainMenu);
 		// Fill in the CtlAddItem structure values
-		WSPRINTF(szText, MP_MAX_STRLEN, L"Lat: %s", pme->m_szTextLat);
+		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LAT,szBuf,sizeof(szBuf));
+		WSPRINTF(szText, MP_MAX_STRLEN, L"%s:\t%s", szBuf, pme->m_pOwner->m_szTextLat);
 		ai.pText = szText;
 		ai.pImage = NULL;
 		ai.pszResImage = NULL;//KITIMG_RES_FILE;
@@ -193,7 +192,8 @@ static void CNewDestWin_Redraw(IWindow * po)
 
 
 		// Fill in the CtlAddItem structure values
-		WSPRINTF(szText, MP_MAX_STRLEN, L"Lon: %s", pme->m_szTextLon);
+		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LON,szBuf,sizeof(szBuf));
+		WSPRINTF(szText, MP_MAX_STRLEN, L"%s:\t%s", szBuf, pme->m_pOwner->m_szTextLon);
 		ai.pText = szText;
 		ai.pImage = NULL;
 		ai.pszResImage = NULL;//KITIMG_RES_FILE;
@@ -208,7 +208,8 @@ static void CNewDestWin_Redraw(IWindow * po)
 		IMENUCTL_AddItemEx( pme->m_pMainMenu, &ai );
 
 		// Fill in the CtlAddItem structure values
-		WSPRINTF(szText, MP_MAX_STRLEN, L"Desc: %s", pme->m_szTextDesc);
+		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_DESC,szBuf,sizeof(szBuf));
+		WSPRINTF(szText, MP_MAX_STRLEN, L"%s:\t%s", szBuf, pme->m_pOwner->m_szTextDesc);
 		ai.pText = szText;
 		ai.pImage = NULL;
 		ai.pszResImage = NULL;//KITIMG_RES_FILE;
@@ -225,6 +226,7 @@ static void CNewDestWin_Redraw(IWindow * po)
 		// Active Menu
 		ITEXTCTL_SetActive( pme->m_pTextCtl, FALSE);
 		IMENUCTL_SetActive( pme->m_pMainMenu, TRUE);
+		IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMainWin);
 		IMENUCTL_Redraw(pme->m_pMainMenu);
 	}
 	else if (pme->m_eViewType == VIEW_EDIT)
@@ -232,6 +234,10 @@ static void CNewDestWin_Redraw(IWindow * po)
 		AEERect rRect;
 		int      cx = pme->m_pOwner->m_cxWidth;
 		int      cy = pme->m_pOwner->m_cyHeight;
+
+		 
+		if (pme->m_pMainMenu)
+			pme->m_pOwner->m_wMainWin = IMENUCTL_GetSel(pme->m_pMainMenu);
 
 		SETAEERECT( &rRect, 0, TS_TITLE_Y, cx, pme->m_pOwner->m_rectWin.dy );
 
@@ -243,31 +249,31 @@ static void CNewDestWin_Redraw(IWindow * po)
 		{
 		case EDIT_LAT:
 			ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LAT,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
-			//ITEXTCTL_SetTitle( pme->m_pTextCtl, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LAT, NULL );
+			TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_OK);
+			TS_DrawBackgroud(po);
 			ITEXTCTL_SetInputMode( pme->m_pTextCtl, AEE_TM_NUMBERS );
-			ITEXTCTL_SetRect( pme->m_pTextCtl, &rRect );
+			ITEXTCTL_SetText( pme->m_pTextCtl, pme->m_pOwner->m_szTextLat, -1);
 			break;
 
 		case EDIT_LON:
 			ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LON,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
-			//ITEXTCTL_SetTitle( pme->m_pTextCtl, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LON, NULL );
+			TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_OK);
+			TS_DrawBackgroud(po);
 			ITEXTCTL_SetInputMode( pme->m_pTextCtl, AEE_TM_NUMBERS );
-			ITEXTCTL_SetRect( pme->m_pTextCtl, &rRect );
+			ITEXTCTL_SetText( pme->m_pTextCtl, pme->m_pOwner->m_szTextLon, -1);
 			break;
 
 		case EDIT_DESC:
 			ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_DESC,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
-			//ITEXTCTL_SetTitle( pme->m_pTextCtl, NAVIGATE_RES_FILE, IDS_STRING_EDIT_DESC, NULL );
+			TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_OK);
+			TS_DrawBackgroud(po);
 			ITEXTCTL_SetInputMode( pme->m_pTextCtl, AEE_TM_PINYIN );
-			ITEXTCTL_SetRect( pme->m_pTextCtl, &rRect );
+			ITEXTCTL_SetText( pme->m_pTextCtl, pme->m_pOwner->m_szTextDesc, -1);
 			break;
 
 		default:
 			break;
 		}
-
-		TS_DrawBackgroud(po);
-		TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_OK);
 	}
 	
 	IDISPLAY_Update(pme->m_pIDisplay);
@@ -394,17 +400,17 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 
 			if (pme->m_eEditType == EDIT_LAT)
 			{
-				WSTRCPY(pme->m_szTextLat, pText);
+				WSTRCPY(pme->m_pOwner->m_szTextLat, pText);
 				DBGPRINTF("GetLat pText:%s", szBuf);
 			}
 			else if (pme->m_eEditType == EDIT_LON)
 			{
-				WSTRCPY(pme->m_szTextLon, pText);
+				WSTRCPY(pme->m_pOwner->m_szTextLon, pText);
 				DBGPRINTF("GetLon pText:%s", szBuf);
 			}
 			else if (pme->m_eEditType == EDIT_DESC)
 			{
-				WSTRCPY(pme->m_szTextDesc, pText);
+				WSTRCPY(pme->m_pOwner->m_szTextDesc, pText);
 				DBGPRINTF("GetDesc pText:%s", szBuf);
 			}
 			else

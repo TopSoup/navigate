@@ -190,6 +190,24 @@
 	<String Id="1033" Name="IDS_STRING_DELETE_FINISH">
 		<Text>已删除</Text>
 	</String>
+	<String Id="1034" Name="IDS_STRING_LOCATION_RANGE_INFO">
+		<Text>经纬度范围说明</Text>
+	</String>
+	<String Id="1035" Name="IDS_STRING_LOCATION_RANGE_INFO_LON_0">
+		<Text>西经: -180.0°~0.0°</Text>
+	</String>
+	<String Id="1036" Name="IDS_STRING_LOCATION_RANGE_INFO_LON_1">
+		<Text>东经: 0.0°~180.0°</Text>
+	</String>
+	<String Id="1037" Name="IDS_STRING_LOCATION_RANGE_INFO_LAT_0">
+		<Text>南纬: -90.0°~0.0°</Text>
+	</String>
+	<String Id="1038" Name="IDS_STRING_LOCATION_RANGE_INFO_LAT_1">
+		<Text>北纬: 0.0°~90.0°</Text>
+	</String>
+	<String Id="1039" Name="IDS_STRING_NOT_SET">
+		<Text>未设定</Text>
+	</String>
 </Strings>
 <Objects MimeType="image/png">
 	<Object Id="1000" Name="IDP_NAVIGATOR">
