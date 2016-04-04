@@ -208,7 +208,22 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 		   return TRUE;
 	   }
 	   
-	   CTopSoupApp_SetWindow(pme->m_pOwner, TSW_LOCATION_RANGE_INFO, 0);
+	   //如果位置名称为空, 则使用默认日志编号格式名称
+	   if (WSTRLEN(pme->m_pOwner->m_szTextDesc) == 0)
+	   {
+		   ts_time_t tw;
+		   AECHAR szTmp[32];
+		   
+		   TS_GetTimeNow(&tw);
+		   
+		   WSPRINTF(szTmp, sizeof(szTmp), 
+			   L"%04d%02d%02d%02d%02d", tw.year, tw.month, tw.day, tw.hour, tw.minute);
+		   
+		   WSPRINTF(pme->m_pOwner->m_szTextDesc, sizeof(pme->m_pOwner->m_szTextDesc), 
+			   L"%s%02d", szTmp, tw.second);
+	   }
+
+	   CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE, 0);
 	   break;
 	   
 	  case IDS_STRING_SAVE_LOCATION:

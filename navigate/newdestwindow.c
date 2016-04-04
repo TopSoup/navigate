@@ -174,9 +174,10 @@ static void CNewDestWin_Redraw(IWindow * po)
 		//ITEXTCTL_Reset(pme->m_pTextCtl);
 
 		IMENUCTL_Reset(pme->m_pMainMenu);
-		// Fill in the CtlAddItem structure values
-		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LAT,szBuf,sizeof(szBuf));
-		WSPRINTF(szText, MP_MAX_STRLEN, L"%s:\t%s", szBuf, pme->m_szTextLat);
+
+		// 1 Fill in the CtlAddItem structure values
+		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LON,szBuf,sizeof(szBuf));
+		WSPRINTF(szText, MP_MAX_STRLEN, L"%s:\t%s", szBuf, pme->m_szTextLon);
 		ai.pText = szText;
 		ai.pImage = NULL;
 		ai.pszResImage = NULL;//KITIMG_RES_FILE;
@@ -190,10 +191,9 @@ static void CNewDestWin_Redraw(IWindow * po)
 		// Add the item to the menu control
 		IMENUCTL_AddItemEx( pme->m_pMainMenu, &ai );
 
-
-		// Fill in the CtlAddItem structure values
-		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LON,szBuf,sizeof(szBuf));
-		WSPRINTF(szText, MP_MAX_STRLEN, L"%s:\t%s", szBuf, pme->m_szTextLon);
+		// 2 Fill in the CtlAddItem structure values
+		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LAT,szBuf,sizeof(szBuf));
+		WSPRINTF(szText, MP_MAX_STRLEN, L"%s:\t%s", szBuf, pme->m_szTextLat);
 		ai.pText = szText;
 		ai.pImage = NULL;
 		ai.pszResImage = NULL;//KITIMG_RES_FILE;
@@ -207,7 +207,7 @@ static void CNewDestWin_Redraw(IWindow * po)
 		// Add the item to the menu control
 		IMENUCTL_AddItemEx( pme->m_pMainMenu, &ai );
 
-		// Fill in the CtlAddItem structure values
+		// 3 Fill in the CtlAddItem structure values
 		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_DESC,szBuf,sizeof(szBuf));
 		WSPRINTF(szText, MP_MAX_STRLEN, L"%s:\t%s", szBuf, pme->m_szTextDesc);
 		ai.pText = szText;

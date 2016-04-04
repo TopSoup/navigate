@@ -6,5 +6,5 @@
 typedef struct CTopSoupApp CTopSoupApp;
 
 // Navigate window
-IWindow *  CNavigateWin_New(CTopSoupApp * pOwner, void *pDest);
+IWindow *  CNavigateWin_New(CTopSoupApp * pOwner);
 #endif

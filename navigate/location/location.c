@@ -191,9 +191,10 @@ static void Loc_cbInfo( LocState *pts ) {
 		}
 		
 		//For Test Hack
-		//pts->pResp->lat = 38.0422378880;
-		//pts->pResp->lon = 114.4925141047;
-		
+#ifdef AEE_SIMULATOR
+		pts->pResp->lat = 38.0422378880;
+		pts->pResp->lon = 114.4925141047;
+#endif
 		if (pts->pResp->bSetDestPos)
 		{
 			//计算距离和方位角
