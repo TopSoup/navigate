@@ -306,7 +306,7 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 			  //ÌáÊ¾´°¿Ú
 			  MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
 			  WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
-			  TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver, pme);
+			  TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver, (void*)pme->m_pOwner);
 			  
 		  }
 		  break;
