@@ -549,6 +549,20 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 		  pme->m_pWin = (IWindow*)CTextCtlWin_New(pme);
 		  break;
 
+	  case TSW_NAVIGATE:
+		  {
+				AECHAR lat[TS_MAX_STRLEN];
+				AECHAR lon[TS_MAX_STRLEN];
+				Coordinate loc;
+				TS_GetExpenseItem(pme,dwParam,NULL,lat,lon);
+				loc.lat = WSTRTOFLOAT(lat);
+				loc.lon = WSTRTOFLOAT(lon);
+
+				pme->m_pWin = (IWindow*)CNavigateWin_New(pme,&loc);
+				break;
+				
+		  }
+
       case TSW_NONE:       
          return TRUE; 
          break;

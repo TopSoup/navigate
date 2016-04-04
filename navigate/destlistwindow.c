@@ -232,6 +232,10 @@ static boolean CDestListWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPa
    if (!TS_ISEVTCMD(eCode))
       return FALSE;
 
+   if ( EXPENSE_LIST_ID <= wParam )
+   {
+	   CTopSoupApp_SetWindow(pme->m_pOwner,TSW_NAVIGATE,wParam-EXPENSE_LIST_ID);
+   }
    //XXX __end
 
    return bRet;
