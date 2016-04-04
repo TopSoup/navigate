@@ -344,7 +344,7 @@ static boolean CNavigateWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPa
 			break;
 
 		case AVK_SOFT2:
-			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
+			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DEST_LIST, 0);
 			bRet = TRUE;
 			break;
 
