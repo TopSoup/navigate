@@ -67,7 +67,7 @@ IWindow * CDestListWin_New(CTopSoupApp * pOwner)
 	//XXX __end
 
 	//For Test
-	//TS_EmptyExpenseDatabase(pme->m_pOwner);
+	TS_EmptyExpenseDatabase(pme->m_pOwner);
 
    }
 
@@ -135,6 +135,25 @@ static void CDestListWin_Redraw(IWindow * po)
    AECHAR psTitle[ MAX_DESC_SIZE + 1 ];
 #endif
    
+   //For Test
+#if 0
+   if( IDATABASE_GetRecordCount( pme->m_pOwner->m_pDatabase ) == 0 )
+   {
+		TS_AddExpenseItem(pme->m_pOwner, L"Aeijing", L"37.012345", L"114.123456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Beijing", L"37.112345", L"114.223456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Ceijing", L"37.212345", L"114.323456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Deijing", L"37.312345", L"114.423456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Eeijing", L"37.012345", L"114.123456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Feijing", L"37.112345", L"114.223456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Geijing", L"37.212345", L"114.323456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Heijing", L"37.312345", L"114.423456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Ieijing", L"37.012345", L"114.123456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Jeijing", L"37.112345", L"114.223456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Keijing", L"37.212345", L"114.323456");
+		TS_AddExpenseItem(pme->m_pOwner, L"Leijing", L"37.312345", L"114.423456");
+   }
+#endif
+
    // Get Expense List
    TS_GetExpenseList( pme->m_pOwner, pme->m_pMainMenu, &nTotal);
 

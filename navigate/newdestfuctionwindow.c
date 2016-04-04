@@ -1,5 +1,6 @@
 #include "wherefuctionwindow.h"
 
+#include "navigatepch.h"
 
 
 // Main window: Displays main menu.
@@ -9,6 +10,9 @@ struct CNewdestFuctionWin
 
 	//XXX
 	IMenuCtl *     m_pMainMenu;
+
+	int				m_nStatus;
+	
 };
 
 typedef struct CNewdestFuctionWin CNewdestFuctionWin;
@@ -125,7 +129,9 @@ static void CNewdestFuctionWin_onSplashDrawOver(void * po)
 {
 	CTopSoupApp* pme = (CTopSoupApp*)po;
 
+	//if (pme->m_nStatus == 0)
 	CTopSoupApp_SetWindow(pme, TSW_DEST_NEW_FUCTION, 0);
+
 }
 
 /*===========================================================================
@@ -156,47 +162,147 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
    if (!TS_ISEVTCMD(eCode))
       return FALSE;
 
+   pme->m_nStatus = 0;
    switch (wParam)
    {
-      case IDS_STRING_DEST_NAVIGATE:
-         break;
-
-	  case IDS_STRING_SAVE_LOCATION:
-		  {
-			AECHAR prompt[TS_MAX_STRLEN];
-
-			//保存位置信息到数据库
-			if (WSTRLEN(pme->m_pOwner->m_szTextLat) == 0 
-				|| WSTRLEN(pme->m_pOwner->m_szTextLon) == 0 
-				|| WSTRLEN(pme->m_pOwner->m_szTextDesc) == 0)
-			{
-				DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
-				return TRUE;
-			}
-
-			if (!TS_AddExpenseItem(pme->m_pOwner, pme->m_pOwner->m_szTextLat, pme->m_pOwner->m_szTextLon, pme->m_pOwner->m_szTextDesc))
-			{
-				DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
-				return TRUE;
-			}  
-
-			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
-
-			//提示窗口
+   case IDS_STRING_DEST_NAVIGATE:
+	   
+	   //校验经纬度
+	   if (WSTRLEN(pme->m_pOwner->m_szTextLat) == 0 
+		   || WSTRLEN(pme->m_pOwner->m_szTextLon) == 0 )
+	   {
+		   AECHAR prompt[TS_MAX_STRLEN];
+		   DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
+		   
+		   ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_COORD,prompt,sizeof(prompt));
+		   
+		   //提示窗口
 		   MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
 		   WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
-		   TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+		   //TS_DrawSplash(pme->m_pOwner,prompt,1500,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+		   TS_DrawSplash(pme->m_pOwner,prompt,1500,0);
+		   pme->m_nStatus = 1;
 
+		   return TRUE;
+	   }
+	   
+	   //校验经纬度
+	   if (TS_CheckLat(pme->m_pOwner->m_szTextLat) == FALSE 
+		   || TS_CheckLon(pme->m_pOwner->m_szTextLon) == FALSE )
+	   {
+		   AECHAR prompt[TS_MAX_STRLEN];
+		   DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
+		   
+		   if (TS_CheckLat(pme->m_pOwner->m_szTextLat) == FALSE)
+			   ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_LAT,prompt,sizeof(prompt));
+		   else
+			   ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_LON,prompt,sizeof(prompt));
+		   
+		   //提示窗口
+		   MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
+		   WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
+		   //TS_DrawSplash(pme->m_pOwner,prompt,1500,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+		   TS_DrawSplash(pme->m_pOwner,prompt,1500,0);
+		   pme->m_nStatus = 1;
+
+		   return TRUE;
+	   }
+	   
+	   CTopSoupApp_SetWindow(pme->m_pOwner, TSW_LOCATION_RANGE_INFO, 0);
+	   break;
+	   
+	  case IDS_STRING_SAVE_LOCATION:
+		  {
+			  AECHAR prompt[TS_MAX_STRLEN];
+			  
+			  //校验是否输入经纬度
+			  if (WSTRLEN(pme->m_pOwner->m_szTextLat) == 0 
+				  || WSTRLEN(pme->m_pOwner->m_szTextLon) == 0 )
+			  {
+				  AECHAR prompt[TS_MAX_STRLEN];
+				  DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
+				  
+				  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_COORD,prompt,sizeof(prompt));
+				  
+				  MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
+				  WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
+				  //TS_DrawSplash(pme->m_pOwner,prompt,1500,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+				  TS_DrawSplash(pme->m_pOwner,prompt,1500,0);
+				  pme->m_nStatus = 1;
+
+				  return TRUE;
+			  }
+			  
+			  //校验经纬度范围
+			  if (TS_CheckLat(pme->m_pOwner->m_szTextLat) == FALSE 
+				  || TS_CheckLon(pme->m_pOwner->m_szTextLon) == FALSE )
+			  {
+				  AECHAR prompt[TS_MAX_STRLEN];
+				  DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
+				  
+				  if (TS_CheckLat(pme->m_pOwner->m_szTextLat) == FALSE)
+					  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_LAT,prompt,sizeof(prompt));
+				  else
+					  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_LON,prompt,sizeof(prompt));
+				  
+				  //提示窗口
+				  MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
+				  WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
+				  //TS_DrawSplash(pme->m_pOwner,prompt,1500,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+				  TS_DrawSplash(pme->m_pOwner,prompt,1500,0);
+				  pme->m_nStatus = 1;
+
+				  return TRUE;
+			  }
+			  
+			  //如果位置名称为空, 则使用默认日志编号格式名称
+			  if (WSTRLEN(pme->m_pOwner->m_szTextDesc) == 0)
+			  {
+				  ts_time_t tw;
+				  AECHAR szTmp[32];
+				  
+				  TS_GetTimeNow(&tw);
+				  
+				  WSPRINTF(szTmp, sizeof(szTmp), 
+					  L"%04d%02d%02d%02d%02d", tw.year, tw.month, tw.day, tw.hour, tw.minute);
+				  
+				  WSPRINTF(pme->m_pOwner->m_szTextDesc, sizeof(pme->m_pOwner->m_szTextDesc), 
+					  L"%s%02d", szTmp, tw.second);
+			  }
+			  
+			  if (!TS_AddExpenseItem(pme->m_pOwner, pme->m_pOwner->m_szTextLat, pme->m_pOwner->m_szTextLon, pme->m_pOwner->m_szTextDesc))
+			  {
+				  DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
+				  
+				  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_SAVE,prompt,sizeof(prompt));
+				  
+				  //提示窗口
+				  MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
+				  WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
+				  //TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+				  TS_DrawSplash(pme->m_pOwner,prompt,1500,0);
+				  pme->m_nStatus = 1;
+
+				  return TRUE;
+			  }  
+			  
+			  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
+			  
+			  //提示窗口
+			  MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
+			  WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
+			  TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+			  
 		  }
 		  break;
-	 
+		  
 	  case IDS_STRING_LOCATION_RANGE_INFO:
 		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_LOCATION_RANGE_INFO, 0);
 		  break;
-
+		  
       default:
-         bRet = FALSE;
-         break;
+		  bRet = FALSE;
+		  break;
    }
    //XXX __end
 
