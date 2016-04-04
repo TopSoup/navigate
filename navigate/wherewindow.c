@@ -388,7 +388,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			AECHAR prompt[TS_MAX_STRLEN];
 			
 			ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATING,prompt,sizeof(prompt));
-			TS_DrawSplash(pme->m_pOwner,prompt,2000,NULL);
+			TS_DrawSplash(pme->m_pOwner,prompt,2000,NULL,NULL);
 		}
 	}
 

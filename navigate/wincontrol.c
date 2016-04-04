@@ -266,7 +266,7 @@ void CTopSoupApp_onSplashDrawOver(void * po)
    This function draws the splash screen and brings up the main window
    after the splash timer runs out.
 ===========================================================================*/
-void  TS_DrawSplash(CTopSoupApp * pme,AECHAR* prompt,int msTimeout,PFNNOTIFY on_splashOver)
+void  TS_DrawSplash(CTopSoupApp * pme,AECHAR* prompt,int msTimeout,PFNNOTIFY on_splashOver,void* pUser)
 {
 	if( NULL == prompt )
 		return;
@@ -302,7 +302,7 @@ void  TS_DrawSplash(CTopSoupApp * pme,AECHAR* prompt,int msTimeout,PFNNOTIFY on_
 
       // start the timer.
 	  if ( on_splashOver )
-		  ISHELL_SetTimer(pme->a.m_pIShell, msTimeout, (PFNNOTIFY)on_splashOver, pme);  
+		  ISHELL_SetTimer(pme->a.m_pIShell, msTimeout, (PFNNOTIFY)on_splashOver, pUser);  
 	  else
 		  ISHELL_SetTimer(pme->a.m_pIShell, msTimeout, (PFNNOTIFY)CTopSoupApp_onSplashDrawOver, pme);  
    }

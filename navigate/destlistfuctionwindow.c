@@ -127,6 +127,13 @@ static void CDestlistFuctionWin_Redraw(IWindow * po)
    //XXX _end
 }
 
+
+void CDestlistFuctionWin_OnSplashOver(void* po) {
+	CDestlistFuctionWin *  pme = (CDestlistFuctionWin *)po;
+
+	CTopSoupApp_SetWindow(pme->m_pOwner,TSW_DEST_LIST,pme->m_wRecID);
+}
+
 /*===========================================================================
    This function processes events routed to main window.
 ===========================================================================*/
@@ -184,10 +191,24 @@ static boolean CDestlistFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uin
 		  }
 		  break;
 
-	  case IDS_STRING_DELETE:
+	  case IDS_STRING_DELETE: 
+		  if( TRUE == TS_DeleteExpenseItem(pme->m_pOwner,pme->m_wRecID)) {
+			  AECHAR res[TS_MAX_STRLEN];
+
+			  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DELETE_FINISH,res,sizeof(res));
+			  TS_DrawSplash( pme->m_pOwner,res,700,(PFNNOTIFY)CDestlistFuctionWin_OnSplashOver,(void*)pme );
+		  }
+
 		  break;
 
 	  case IDS_STRING_DELETE_ALL:
+		  {
+			  AECHAR res[TS_MAX_STRLEN];
+
+			  TS_EmptyExpenseDatabase(pme->m_pOwner);
+			  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DELETE_FINISH,res,sizeof(res));
+			  TS_DrawSplash( pme->m_pOwner,res,300,(PFNNOTIFY)CDestlistFuctionWin_OnSplashOver,(void*)pme );
+		  }
 		  break;
 	 
       default:

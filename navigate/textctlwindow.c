@@ -206,7 +206,7 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			{
 				ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_RECIPIENT,prompt,sizeof(prompt));	
 			}
-			TS_DrawSplash(pme->m_pOwner,prompt,1000,0);
+			TS_DrawSplash(pme->m_pOwner,prompt,1000,0,NULL);
 
 		   	return bRet;	   
 	   }
@@ -247,7 +247,7 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	   //ÌáÊ¾´°¿Ú
 	   MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
 	   WSTRCPY(pme->m_pOwner->m_pTextctlText, pTextDesc);	   
-	   TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CTextCtlWin_onSplashDrawOver);
+	   TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CTextCtlWin_onSplashDrawOver,(void*)pme->m_pOwner );
    }
    //XXX __end
 

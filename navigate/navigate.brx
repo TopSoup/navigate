@@ -187,6 +187,9 @@
 	<String Id="1032" Name="IDS_STRING_SAVETIME">
 		<Text>存储时间</Text>
 	</String>
+	<String Id="1033" Name="IDS_STRING_DELETE_FINISH">
+		<Text>已删除</Text>
+	</String>
 </Strings>
 <Objects MimeType="image/png">
 	<Object Id="1000" Name="IDP_NAVIGATOR">
