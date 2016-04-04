@@ -69,6 +69,7 @@ typedef enum TSWindow
 	//1
 	TSW_LOCATING,		//定位中...
 	TSW_NAVIGATE,		//领航
+	TSW_NAVIGATE_EX,	//领航2
 	
 	//3 
 	TSW_ADDRBOOK,		//联系人界面

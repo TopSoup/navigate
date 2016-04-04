@@ -542,30 +542,27 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 		  break;
 
 	  case TSW_DEST_LIST_FUCTION:
-		  pme->m_pWin = (IWindow*)CDestlistFuctionWin_New(pme,dwParam);
+		  pme->m_pWin = (IWindow*)CDestlistFuctionWin_New(pme,(uint16)dwParam);
 		  break;
 
 	  case TSW_TEXTCTL:
-		  pme->m_pWin = (IWindow*)CTextCtlWin_New(pme,dwParam);
+		  pme->m_pWin = (IWindow*)CTextCtlWin_New(pme,(uint16)dwParam);
 		  break;
 
 
 	  case TSW_NAVIGATE:
 		  {
-				AECHAR lat[TS_MAX_STRLEN];
-				AECHAR lon[TS_MAX_STRLEN];
-				Coordinate loc;
-				TS_GetExpenseItem(pme,dwParam,NULL,lat,lon);
-				loc.lat = WSTRTOFLOAT(lat);
-				loc.lon = WSTRTOFLOAT(lon);
+			  //使用当前选择的项作为领航目标
+				TS_GetExpenseItem(pme,(uint16)dwParam,NULL,pme->m_szTextLat,pme->m_szTextLon);
 
-				pme->m_pWin = (IWindow*)CNavigateWin_New(pme,&loc);
+				pme->m_pWin = (IWindow*)CNavigateWin_New(pme);
+
 				break;
 				
 		  }
 
 	  case TSW_LOCINFO:
-		  pme->m_pWin = (IWindow*)CLocinfoWin_New(pme,dwParam);
+		  pme->m_pWin = (IWindow*)CLocinfoWin_New(pme,(uint16)dwParam);
 		  break;
 
 
@@ -573,9 +570,10 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 		  pme->m_pWin = (IWindow*)CLocationInfoWin_New(pme);
 		  break;
 	
-	  case TSW_NAVIGATE:     
+	  case TSW_NAVIGATE_EX:     
 		  pme->m_pWin = CNavigateWin_New(pme); 
 		  break;
+
       case TSW_NONE:       
          return TRUE; 
          break;

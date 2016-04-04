@@ -180,7 +180,7 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 		   MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
 		   WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
 		   //TS_DrawSplash(pme->m_pOwner,prompt,1500,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
-		   TS_DrawSplash(pme->m_pOwner,prompt,1500,0);
+		   TS_DrawSplash(pme->m_pOwner,prompt,1500,0, 0);
 		   pme->m_nStatus = 1;
 
 		   return TRUE;
@@ -202,7 +202,7 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 		   MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
 		   WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
 		   //TS_DrawSplash(pme->m_pOwner,prompt,1500,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
-		   TS_DrawSplash(pme->m_pOwner,prompt,1500,0);
+		   TS_DrawSplash(pme->m_pOwner,prompt,1500,0, 0);
 		   pme->m_nStatus = 1;
 
 		   return TRUE;
@@ -223,7 +223,7 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 			   L"%s%02d", szTmp, tw.second);
 	   }
 
-	   CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE, 0);
+	   CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_EX, 0);
 	   break;
 	   
 	  case IDS_STRING_SAVE_LOCATION:
@@ -242,7 +242,7 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 				  MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
 				  WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
 				  //TS_DrawSplash(pme->m_pOwner,prompt,1500,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
-				  TS_DrawSplash(pme->m_pOwner,prompt,1500,0);
+				  TS_DrawSplash(pme->m_pOwner,prompt,1500,0, 0);
 				  pme->m_nStatus = 1;
 
 				  return TRUE;
@@ -264,7 +264,7 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 				  MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
 				  WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
 				  //TS_DrawSplash(pme->m_pOwner,prompt,1500,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
-				  TS_DrawSplash(pme->m_pOwner,prompt,1500,0);
+				  TS_DrawSplash(pme->m_pOwner,prompt,1500,0, 0);
 				  pme->m_nStatus = 1;
 
 				  return TRUE;
@@ -295,7 +295,7 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 				  MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
 				  WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
 				  //TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
-				  TS_DrawSplash(pme->m_pOwner,prompt,1500,0);
+				  TS_DrawSplash(pme->m_pOwner,prompt,1500,0, 0);
 				  pme->m_nStatus = 1;
 
 				  return TRUE;
@@ -306,7 +306,7 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 			  //ÌáÊ¾´°¿Ú
 			  MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
 			  WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
-			  TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+			  TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver, pme);
 			  
 		  }
 		  break;
