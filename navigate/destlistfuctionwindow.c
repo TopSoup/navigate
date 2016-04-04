@@ -73,8 +73,6 @@ static void CDestlistFuctionWin_Delete(IWindow * po)
    CDestlistFuctionWin *  pme = (CDestlistFuctionWin *)po;
 
    //XXX __begin
-   if (pme->m_pMainMenu)
-	   pme->m_pOwner->m_wMainWin = IMENUCTL_GetSel(pme->m_pMainMenu);
    TS_RELEASEIF(pme->m_pMainMenu);
    //XXX _end
 

@@ -49,7 +49,7 @@ IWindow * CTextCtlWin_New(CTopSoupApp * pOwner,uint16 wRecID)
 	  AECHAR pTextInit[TS_MAX_STRLEN];
 
 	  MEMSET(pTextInit,0,sizeof(pTextInit));
-	  if ( pme->m_wRecID != 0 && pme->m_pOwner->m_op != 1 )
+	  if ( pme->m_pOwner->m_op == 2 )
 		  TS_GetExpenseItem(pme->m_pOwner,pme->m_wRecID,pTextInit,NULL,NULL); 
 
 
@@ -133,7 +133,7 @@ static void CTextCtlWin_Redraw(IWindow * po)
    ITEXTCTL_SetInputMode( pme->m_pTextCtl, pme->m_pOwner->m_pTextctlMode );
 
    MEMSET(pTextInit,0,sizeof(pTextInit));
-   if ( pme->m_wRecID != 0 && pme->m_pOwner->m_op != 1 )
+   if ( pme->m_pOwner->m_op == 2 )
 	   TS_GetExpenseItem(pme->m_pOwner,pme->m_wRecID,pTextInit,NULL,NULL); 
     ITEXTCTL_SetText(pme->m_pTextCtl,pTextInit,WSTRLEN(pTextInit));
 
@@ -242,7 +242,7 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			return TRUE;
 			}
 
-			if ( pme->m_wRecID == 0 )
+			if ( pme->m_pOwner->m_op == 0 )
 			{
 				if (!TS_AddExpenseItem(pme->m_pOwner, pTextDesc, textLat, textLon))
 				{
@@ -250,7 +250,7 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 					return TRUE;
 				}  
 
-			} else {
+			} else if( pme->m_pOwner->m_op == 2 ){
 				MEMSET(textLat,0,sizeof(textLat));
 				MEMSET(textLon,0,sizeof(textLon));
 				TS_GetExpenseItem(pme->m_pOwner,pme->m_wRecID,NULL,textLat,textLon);
@@ -268,7 +268,7 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 		   char szNum[TS_MAX_STRLEN];
 		   WSTRTOSTR(pTextDesc, szNum, TS_MAX_STRLEN);
 
-		   if( pme->m_wRecID != 0 ) {
+		   if( pme->m_pOwner->m_op == 2 ) {
 			   AECHAR lat[TS_MAX_STRLEN];
 			   AECHAR lon[TS_MAX_STRLEN];
 			   AECHAR desc[TS_MAX_STRLEN];
@@ -280,7 +280,7 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			   TS_GetExpenseItem(pme->m_pOwner,pme->m_wRecID,desc,lat,lon);
 			   CTopSoupApp_SendSMSMessage(pme->m_pOwner, 0, desc,lat,lon,szNum);  //XXX
 		   }
-		   else
+		   else if( pme->m_pOwner->m_op == 0 )
 		   {
 			   CTopSoupApp_SendSMSMessage(pme->m_pOwner, 0, pTextDesc,NULL,NULL,szNum);  //XXX
 		   }
