@@ -6,5 +6,5 @@
 typedef struct CTopSoupApp CTopSoupApp;
 
 // Main window
-IWindow *  CDestlistFuctionWin_New(CTopSoupApp * pOwner);
+IWindow *  CDestlistFuctionWin_New(CTopSoupApp * pOwner,uint16 wRecID);
 #endif

@@ -181,6 +181,12 @@
 	<String Id="1030" Name="IDS_STRING_DEST_INFO_2">
 		<Text>2在短信收件箱中选择含有经纬度的短信为目的地。</Text>
 	</String>
+	<String Id="1031" Name="IDS_STRING_DEST">
+		<Text>目的地</Text>
+	</String>
+	<String Id="1032" Name="IDS_STRING_SAVETIME">
+		<Text>存储时间</Text>
+	</String>
 </Strings>
 <Objects MimeType="image/png">
 	<Object Id="1000" Name="IDP_NAVIGATOR">

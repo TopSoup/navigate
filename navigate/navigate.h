@@ -55,6 +55,7 @@ typedef enum TSWindow
 	//3 
 	//目的地列表项内容
 	TSW_DEST_LIST_ITEM,	//列表项内容
+	TSW_LOCINFO,//列表项-选项-位置信息说明
 
 	//SOS和发送短信复用界面
 	TSW_SEND_NUM,		//接收电话号码

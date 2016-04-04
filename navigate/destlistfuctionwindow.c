@@ -9,6 +9,8 @@ struct CDestlistFuctionWin
 
 	//XXX
 	IMenuCtl *     m_pMainMenu;
+
+	uint16			m_wRecID;
 };
 
 typedef struct CDestlistFuctionWin CDestlistFuctionWin;
@@ -28,7 +30,7 @@ static boolean    CDestlistFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, 
 /*===========================================================================
    This function constucts the main window.
 ===========================================================================*/
-IWindow * CDestlistFuctionWin_New(CTopSoupApp * pOwner)
+IWindow * CDestlistFuctionWin_New(CTopSoupApp * pOwner,uint16 wRectID)
 {
    CDestlistFuctionWin *        pme;
    VTBL(IWindow)     vtbl;
@@ -37,6 +39,8 @@ IWindow * CDestlistFuctionWin_New(CTopSoupApp * pOwner)
    pme = (CDestlistFuctionWin *)CWindow_New(sizeof(CDestlistFuctionWin), pOwner, &vtbl);
    if (!pme)
       return NULL;
+
+   pme->m_wRecID = wRectID;
 
    {
 	  //XXX __begin
@@ -154,9 +158,15 @@ static boolean CDestlistFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uin
    switch (wParam)
    {
       case IDS_STRING_SMS:
+		  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_RECIPIENT,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
+		  pme->m_pOwner->m_pTextctlMode = AEE_TM_NUMBERS;
+		  pme->m_pOwner->m_pTextctlWin = TSW_DEST_LIST;
+		  pme->m_pOwner->m_op = 1;
+		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_TEXTCTL, 0);
          break;
 
-      case IDS_STRING_LOCATION_INFO:
+      case IDS_STRING_DEST_LOCATION_INFO:
+		  CTopSoupApp_SetWindow(pme->m_pOwner,TSW_LOCINFO,pme->m_wRecID);
 		  break;
 
 	  case IDS_STRING_EDIT:

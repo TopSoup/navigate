@@ -193,13 +193,15 @@ static boolean CDestListWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPa
 {
    CDestListWin *  pme = (CDestListWin *)po;
    boolean     bRet = TRUE;
+   uint16		wRecID;
 
    DBGPRINTF("dest ecode:%x", eCode);
    //XXX __begin
    if ( TS_ISSOFT(eCode)){
 	   if( AVK_SOFT1 == wParam )
 	   {
-		   CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DEST_LIST_FUCTION, 0);
+		   wRecID = IMENUCTL_GetSel( pme->m_pMainMenu );		  
+		   CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DEST_LIST_FUCTION, wRecID - EXPENSE_LIST_ID);
 		   return TRUE;
 	   }
 

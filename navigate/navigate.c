@@ -542,7 +542,7 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 		  break;
 
 	  case TSW_DEST_LIST_FUCTION:
-		  pme->m_pWin = (IWindow*)CDestlistFuctionWin_New(pme);
+		  pme->m_pWin = (IWindow*)CDestlistFuctionWin_New(pme,dwParam);
 		  break;
 
 	  case TSW_TEXTCTL:
@@ -562,6 +562,10 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 				break;
 				
 		  }
+
+	  case TSW_LOCINFO:
+		  pme->m_pWin = (IWindow*)CLocinfoWin_New(pme,dwParam);
+		  break;
 
       case TSW_NONE:       
          return TRUE; 

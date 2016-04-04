@@ -236,6 +236,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\locinfowindow.c"
+				>
+			</File>
+			<File
 				RelativePath=".\logicmacro.c"
 				>
 			</File>
@@ -350,6 +354,10 @@
 			</File>
 			<File
 				RelativePath=".\kitimg.brh"
+				>
+			</File>
+			<File
+				RelativePath=".\locinfowindow.h"
 				>
 			</File>
 			<File
