@@ -236,6 +236,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\locationinfowindow.c"
+				>
+			</File>
+			<File
 				RelativePath=".\locinfowindow.c"
 				>
 			</File>
@@ -354,6 +358,10 @@
 			</File>
 			<File
 				RelativePath=".\kitimg.brh"
+				>
+			</File>
+			<File
+				RelativePath=".\locationinfowindow.h"
 				>
 			</File>
 			<File
