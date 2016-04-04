@@ -102,7 +102,6 @@ static void CLocinfoWin_Redraw(IWindow * po)
 		ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DEST, bufRes, sizeof(bufRes));
 		WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, bufDestName);
 		xx = xMargin;
-		yy += h;
 		dxx = pme->m_pOwner->m_cxWidth - 2;
 		dyy = h;
 		SETAEERECT(&rect, xx, yy, dxx, dyy);
