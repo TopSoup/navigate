@@ -549,6 +549,7 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 		  pme->m_pWin = (IWindow*)CTextCtlWin_New(pme,dwParam);
 		  break;
 
+
 	  case TSW_NAVIGATE:
 		  {
 				AECHAR lat[TS_MAX_STRLEN];
@@ -566,6 +567,7 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 	  case TSW_LOCINFO:
 		  pme->m_pWin = (IWindow*)CLocinfoWin_New(pme,dwParam);
 		  break;
+
 
 	  case TSW_LOCATION_RANGE_INFO:
 		  pme->m_pWin = (IWindow*)CLocationInfoWin_New(pme);
