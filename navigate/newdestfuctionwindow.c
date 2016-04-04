@@ -285,7 +285,7 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 					  L"%s%02d", szTmp, tw.second);
 			  }
 			  
-			  if (!TS_AddExpenseItem(pme->m_pOwner, pme->m_pOwner->m_szTextLat, pme->m_pOwner->m_szTextLon, pme->m_pOwner->m_szTextDesc))
+			  if (!TS_AddExpenseItem(pme->m_pOwner,pme->m_pOwner->m_szTextDesc,pme->m_pOwner->m_szTextLat, pme->m_pOwner->m_szTextLon))
 			  {
 				  DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
 				  
