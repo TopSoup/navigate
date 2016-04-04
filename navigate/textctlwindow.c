@@ -265,20 +265,26 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	   }
 	   else if (pme->m_pOwner->m_op == 1)	//¶ÌÐÅ·¢ËÍ
 	   {
+		   char szNum[TS_MAX_STRLEN];
+		   WSTRTOSTR(pTextDesc, szNum, TS_MAX_STRLEN);
+
 		   if( pme->m_wRecID != 0 ) {
 			   AECHAR lat[TS_MAX_STRLEN];
 			   AECHAR lon[TS_MAX_STRLEN];
 			   AECHAR desc[TS_MAX_STRLEN];
-
+			   
 			   MEMSET(lat,0,sizeof(lat));
 			   MEMSET(lon,0,sizeof(lon));
 			   MEMSET(desc,0,sizeof(desc));
-
+			   
 			   TS_GetExpenseItem(pme->m_pOwner,pme->m_wRecID,desc,lat,lon);
-			   CTopSoupApp_SendSMSMessage(pme->m_pOwner, 0, desc,lat,lon,pTextDesc);  //XXX
+			   CTopSoupApp_SendSMSMessage(pme->m_pOwner, 0, desc,lat,lon,szNum);  //XXX
 		   }
 		   else
-				CTopSoupApp_SendSMSMessage(pme->m_pOwner, 0, pTextDesc,NULL,NULL,pTextDesc);  //XXX
+		   {
+			   CTopSoupApp_SendSMSMessage(pme->m_pOwner, 0, pTextDesc,NULL,NULL,szNum);  //XXX
+		   }
+				
 		  
 		   ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SEND,prompt,sizeof(prompt));
 	   }

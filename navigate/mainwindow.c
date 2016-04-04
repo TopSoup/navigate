@@ -9,6 +9,8 @@ struct CMainWin
 
 	//XXX
 	IMenuCtl *     m_pMainMenu;
+	boolean			m_bVersion;
+
 };
 
 typedef struct CMainWin CMainWin;
@@ -56,6 +58,7 @@ IWindow * CMainWin_New(CTopSoupApp * pOwner)
 	  //XXX __end
 
 
+	  pme->m_bVersion = FALSE;
    }
 
    return (IWindow *)pme;
@@ -139,7 +142,15 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
 	   //ÍË³ö³ÌÐò
 	   if( AVK_SOFT2 == wParam )
 	   {
-			ISHELL_CloseApplet(pme->m_pIShell, FALSE);
+		   if (pme->m_bVersion == TRUE)
+		   {
+			   CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
+		   }
+		   else
+		   {
+			   ISHELL_CloseApplet(pme->m_pIShell, FALSE);
+		   }
+			
 			return TRUE;
 	   }
    }
@@ -162,10 +173,12 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
 		  break;
 
 	  case IDS_STRING_SOS:
-		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_SOS, 0);
+		  //CTopSoupApp_SetWindow(pme->m_pOwner, TSW_SOS, 0);
 		  break;
 
       case IDS_STRING_APPINFO:
+		  pme->m_bVersion = TRUE;
+		  TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,0);
          CMainWin_About((IWindow*)pme);
 		 break;
 	 

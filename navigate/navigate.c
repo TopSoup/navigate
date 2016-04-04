@@ -652,6 +652,31 @@ static void CTopSoupApp_ReleaseRes(CTopSoupApp * pme)
                         SMS & TELEPHONE TEST
 =============================================================================== */
 
+//解析短信内容
+//格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
+static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
+{
+	char szBuf[128];
+	
+	if (szMsg == NULL || STRLEN(szMsg) < 10)
+		return FALSE;
+
+	STRCPY(szBuf, szMsg);
+	
+	//解析短信
+	
+	//#
+	//		:
+	
+	//保存到数据库
+	//TS_ADD
+	
+	//提示信息
+	//TS_SPLAH
+	
+	return TRUE;
+}
+
 
 static boolean CTopSoupApp_ReceiveSMSMessage(CTopSoupApp* pme, uint32 uMsgId)
 {
@@ -676,6 +701,7 @@ static boolean CTopSoupApp_ReceiveSMSMessage(CTopSoupApp* pme, uint32 uMsgId)
 				WSTRTOUTF8((AECHAR*)TmpOpt.pVal,WSTRLEN((AECHAR*)TmpOpt.pVal), (byte*)szText, sizeof(szText));
 				//WSTRTOSTR((AECHAR*)TmpOpt.pVal,WSTRLEN((AECHAR*)TmpOpt.pVal), (char*)szText)//, sizeof(szText));
 				DBGPRINTF("WSZ msg from %s: %s",szPhone,szText);
+
 			} else if( ISMSMSG_GetOpt(pSMS,MSGOPT_PAYLOAD_SZ,&TmpOpt) == AEE_SUCCESS ) {
 				STRCPY(szText,(const char*)(TmpOpt.pVal));
 				DBGPRINTF("SZ msg from %s: %s",szPhone,szText);
@@ -726,7 +752,7 @@ static void SMSCallBack_Send(void *p)
    }   
 }
 
-void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDesc,AECHAR* lat,AECHAR* lon,AECHAR* phoneNumber)
+void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDesc,AECHAR* lat,AECHAR* lon,char* phoneNumber)
 {   
 	AECHAR textDest[32], textLat[32], textLon[32];
 	AECHAR szLat[32], szLon[32];

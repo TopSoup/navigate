@@ -313,17 +313,28 @@ static void CWhereWin_Redraw(IWindow * po)
 			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  pme->m_szText, &rect);
 
 			
-			//速度
+			//速度[使用节和公里/小时表示]
+			{
+			AECHAR szKn[32];
+			AECHAR knRes[10];
+			AECHAR kmRes[10];
+			double kn = 0;
+
+			kn = FDIV(pGetGpsInfo->theInfo.velocityHor, 1852.0);	//1节=1.852公里 velocityHor为m/s
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_VEL, bufRes, sizeof(bufRes));
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SPEED_KN, knRes, sizeof(knRes));
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SPEED_KM, kmRes, sizeof(kmRes));
 			//FLOATTOWSTR(pGetGpsInfo->theInfo.velocityHor, bufVel, 32);
-			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, TS_FLT2SZ(bufVel, pGetGpsInfo->theInfo.velocityHor));
+			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s%s(%s%s)", 
+				bufRes, TS_FLT2SZ(szKn, kn), knRes, TS_FLT2SZ(bufVel, pGetGpsInfo->theInfo.velocityHor), kmRes);
 			xx = xMargin;
 			yy += h;
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
 			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  pme->m_szText, &rect);
-		
+			}
+
 			//方向
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_HEADING, bufRes, sizeof(bufRes));
 			//FLOATTOWSTR(pGetGpsInfo->theInfo.heading, bufHeading, 32);

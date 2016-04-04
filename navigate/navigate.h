@@ -168,6 +168,7 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam);
 void CTopSoupApp_onSplashDrawOver(void * po);
 
 //发送位置短信
-void CTopSoupApp_SendSMSMessage(CTopSoupApp * pMe, uint16 wParam, AECHAR *szDesc,AECHAR* szLat,AECHAR* szLon,AECHAR* phoneNumber);
+//格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
+void CTopSoupApp_SendSMSMessage(CTopSoupApp * pMe, uint16 wParam, AECHAR *szDesc,AECHAR* szLat,AECHAR* szLon,char* phoneNumber);
 
 #endif
