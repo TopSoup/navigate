@@ -3,6 +3,8 @@
 #define MP_MAX_STRLEN         64
 #define MP_NAVIGATE_CY			  32
 
+#define WIN_FONT AEE_FONT_LARGE
+
 // Navigate window: Displays main menu.
 struct CNavigateWin
 {
@@ -24,6 +26,8 @@ struct CNavigateWin
 	IImageCtl *		m_pImageCtl;	//罗盘图片
 
 	struct _GetGPSInfo		m_gpsInfo;	//
+
+	boolean			m_bGetGpsInfo;
 };
 
 typedef struct CNavigateWin CNavigateWin;
@@ -104,7 +108,7 @@ IWindow * CNavigateWin_New(CTopSoupApp * pOwner)
 		if (ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_IMAGECTL, (void **)(&pme->m_pImageCtl)))
 			TS_WINERR_RETURN(pme);
 
-		SETAEERECT(&rect, 0, 16, 240, 232);
+		SETAEERECT(&rect, 0, 0, 240, 232);
 		IIMAGECTL_SetRect(pme->m_pImageCtl, &rect);
 		//IIMAGECTL_SetProperties(pme->m_pImageCtl, CP_BORDER);
 
@@ -163,8 +167,14 @@ IWindow * CNavigateWin_New(CTopSoupApp * pOwner)
 				ISHELL_SetTimerEx( pme->m_pIShell, 1000, &pGetGPSInfo->cbProgressTimer );
 			}
 		}
+
+		pme->m_bGetGpsInfo = FALSE;
 	}
 
+
+	ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DEST_NAVIGATE,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
+	//TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,0);
+	TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,0);
 
 
    return (IWindow *)pme;
@@ -233,18 +243,30 @@ static void CNavigateWin_Redraw(IWindow * po)
 	
 	IDISPLAY_BitBlt( pme->m_pIDisplay, pme->m_rViewportRect.x, pme->m_rViewportRect.y, pme->m_rViewportRect.dx, pme->m_rViewportRect.dy, pme->m_pBitmap, pme->m_nWindowXOrigin, 0, AEE_RO_COPY );
 	
-	if (pme->m_pTitle)
+		//更新底部文字
+	if (pme->m_bGetGpsInfo)
 	{
-		// File name (title) text
-		STRTOWSTR("Navigate", pme->m_szText, sizeof(pme->m_szText));
-		TS_FitStaticText(pme->m_pIDisplay, pme->m_pTitle, AEE_FONT_NORMAL, pme->m_szText);
+		//TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_INFO,IDS_STRING_BACK,0);	//TODO
+		TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,0);
+	}
+	else
+	{
+		TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,0);
 	}
 
-	//显示罗盘
-	IIMAGECTL_Redraw(pme->m_pImageCtl);
+		//绘制背景及框架
+	TS_DrawBackgroud(po);
+
+//	if (pme->m_pTitle)
+//	{
+//		// File name (title) text
+//		STRTOWSTR("Navigate", pme->m_szText, sizeof(pme->m_szText));
+//		TS_FitStaticText(pme->m_pIDisplay, pme->m_pTitle, AEE_FONT_NORMAL, pme->m_szText);
+//	}
 
 	//当取得定位结果时更新显示
-	if (pme->m_gpsInfo.pPosDet)
+	if (pme->m_gpsInfo.pPosDet
+		&& pme->m_bGetGpsInfo)
 	{
 		if (pme->m_gpsInfo.theInfo.nErr == SUCCESS)
 		{
@@ -255,7 +277,45 @@ static void CNavigateWin_Redraw(IWindow * po)
 			destHeading = FMUL(pme->m_gpsInfo.theInfo.destHeading, M_D2R);
 		}
 	}
+	else
+	{
+		{
+			IImage * pi = ISHELL_LoadResImage(pme->m_pIShell, NAVIGATE_RES_FILE, IDP_OBJECT_PROMPT);
+			IStatic * pInfoStatic = NULL;
+			
+			if (pi)
+			{
+				AEERect  rect;
+				AEEImageInfo      info;
+				int16 x,y;
+				AECHAR prompt[TS_MAX_STRLEN];
+
+				IIMAGE_GetInfo(pi,&info);
+				x = ( pme->m_pOwner->m_rectWin.dx - info.cx ) / 2;
+				y =  pme->m_pOwner->m_rectWin.y + (  pme->m_pOwner->m_rectWin.dy - info.cy ) / 2;
+				SETAEERECT(&rect,x,y,info.cx,info.cy);
+				TS_DrawImage(pi, &rect, TRUE);
+				
+					
+				ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATING,prompt,sizeof(prompt));
+				
+				ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void **)&pInfoStatic);
+				ISTATIC_SetRect(pInfoStatic, &rect);
+				ISTATIC_SetProperties(pInfoStatic,  ST_MIDDLETEXT | ST_CENTERTEXT | ST_NOSCROLL);
+				TS_FitStaticText(pme->m_pIDisplay, pInfoStatic, AEE_FONT_LARGE, prompt);
+				
+				TS_RELEASEIF(pi);
+				TS_RELEASEIF(pInfoStatic);
+			}
+		}
+
+		IDISPLAY_Update(pme->m_pIDisplay);
+		return ;
+	}
 	
+	//显示罗盘
+	IIMAGECTL_Redraw(pme->m_pImageCtl);
+
 	// 绘制当前方向线和箭头
 	IGRAPHICS_SetFillMode( pme->m_pGraphics, FALSE);
 	IGRAPHICS_SetPaintMode( pme->m_pGraphics, AEE_PAINT_COPY );
@@ -265,15 +325,15 @@ static void CNavigateWin_Redraw(IWindow * po)
 
 	//罗盘刻度圆
 	rCircle.cx = 120;
-	rCircle.cy = 128;
+	rCircle.cy = 114;
 	rCircle.r = FLTTOINT(r);
 	IGRAPHICS_DrawCircle( pme->m_pGraphics, &rCircle );
 
 	//当前方向角直线
 	rLine.sx = 120;
-	rLine.sy = 128;
+	rLine.sy = 114;
 	rLine.ex = 120+FLTTOINT(FMUL(r, FSIN(heading)));
-	rLine.ey = 128-FLTTOINT(FMUL(r, FCOS(heading)));
+	rLine.ey = 114-FLTTOINT(FMUL(r, FCOS(heading)));
 	DBGPRINTF("@GetGpsInfo Line:(%d,%d)-(%d,%d)-r:%d", rLine.sx, rLine.sy, rLine.ex, rLine.ey, rCircle.r);
 	IGRAPHICS_DrawLine( pme->m_pGraphics, &rLine );
 	
@@ -288,6 +348,54 @@ static void CNavigateWin_Redraw(IWindow * po)
 	IGRAPHICS_DrawTriangle( pme->m_pGraphics, &rTriangle );
 
 
+	 {
+		AECHAR bufRes[MP_MAX_STRLEN];
+		AECHAR szBuf[MP_MAX_STRLEN];
+		int a = 0, b = 0;
+		int h = 0, xx = 0, yy = 0, dxx = 0, dyy = 0;
+		AEERect rect;
+		int xMargin = 0;
+
+		//STRTOWSTR("Destination: BeiJing", pme->m_szText, sizeof(pme->m_szText));
+		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DEST_NAME,bufRes,sizeof(bufRes));
+		WSPRINTF(szBuf, sizeof(szBuf), L"%s: %s", bufRes, pme->m_pOwner->m_szTextDesc);
+		//ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_WHERE_DETAILS_0, bufRes, sizeof(bufRes));
+		h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 2;
+		xx = xMargin;
+		yy = 232+2;
+		dxx = pme->m_pOwner->m_cxWidth - 2;
+		dyy = h;
+		SETAEERECT(&rect, xx, yy, dxx, dyy);
+		TS_DrawText(pme->m_pIDisplay, WIN_FONT, szBuf, &rect);
+
+		//目的地
+		if (FCMP_G(distance, 0))
+		{
+			AECHAR bufDis[32];
+			
+			TS_PRINTD("FSIN", FSIN(destHeading));
+			TS_PRINTD("FSIN", FCOS(destHeading));
+			
+			rCircle.cx = 120+FLTTOINT(FMUL(r, FSIN(destHeading)));
+			rCircle.cy = 114-FLTTOINT(FMUL(r, FCOS(destHeading)));
+			rCircle.r = 5;
+			DBGPRINTF("@GetGpsInfo Dest:(%d,%d,r-%d)", rCircle.cx, rCircle.cy, rCircle.r);
+			IGRAPHICS_DrawCircle( pme->m_pGraphics, &rCircle );
+			
+			//FLOATTOWSTR(distance, bufDis, 32);
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DISTANCE, bufRes, sizeof(bufRes));
+			WSPRINTF(szBuf, sizeof(szBuf), L"%s: %s", bufRes, TS_FLT2SZ(bufDis, distance));
+			h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 2;
+			xx = xMargin;
+			yy += h;
+			dxx = pme->m_pOwner->m_cxWidth - 2;
+			dyy = h;
+			SETAEERECT(&rect, xx, yy, dxx, dyy);
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT, szBuf, &rect);
+		}
+
+	 }
+/*
 	if (pme->m_pTextDestination)
 	{
 		AECHAR szBuf[32];
@@ -305,7 +413,7 @@ static void CNavigateWin_Redraw(IWindow * po)
 		TS_PRINTD("FSIN", FCOS(destHeading));
 
 		rCircle.cx = 120+FLTTOINT(FMUL(r, FSIN(destHeading)));
-		rCircle.cy = 128-FLTTOINT(FMUL(r, FCOS(destHeading)));
+		rCircle.cy = 114-FLTTOINT(FMUL(r, FCOS(destHeading)));
 		rCircle.r = 5;
 		DBGPRINTF("@GetGpsInfo Dest:(%d,%d,r-%d)", rCircle.cx, rCircle.cy, rCircle.r);
 		IGRAPHICS_DrawCircle( pme->m_pGraphics, &rCircle );
@@ -325,7 +433,7 @@ static void CNavigateWin_Redraw(IWindow * po)
 
 	WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"Pro: %d nErr:%u", pme->m_gpsInfo.wProgress,  pme->m_gpsInfo.theInfo.nErr);
 	TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextInfo, AEE_FONT_NORMAL, pme->m_szText);	
-
+*/
 	IDISPLAY_Update(pme->m_pIDisplay);
 }
 
@@ -348,12 +456,15 @@ static boolean CNavigateWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPa
 	case EVT_KEY:
 		switch (wParam)
 		{
+		case AVK_SELECT:
+			pme->m_bGetGpsInfo = TRUE;
+			break;
 		case AVK_SOFT1:
 			bRet = FALSE;
 			break;
 
 		case AVK_SOFT2:
-			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DEST_LIST, 0);
+			CTopSoupApp_SetWindow(pme->m_pOwner, pme->m_pOwner->m_pPreNaviWin, 0);
 			bRet = TRUE;
 			break;
 
@@ -385,6 +496,7 @@ static void CNavigateWin_GetGPSInfo_Callback( IWindow *po )
 		pGetGPSInfo->wProgress = 0;
 		DBGPRINTF("@GetGPSInfo fix:%d", pGetGPSInfo->dwFixNumber);
 
+		pme->m_bGetGpsInfo = TRUE;
 		CNavigateWin_Redraw(po);
 	}
 	else if( pGetGPSInfo->theInfo.nErr == EIDLE ) {

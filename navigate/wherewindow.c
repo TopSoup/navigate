@@ -349,10 +349,38 @@ static void CWhereWin_Redraw(IWindow * po)
 	else
 	{
 		{
-			AECHAR prompt[TS_MAX_STRLEN];
+			IImage * pi = ISHELL_LoadResImage(pme->m_pIShell, NAVIGATE_RES_FILE, IDP_OBJECT_PROMPT);
+			IStatic * pInfoStatic = NULL;
 			
-			ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATING,prompt,sizeof(prompt));
-			TS_DrawSplash(pme->m_pOwner,prompt,2000,NULL,NULL);
+			if (pi)
+			{
+				AEERect  rect;
+				AEEImageInfo      info;
+				int16 x,y;
+				AECHAR prompt[TS_MAX_STRLEN];
+
+				IIMAGE_GetInfo(pi,&info);
+				x = ( pme->m_pOwner->m_rectWin.dx - info.cx ) / 2;
+				y =  pme->m_pOwner->m_rectWin.y + (  pme->m_pOwner->m_rectWin.dy - info.cy ) / 2;
+				SETAEERECT(&rect,x,y,info.cx,info.cy);
+				TS_DrawImage(pi, &rect, TRUE);
+				
+					
+				ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATING,prompt,sizeof(prompt));
+				
+				ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void **)&pInfoStatic);
+				ISTATIC_SetRect(pInfoStatic, &rect);
+				ISTATIC_SetProperties(pInfoStatic,  ST_MIDDLETEXT | ST_CENTERTEXT | ST_NOSCROLL);
+				TS_FitStaticText(pme->m_pIDisplay, pInfoStatic, AEE_FONT_LARGE, prompt);
+				
+				TS_RELEASEIF(pi);
+				TS_RELEASEIF(pInfoStatic);
+			}
+		}
+		{
+		//  AECHAR prompt[TS_MAX_STRLEN];	
+		//	ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATING,prompt,sizeof(prompt));
+		//	TS_DrawSplash(pme->m_pOwner,prompt,2000,NULL);
 		}
 	}
 

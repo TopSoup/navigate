@@ -234,6 +234,7 @@ static boolean CDestListWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPa
 
    if ( EXPENSE_LIST_ID <= wParam )
    {
+	   pme->m_pOwner->m_pPreNaviWin = TSW_DEST_LIST;
 	   CTopSoupApp_SetWindow(pme->m_pOwner,TSW_NAVIGATE,wParam-EXPENSE_LIST_ID);
    }
    //XXX __end

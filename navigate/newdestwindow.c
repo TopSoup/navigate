@@ -7,6 +7,7 @@
 
 #define NET_DEST_LIST_ID 3
 
+#define WIN_FONT AEE_FONT_NORMAL
 
 //界面状态控制
 typedef enum
@@ -70,6 +71,8 @@ IWindow * CNewDestWin_New(CTopSoupApp * pOwner)
       return NULL;
 
    {
+	   AEERect   rRect;
+	   
 		int      cx = pme->m_pOwner->m_cxWidth;
 		int      cy = pme->m_pOwner->m_cyHeight;
 		int		 dy = MP_NEW_DEST_CY;
@@ -78,8 +81,11 @@ IWindow * CNewDestWin_New(CTopSoupApp * pOwner)
 			(ISHELL_CreateInstance( pme->m_pIShell, AEECLSID_TEXTCTL, (void **)&pme->m_pTextCtl)) )
 			TS_WINERR_RETURN(pme);
 
+		rRect = ((CTopSoupApp*)pme->m_pOwner)->m_rectWin;
+		rRect.dy = rRect.dy/3 + 10;
+
 		//MENU
-		TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth,&((CTopSoupApp*)pme->m_pOwner)->m_rectWin , 0);
+		TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth,&rRect , 0);
 		
 		/*
 		SETAEERECT( &rRect, 0, pme->m_pOwner->m_nFontHeight, cx, cy - ( 3 * pme->m_pOwner->m_nFontHeight ) );
@@ -228,6 +234,52 @@ static void CNewDestWin_Redraw(IWindow * po)
 		IMENUCTL_SetActive( pme->m_pMainMenu, TRUE);
 		IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMainWin);
 		IMENUCTL_Redraw(pme->m_pMainMenu);
+
+		{
+			AECHAR bufRes[MP_MAX_STRLEN];
+			int a = 0, b = 0;
+			int h = 0, xx = 0, yy = 0, dxx = 0, dyy = 0;
+			AEERect rect;
+			int xMargin = 0;
+			
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATION_RANGE_INFO_LON_0, bufRes, sizeof(bufRes));
+			h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 2;
+			xx = xMargin;
+			yy = pme->m_pOwner->m_rectWin.dy/2+36;
+			dxx = pme->m_pOwner->m_cxWidth - 2;
+			dyy = h;
+			SETAEERECT(&rect, xx, yy, dxx, dyy);
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+			
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATION_RANGE_INFO_LON_1, bufRes, sizeof(bufRes));
+			h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 2;
+			xx = xMargin;
+			yy += h;
+			dxx = pme->m_pOwner->m_cxWidth - 2;
+			dyy = h;
+			SETAEERECT(&rect, xx, yy, dxx, dyy);
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+			
+			
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATION_RANGE_INFO_LAT_0, bufRes, sizeof(bufRes));
+			h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 2;
+			xx = xMargin;
+			yy += h;
+			dxx = pme->m_pOwner->m_cxWidth - 2;
+			dyy = h;
+			SETAEERECT(&rect, xx, yy, dxx, dyy);
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+			
+			
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATION_RANGE_INFO_LAT_1, bufRes, sizeof(bufRes));
+			h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 2;
+			xx = xMargin;
+			yy += h;
+			dxx = pme->m_pOwner->m_cxWidth - 2;
+			dyy = h;
+			SETAEERECT(&rect, xx, yy, dxx, dyy);
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+		}
 	}
 	else if (pme->m_eViewType == VIEW_EDIT)
 	{
@@ -401,7 +453,7 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			if (pme->m_eEditType == EDIT_LAT)
 			{
 				//校验经纬度
-				if (TS_CheckLat(pme->m_pOwner->m_szTextLat) == FALSE)
+				if (TS_CheckLat(pText) == FALSE)
 				{
 					AECHAR prompt[TS_MAX_STRLEN];
 					DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
@@ -424,7 +476,7 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			else if (pme->m_eEditType == EDIT_LON)
 			{
 				//校验经纬度
-				if (TS_CheckLon(pme->m_pOwner->m_szTextLon) == FALSE )
+				if (TS_CheckLon(pText) == FALSE )
 				{
 					AECHAR prompt[TS_MAX_STRLEN];
 					DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示

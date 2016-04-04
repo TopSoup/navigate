@@ -223,6 +223,7 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 			   L"%s%02d", szTmp, tw.second);
 	   }
 
+	   pme->m_pOwner->m_pPreNaviWin = TSW_WHERE_FUCTION;
 	   CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_EX, 0);
 	   break;
 	   

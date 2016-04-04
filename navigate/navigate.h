@@ -151,6 +151,9 @@ struct CTopSoupApp
 	TSWindow        m_pTextctlWin; 
 	int				m_op;				//TEXTCTL OP: 0-保存到目的地列表 1-短信发送
 	boolean			m_opStatus;
+
+	//领航前一个窗口
+	TSWindow        m_pPreNaviWin; 
 };
 
 typedef struct CTopSoupApp  CTopSoupApp;
