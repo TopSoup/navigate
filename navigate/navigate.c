@@ -546,7 +546,7 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 		  break;
 
 	  case TSW_TEXTCTL:
-		  pme->m_pWin = (IWindow*)CTextCtlWin_New(pme,(AECHAR*)dwParam);
+		  pme->m_pWin = (IWindow*)CTextCtlWin_New(pme,dwParam);
 		  break;
 
 	  case TSW_NAVIGATE:

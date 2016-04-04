@@ -10,7 +10,7 @@ struct CTextCtlWin
 	//XXX
 	ITextCtl			*m_pTextCtl;
 
-	AECHAR				m_pText[TS_MAX_STRLEN];
+	uint16              m_wRecID;
 };
 
 typedef struct CTextCtlWin CTextCtlWin;
@@ -30,7 +30,7 @@ static boolean    CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 w
 /*===========================================================================
    This function constucts the main window.
 ===========================================================================*/
-IWindow * CTextCtlWin_New(CTopSoupApp * pOwner,AECHAR* pTextInit)
+IWindow * CTextCtlWin_New(CTopSoupApp * pOwner,uint16 wRecID)
 {
    CTextCtlWin *        pme;
    VTBL(IWindow)     vtbl;
@@ -40,19 +40,25 @@ IWindow * CTextCtlWin_New(CTopSoupApp * pOwner,AECHAR* pTextInit)
    if (!pme)
       return NULL;
 
-   MEMSET(pme->m_pText,0,sizeof(pme->m_pText));
-   if ( pTextInit )
-		WSTRCPY(pme->m_pText,pTextInit);
+   pme->m_wRecID = wRecID;
+   
 
    {
 	  //XXX __begin
       //Initialize logo below the header
+	  AECHAR pTextInit[TS_MAX_STRLEN];
+
+	  MEMSET(pTextInit,0,sizeof(pTextInit));
+	  if ( pme->m_wRecID != 0 )
+		  TS_GetExpenseItem(pme->m_pOwner,pme->m_wRecID,pTextInit,NULL,NULL); 
+
+
 	   if (ISHELL_CreateInstance( pme->m_pIShell, AEECLSID_TEXTCTL, (void **)&pme->m_pTextCtl))
 		   TS_WINERR_RETURN(pme);
 
 	   ITEXTCTL_SetRect( pme->m_pTextCtl, &pme->m_pOwner->m_rectWin);
 
-	   if (pme->m_pOwner->m_op == 0)
+	   if (pme->m_pOwner->m_op == 0 || pme->m_pOwner->m_op == 2)
 	   {
 			TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_EREASE,IDS_STRING_SAVE);	   
 	   }
@@ -62,7 +68,7 @@ IWindow * CTextCtlWin_New(CTopSoupApp * pOwner,AECHAR* pTextInit)
 	   }
 	   
 	   ITEXTCTL_SetInputMode( pme->m_pTextCtl, pme->m_pOwner->m_pTextctlMode );
-	   ITEXTCTL_SetText(pme->m_pTextCtl,pme->m_pText,WSTRLEN(pme->m_pText));
+	   ITEXTCTL_SetText(pme->m_pTextCtl,pTextInit,WSTRLEN(pTextInit));
 	   //XXX __end
 
 
@@ -114,6 +120,7 @@ static void CTextCtlWin_Enable(IWindow * po, boolean bEnable)
 static void CTextCtlWin_Redraw(IWindow * po)
 {
    CTextCtlWin *  pme = (CTextCtlWin *)po;
+   AECHAR pTextInit[TS_MAX_STRLEN];
 
    if (!pme->m_bActive)
       return;
@@ -124,7 +131,12 @@ static void CTextCtlWin_Redraw(IWindow * po)
 
    TS_DrawBackgroud(po);
    ITEXTCTL_SetInputMode( pme->m_pTextCtl, pme->m_pOwner->m_pTextctlMode );
-   ITEXTCTL_SetText(pme->m_pTextCtl,pme->m_pText,WSTRLEN(pme->m_pText));
+
+   MEMSET(pTextInit,0,sizeof(pTextInit));
+   if ( pme->m_wRecID != 0 )
+	   TS_GetExpenseItem(pme->m_pOwner,pme->m_wRecID,pTextInit,NULL,NULL); 
+    ITEXTCTL_SetText(pme->m_pTextCtl,pTextInit,WSTRLEN(pTextInit));
+
    ITEXTCTL_Redraw(pme->m_pTextCtl);
    
 
@@ -198,7 +210,7 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
 			WSTRCPY(pme->m_pOwner->m_pTextctlText, pTextDesc);	   
 
-			if (pme->m_pOwner->m_op == 0)
+			if (pme->m_pOwner->m_op == 0 || pme->m_pOwner->m_op == 2)
 			{
 				ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_DESC,prompt,sizeof(prompt));				
 			}
@@ -213,8 +225,8 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 
 	   pme->m_pOwner->m_opStatus = TRUE;
 
-	   if (pme->m_pOwner->m_op == 0)	//保存位置
-	   {
+	   if (pme->m_pOwner->m_op == 0 || pme->m_pOwner->m_op == 2)	//0=保存位置 2=重命名
+  	   {
 			TS_FLT2SZ(textLat, pme->m_pOwner->m_gpsInfo.theInfo.lat);
 			WSTRTOSTR(textLat, szBuf, WSTRLEN(textLat) + 1);
 			DBGPRINTF("Lat: %s", szBuf);
@@ -223,18 +235,31 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			WSTRTOSTR(textLon, szBuf, WSTRLEN(textLon) + 1);
 			DBGPRINTF("Lon: %s", szBuf);
 
-			//保存到数据库
+			//数据库操作
 			if (WSTRLEN(textLat) == 0 || WSTRLEN(textLon) == 0 || WSTRLEN(pTextDesc) == 0)
 			{
 			DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
 			return TRUE;
 			}
 
-			if (!TS_AddExpenseItem(pme->m_pOwner, pTextDesc, textLat, textLon))
+			if ( pme->m_wRecID == 0 )
 			{
-			DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
-			return TRUE;
-			}  
+				if (!TS_AddExpenseItem(pme->m_pOwner, pTextDesc, textLat, textLon))
+				{
+					DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
+					return TRUE;
+				}  
+
+			} else {
+				MEMSET(textLat,0,sizeof(textLat));
+				MEMSET(textLon,0,sizeof(textLon));
+				TS_GetExpenseItem(pme->m_pOwner,pme->m_wRecID,NULL,textLat,textLon);
+				if (!TS_UpdateExpenseItem(pme->m_pOwner, pme->m_wRecID,pTextDesc, textLat, textLon))
+				{
+					DBGPRINTF("UPDATE DATA ERROR!");//TODO 界面提示
+					return TRUE;
+				}  
+			}
 
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
 	   }
