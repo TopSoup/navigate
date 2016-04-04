@@ -9,6 +9,8 @@ struct CTextCtlWin
 
 	//XXX
 	ITextCtl			*m_pTextCtl;
+
+	AECHAR				m_pText[TS_MAX_STRLEN];
 };
 
 typedef struct CTextCtlWin CTextCtlWin;
@@ -28,7 +30,7 @@ static boolean    CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 w
 /*===========================================================================
    This function constucts the main window.
 ===========================================================================*/
-IWindow * CTextCtlWin_New(CTopSoupApp * pOwner)
+IWindow * CTextCtlWin_New(CTopSoupApp * pOwner,AECHAR* pTextInit)
 {
    CTextCtlWin *        pme;
    VTBL(IWindow)     vtbl;
@@ -37,6 +39,10 @@ IWindow * CTextCtlWin_New(CTopSoupApp * pOwner)
    pme = (CTextCtlWin *)CWindow_New(sizeof(CTextCtlWin), pOwner, &vtbl);
    if (!pme)
       return NULL;
+
+   MEMSET(pme->m_pText,0,sizeof(pme->m_pText));
+   if ( pTextInit )
+		WSTRCPY(pme->m_pText,pTextInit);
 
    {
 	  //XXX __begin
@@ -56,6 +62,7 @@ IWindow * CTextCtlWin_New(CTopSoupApp * pOwner)
 	   }
 	   
 	   ITEXTCTL_SetInputMode( pme->m_pTextCtl, pme->m_pOwner->m_pTextctlMode );
+	   ITEXTCTL_SetText(pme->m_pTextCtl,pme->m_pText,WSTRLEN(pme->m_pText));
 	   //XXX __end
 
 
@@ -117,6 +124,7 @@ static void CTextCtlWin_Redraw(IWindow * po)
 
    TS_DrawBackgroud(po);
    ITEXTCTL_SetInputMode( pme->m_pTextCtl, pme->m_pOwner->m_pTextctlMode );
+   ITEXTCTL_SetText(pme->m_pTextCtl,pme->m_pText,WSTRLEN(pme->m_pText));
    ITEXTCTL_Redraw(pme->m_pTextCtl);
    
 

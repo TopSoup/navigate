@@ -170,6 +170,18 @@ static boolean CDestlistFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uin
 		  break;
 
 	  case IDS_STRING_EDIT:
+		  {
+			  AECHAR destName[TS_MAX_STRLEN];
+
+			  MEMSET(destName,0,sizeof(destName));
+			  TS_GetExpenseItem(pme->m_pOwner,pme->m_wRecID,destName,NULL,NULL);
+			  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_RENAME,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
+			  pme->m_pOwner->m_pTextctlMode = AEE_TM_PINYIN;
+			  pme->m_pOwner->m_pTextctlWin = TSW_DEST_LIST;
+			  pme->m_pOwner->m_op = 0;
+			  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_TEXTCTL,(uint32)destName );
+		
+		  }
 		  break;
 
 	  case IDS_STRING_DELETE:
