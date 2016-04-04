@@ -169,7 +169,7 @@ static boolean CDestlistFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uin
 		  pme->m_pOwner->m_pTextctlMode = AEE_TM_NUMBERS;
 		  pme->m_pOwner->m_pTextctlWin = TSW_DEST_LIST;
 		  pme->m_pOwner->m_op = 1;
-		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_TEXTCTL, 0);
+		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_TEXTCTL, pme->m_wRecID);
          break;
 
       case IDS_STRING_DEST_LOCATION_INFO:

@@ -158,6 +158,6 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam);
 void CTopSoupApp_onSplashDrawOver(void * po);
 
 //∑¢ÀÕŒª÷√∂Ã–≈
-void CTopSoupApp_SendSMSMessage(CTopSoupApp * pMe, uint16 wParam, AECHAR *szDesc);
+void CTopSoupApp_SendSMSMessage(CTopSoupApp * pMe, uint16 wParam, AECHAR *szDesc,AECHAR* szLat,AECHAR* szLon,AECHAR* phoneNumber);
 
 #endif

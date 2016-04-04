@@ -719,7 +719,7 @@ static void SMSCallBack_Send(void *p)
    }   
 }
 
-void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDesc)
+void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDesc,AECHAR* lat,AECHAR* lon,AECHAR* phoneNumber)
 {   
 	AECHAR textDest[32], textLat[32], textLon[32];
 	AECHAR szLat[32], szLon[32];
@@ -749,7 +749,7 @@ void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDes
 			/* NULL terminated string providing destination device number.   
 			'+' as first character signifies international number.  */   
 			awo[i].nId  = MSGOPT_TO_DEVICE_SZ ;   
-			awo[i].pVal = (void *)DESTINATION_NUMBER;   
+			awo[i].pVal = (void *)phoneNumber;   
 			i++;   
 			
 			/* ascii text to be send */   
@@ -807,7 +807,7 @@ void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDes
 			/* NULL terminated string providing destination device number.   
 			'+' as first character signifies international number.  */   
 			awo[i].nId  = MSGOPT_TO_DEVICE_SZ ;   
-			awo[i].pVal = (void *)DESTINATION_NUMBER;   
+			awo[i].pVal = (void *)phoneNumber;   
 			i++;   
 			
 			/* unicode text to be send */   
@@ -825,14 +825,22 @@ void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDes
 			ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LON, textLon, sizeof(textLon));
 			
 			{
-				char szBuf[32];
-	   			TS_FLT2SZ(szLat, pme->m_gpsInfo.theInfo.lat);
-				WSTRTOSTR(szLat, szBuf, WSTRLEN(szLat) + 1);
-				DBGPRINTF("Lat: %s", szBuf);
+				if ( NULL == lat || NULL == lon ){
+					char szBuf[32];
+					TS_FLT2SZ(szLat, pme->m_gpsInfo.theInfo.lat);
+					WSTRTOSTR(szLat, szBuf, WSTRLEN(szLat) + 1);
+					DBGPRINTF("Lat: %s", szBuf);
 
-				TS_FLT2SZ(szLon, pme->m_gpsInfo.theInfo.lon);
-				WSTRTOSTR(szLon, szBuf, WSTRLEN(szLon) + 1);
-				DBGPRINTF("Lon: %s", szBuf);
+					TS_FLT2SZ(szLon, pme->m_gpsInfo.theInfo.lon);
+					WSTRTOSTR(szLon, szBuf, WSTRLEN(szLon) + 1);
+					DBGPRINTF("Lon: %s", szBuf);
+				} else {
+					MEMSET(szLat,0,sizeof(szLat));
+					MEMSET(szLon,0,sizeof(szLon));
+
+					MEMCPY(szLat,lat,WSTRLEN(lat));
+					MEMCPY(szLon,lon,WSTRLEN(lon));
+				}
 			}
 			
 			WSPRINTF(pszBuf, sizeof(pszBuf), L"%s:%s#%s:E,%s#%s:N,%s", textDest, szDesc, textLon, szLon, textLat, szLat);

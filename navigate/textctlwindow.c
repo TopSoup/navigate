@@ -49,7 +49,7 @@ IWindow * CTextCtlWin_New(CTopSoupApp * pOwner,uint16 wRecID)
 	  AECHAR pTextInit[TS_MAX_STRLEN];
 
 	  MEMSET(pTextInit,0,sizeof(pTextInit));
-	  if ( pme->m_wRecID != 0 )
+	  if ( pme->m_wRecID != 0 && pme->m_pOwner->m_op != 1 )
 		  TS_GetExpenseItem(pme->m_pOwner,pme->m_wRecID,pTextInit,NULL,NULL); 
 
 
@@ -133,7 +133,7 @@ static void CTextCtlWin_Redraw(IWindow * po)
    ITEXTCTL_SetInputMode( pme->m_pTextCtl, pme->m_pOwner->m_pTextctlMode );
 
    MEMSET(pTextInit,0,sizeof(pTextInit));
-   if ( pme->m_wRecID != 0 )
+   if ( pme->m_wRecID != 0 && pme->m_pOwner->m_op != 1 )
 	   TS_GetExpenseItem(pme->m_pOwner,pme->m_wRecID,pTextInit,NULL,NULL); 
     ITEXTCTL_SetText(pme->m_pTextCtl,pTextInit,WSTRLEN(pTextInit));
 
@@ -265,7 +265,21 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	   }
 	   else if (pme->m_pOwner->m_op == 1)	//¶ÌÐÅ·¢ËÍ
 	   {
-		   CTopSoupApp_SendSMSMessage(pme->m_pOwner, 0, pTextDesc);
+		   if( pme->m_wRecID != 0 ) {
+			   AECHAR lat[TS_MAX_STRLEN];
+			   AECHAR lon[TS_MAX_STRLEN];
+			   AECHAR desc[TS_MAX_STRLEN];
+
+			   MEMSET(lat,0,sizeof(lat));
+			   MEMSET(lon,0,sizeof(lon));
+			   MEMSET(desc,0,sizeof(desc));
+
+			   TS_GetExpenseItem(pme->m_pOwner,pme->m_wRecID,desc,lat,lon);
+			   CTopSoupApp_SendSMSMessage(pme->m_pOwner, 0, desc,lat,lon,pTextDesc);  //XXX
+		   }
+		   else
+				CTopSoupApp_SendSMSMessage(pme->m_pOwner, 0, pTextDesc,NULL,NULL,pTextDesc);  //XXX
+		  
 		   ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SEND,prompt,sizeof(prompt));
 	   }
 
