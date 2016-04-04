@@ -116,6 +116,14 @@ SOURCE=.\destlistwindow.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\locationinfowindow.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\locinfowindow.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\logicmacro.c
 # End Source File
 # Begin Source File
@@ -197,6 +205,14 @@ SOURCE=.\destlistfuctionwindow.h
 # Begin Source File
 
 SOURCE=.\destlistwindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\locationinfowindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\locinfowindow.h
 # End Source File
 # Begin Source File
 

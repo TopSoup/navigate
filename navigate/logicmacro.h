@@ -20,8 +20,35 @@ AECHAR*	   TS_FLT2SZ(AECHAR* szBuf, double val);
 
 //绘制文字
 void       TS_DrawText(IDisplay* pIDisplay, AEEFont nFont, AECHAR* pText, AEERect *rect);
-	
 
+
+/**
+ * @brief
+ */
+typedef struct _ts_time_t {
+	uint16			year;
+	uint8			month;
+	uint8			day;
+	uint8			hour;
+	uint8			minute;
+	uint8			second;
+	uint16			millisecond;
+}ts_time_t;
+
+	
+/**
+ * @brief 获得当前时间
+ */
+int			TS_GetTimeNow(ts_time_t* tw);
+
+/**
+ * @brief 经度校验[-180,180]
+ */
+boolean		TS_CheckLon(AECHAR* szLon);
+/**
+ * @brief 纬度校验[-90,90]
+ */
+boolean		TS_CheckLat(AECHAR* szLon);
 
 //key
 #define TS_ISEVTKEY(e)                 ((e) == EVT_KEY)

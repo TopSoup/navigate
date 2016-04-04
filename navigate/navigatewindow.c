@@ -44,7 +44,7 @@ static void		  TS_PRINTD(const char* p, double param);
 /*===========================================================================
    This function constucts the Navigate window.
 ===========================================================================*/
-IWindow * CNavigateWin_New(CTopSoupApp * pOwner, void *pDest)
+IWindow * CNavigateWin_New(CTopSoupApp * pOwner)
 {
    CNavigateWin *        pme;
    VTBL(IWindow)     vtbl;
@@ -138,9 +138,12 @@ IWindow * CNavigateWin_New(CTopSoupApp * pOwner, void *pDest)
 		pGetGPSInfo->theInfo.gpsConfig.optim = 1;
 		pGetGPSInfo->theInfo.gpsConfig.mode = AEEGPS_MODE_TRACK_NETWORK;
 		
-		if (pDest != NULL)
+		//if (pDest != NULL)
 		{
-			pGetGPSInfo->theInfo.destPos = *((Coordinate*)pDest);
+			Coordinate dest;
+			dest.lat = WSTRTOFLOAT(pme->m_pOwner->m_szTextLat);
+			dest.lon = WSTRTOFLOAT(pme->m_pOwner->m_szTextLon);
+			pGetGPSInfo->theInfo.destPos = dest;
 			pGetGPSInfo->theInfo.bSetDestPos = TRUE;
 		}
 		
@@ -287,7 +290,11 @@ static void CNavigateWin_Redraw(IWindow * po)
 
 	if (pme->m_pTextDestination)
 	{
-		STRTOWSTR("Destination: BeiJing", pme->m_szText, sizeof(pme->m_szText));
+		AECHAR szBuf[32];
+		
+		//STRTOWSTR("Destination: BeiJing", pme->m_szText, sizeof(pme->m_szText));
+		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DEST_NAME,szBuf,sizeof(szBuf));
+		WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", szBuf, pme->m_pOwner->m_szTextDesc);
 		TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextDestination, AEE_FONT_NORMAL, pme->m_szText);
 	}
 
@@ -305,10 +312,12 @@ static void CNavigateWin_Redraw(IWindow * po)
 
 		if (pme->m_pTextDistance)
 		{
-			AECHAR bufDis [32];
-
+			AECHAR bufDis[32];
+			AECHAR szBuf[32];
+			
 			FLOATTOWSTR(distance, bufDis, 32);
-			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"Distance: %s m", bufDis);
+			ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DISTANCE,szBuf,sizeof(szBuf));
+			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %sm", szBuf, bufDis);
 			TS_FitStaticText(pme->m_pIDisplay, pme->m_pTextDistance, AEE_FONT_NORMAL, pme->m_szText);
 		}
 	}

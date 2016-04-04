@@ -36,6 +36,8 @@
 #include "destlistfuctionwindow.h"
 #include "textctlwindow.h"
 #include "wheredetailswindow.h"
+#include "locationinfowindow.h"
+#include "locinfowindow.h"
 
 #include "gmenuctl.h"
 #include "location.h"

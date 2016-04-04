@@ -62,12 +62,14 @@ typedef enum TSWindow
 	
 
 	//位置信息说明
-	TSW_WHERE_DETAILS,	//我在哪选项->信息说明
+	TSW_WHERE_DETAILS,			//我在哪选项->信息说明
+	TSW_LOCATION_RANGE_INFO,	//目的地经纬度范围说明
 
 	/* Interval */
 	//1
 	TSW_LOCATING,		//定位中...
 	TSW_NAVIGATE,		//领航
+	TSW_NAVIGATE_EX,	//领航2
 	
 	//3 
 	TSW_ADDRBOOK,		//联系人界面
@@ -137,6 +139,11 @@ struct CTopSoupApp
 	//Destination DataBse
 	IDatabase*		m_pDatabase;		// Database
 
+
+	//新建目的地使用的变量
+	AECHAR				m_szTextLat[32];
+	AECHAR				m_szTextLon[32];
+	AECHAR				m_szTextDesc[32];
 
 	//textctl
 	AECHAR          m_pTextctlText[TS_MAX_STRLEN];
