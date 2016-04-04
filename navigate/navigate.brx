@@ -199,6 +199,18 @@
 	<String Id="1036" Name="IDS_STRING_NOT_SET">
 		<Text>未设定</Text>
 	</String>
+	<String Id="1037" Name="IDS_STRING_PROMPT_INVALID_COORD">
+		<Text>请输入经纬度</Text>
+	</String>
+	<String Id="1038" Name="IDS_STRING_PROMPT_INVALID_LON">
+		<Text>请输入有效经度</Text>
+	</String>
+	<String Id="1039" Name="IDS_STRING_PROMPT_INVALID_LAT">
+		<Text>请入有效纬度</Text>
+	</String>
+	<String Id="1040" Name="IDS_STRING_PROMPT_INVALID_SAVE">
+		<Text>保存失败</Text>
+	</String>
 </Strings>
 <Objects MimeType="image/png">
 	<Object Id="1000" Name="IDP_NAVIGATOR">

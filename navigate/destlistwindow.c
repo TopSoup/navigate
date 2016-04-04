@@ -67,7 +67,7 @@ IWindow * CDestListWin_New(CTopSoupApp * pOwner)
 	//XXX __end
 
 	//For Test
-	//TS_EmptyExpenseDatabase(pme->m_pOwner);
+	TS_EmptyExpenseDatabase(pme->m_pOwner);
 
    }
 
@@ -136,6 +136,7 @@ static void CDestListWin_Redraw(IWindow * po)
 #endif
    
    //For Test
+#if 0
    if( IDATABASE_GetRecordCount( pme->m_pOwner->m_pDatabase ) == 0 )
    {
 		TS_AddExpenseItem(pme->m_pOwner, L"Aeijing", L"37.012345", L"114.123456");
@@ -151,6 +152,7 @@ static void CDestListWin_Redraw(IWindow * po)
 		TS_AddExpenseItem(pme->m_pOwner, L"Keijing", L"37.212345", L"114.323456");
 		TS_AddExpenseItem(pme->m_pOwner, L"Leijing", L"37.312345", L"114.423456");
    }
+#endif
 
    // Get Expense List
    TS_GetExpenseList( pme->m_pOwner, pme->m_pMainMenu, &nTotal);

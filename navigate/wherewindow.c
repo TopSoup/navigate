@@ -40,42 +40,6 @@ static void		  CWhereWin_LocStop ( IWindow *po );
 static void		  CWhereWin_GetGPSInfo_SecondTicker( IWindow *po );
 static void		  CWhereWin_GetGPSInfo_Callback( IWindow *po );
 
-/**
- * @brief
- */
-typedef struct ts_time_t {
-	uint16			year;
-	uint8			month;
-	uint8			day;
-	uint8			hour;
-	uint8			minute;
-	uint8			second;
-	uint16			millisecond;
-} ts_time_t;
-
-/**
- * @brief 获得当前时间
- */
-int get_time_now(ts_time_t* tw) {
-	uint32 secs;
-	JulianType julian;
-	
-	if( NULL == tw )
-		return -1;
-	
-	secs = GETTIMESECONDS();
-	GETJULIANDATE(secs,&julian);
-	
-	tw->year = julian.wYear;
-	tw->month = (uint8)julian.wMonth;
-	tw->day = (uint8)julian.wDay;
-	tw->hour = (uint8)julian.wHour;
-	tw->minute = (uint8)julian.wMinute;
-	tw->second = (uint8)julian.wSecond;
-	tw->millisecond = 0;
-	
-	return 0;
-}
 
 /*===============================================================================
 
@@ -306,7 +270,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MONTH, bufRes2, sizeof(bufRes));
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DAY, bufRes3, sizeof(bufRes));
 			
-			get_time_now(&now);
+			TS_GetTimeNow(&now);
 			
 			WSPRINTF(wBuf, sizeof(wBuf), L"%02d%s%02d%s ", now.month, bufRes2, now.day, bufRes3);
 			WSPRINTF(wBuf2, sizeof(wBuf2), L"%02d:%02d:%02d", now.hour, now.minute, now.second);
