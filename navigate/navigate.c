@@ -188,6 +188,9 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
 
 
    SETAEERECT(&pme->m_rectWin, 0, pme->m_rectHdr.y + pme->m_rectHdr.dy + 1, pme->m_cxWidth, pme->m_cyHeight - pme->m_rectHdr.y - pme->m_rectHdr.dy - 1 - pme->m_rectBtm.dy);
+   
+   MEMSET(pme->m_wMenuLastSel,0,sizeof(pme->m_wMenuLastSel));
+   
    //XXX _end
 
    pme->m_pWin = CMainWin_New(pme);

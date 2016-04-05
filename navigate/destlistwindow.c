@@ -78,6 +78,9 @@ static void CDestListWin_Delete(IWindow * po)
    CDestListWin *  pme = (CDestListWin *)po;
   
    //XXX __begin
+   if (pme->m_pMainMenu)
+	   pme->m_pOwner->m_wMenuLastSel[TSW_DEST_LIST] = IMENUCTL_GetSel(pme->m_pMainMenu);
+
    TS_RELEASEIF(pme->m_pMainMenu);
    //XXX _end
 
@@ -104,7 +107,7 @@ static void CDestListWin_Enable(IWindow * po, boolean bEnable)
    }
 
    IMENUCTL_SetActive(pme->m_pMainMenu, TRUE);
-   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMainWin);
+   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMenuLastSel[TSW_DEST_LIST]);
    //XXX __end
 }
 
@@ -176,6 +179,7 @@ static void CDestListWin_Redraw(IWindow * po)
 
    // Active Menu
    IMENUCTL_SetActive( pme->m_pMainMenu, TRUE);
+   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMenuLastSel[TSW_DEST_LIST]);
    }
 
    IMENUCTL_Redraw(pme->m_pMainMenu);
@@ -205,7 +209,10 @@ static boolean CDestListWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPa
 
 	   if( AVK_SOFT2 == wParam )
 	   {
-			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_DEST, 0);
+		   CTopSoupApp* pOwner = pme->m_pOwner;
+
+		    CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_DEST, 0);
+			pOwner->m_wMenuLastSel[TSW_DEST_LIST] = 0;
 			return TRUE;
 	   }
    }

@@ -120,7 +120,7 @@ struct CTopSoupApp
 	AECHAR            m_pMidSoftText[TS_MAX_STRLEN];
 	AECHAR            m_pRightSoftText[TS_MAX_STRLEN];
 
-	uint16            m_wMainWin;    // CurSel of CMainWin
+	uint16            m_wMenuLastSel[TSW_LAST];    // CurSel of CMainWin
 
 	//GPS
 	GetGPSInfo		  m_gpsInfo;	//

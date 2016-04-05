@@ -73,7 +73,7 @@ static void CMainWin_Delete(IWindow * po)
 
    //XXX __begin
    if (pme->m_pMainMenu)
-	   pme->m_pOwner->m_wMainWin = IMENUCTL_GetSel(pme->m_pMainMenu);
+	   pme->m_pOwner->m_wMenuLastSel[TSW_MAIN] = IMENUCTL_GetSel(pme->m_pMainMenu);
    TS_RELEASEIF(pme->m_pMainMenu);
    //XXX _end
 
@@ -100,7 +100,7 @@ static void CMainWin_Enable(IWindow * po, boolean bEnable)
    }
 
    IMENUCTL_SetActive(pme->m_pMainMenu, TRUE);
-   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMainWin);
+   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMenuLastSel[TSW_MAIN]);
    //XXX __end
 }
 

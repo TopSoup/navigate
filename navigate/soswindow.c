@@ -69,7 +69,7 @@ static void CSOSWin_Delete(IWindow * po)
 
    //XXX __begin
    if (pme->m_pMainMenu)
-	   pme->m_pOwner->m_wMainWin = IMENUCTL_GetSel(pme->m_pMainMenu);
+	   pme->m_pOwner->m_wMenuLastSel[TSW_SOS] = IMENUCTL_GetSel(pme->m_pMainMenu);
    TS_RELEASEIF(pme->m_pMainMenu);
    //XXX _end
 
@@ -96,7 +96,7 @@ static void CSOSWin_Enable(IWindow * po, boolean bEnable)
    }
 
    IMENUCTL_SetActive(pme->m_pMainMenu, TRUE);
-   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMainWin);
+   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMenuLastSel[TSW_SOS]);
    //XXX __end
 }
 
@@ -138,7 +138,10 @@ static boolean CSOSWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, 
 	   //ÍË³ö³ÌÐò
 	   if( AVK_SOFT2 == wParam )
 	   {
+		    CTopSoupApp* pOwner = pme->m_pOwner;
+		    
 			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
+			pOwner->m_wMenuLastSel[TSW_SOS] = 0;
 			return TRUE;
 	   }
    }

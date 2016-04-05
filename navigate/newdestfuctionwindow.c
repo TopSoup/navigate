@@ -72,7 +72,7 @@ static void CNewdestFuctionWin_Delete(IWindow * po)
 
    //XXX __begin
    if (pme->m_pMainMenu)
-	   pme->m_pOwner->m_wMainWin = IMENUCTL_GetSel(pme->m_pMainMenu);
+	   pme->m_pOwner->m_wMenuLastSel[TSW_DEST_NEW_FUCTION] = IMENUCTL_GetSel(pme->m_pMainMenu);
    TS_RELEASEIF(pme->m_pMainMenu);
    //XXX _end
 
@@ -99,7 +99,7 @@ static void CNewdestFuctionWin_Enable(IWindow * po, boolean bEnable)
    }
 
    IMENUCTL_SetActive(pme->m_pMainMenu, TRUE);
-   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMainWin);
+   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMenuLastSel[TSW_DEST_NEW_FUCTION]);
    //XXX __end
 }
 
@@ -150,7 +150,10 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 
 	   if( AVK_SOFT2 == wParam )
 	   {
-			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DEST_NEW, 0);
+			CTopSoupApp* pOwner = pme->m_pOwner;
+		   
+		    CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DEST_NEW, 0);
+			pOwner->m_wMenuLastSel[TSW_DEST_NEW_FUCTION] = 0;
 			return TRUE;
 	   }
    }

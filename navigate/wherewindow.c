@@ -431,9 +431,16 @@ static boolean CWhereWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam
 			break;
 
 		case AVK_SOFT2:
-			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
-			bRet = TRUE;
-			break;
+			{
+				CTopSoupApp* pOwner = pme->m_pOwner;
+
+				CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
+				pOwner->m_wMenuLastSel[TSW_WHERE] = 0;
+				bRet = TRUE;
+				break;
+
+			}
+
 
 		case AVK_1:
 			DBGPRINTF("Mode: NETWORK");

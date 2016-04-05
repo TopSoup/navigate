@@ -68,7 +68,7 @@ static void CWhereFuctionWin_Delete(IWindow * po)
 
    //XXX __begin
    if (pme->m_pMainMenu)
-	   pme->m_pOwner->m_wMainWin = IMENUCTL_GetSel(pme->m_pMainMenu);
+	   pme->m_pOwner->m_wMenuLastSel[TSW_WHERE_FUCTION] = IMENUCTL_GetSel(pme->m_pMainMenu);
    TS_RELEASEIF(pme->m_pMainMenu);
    //XXX _end
 
@@ -95,7 +95,7 @@ static void CWhereFuctionWin_Enable(IWindow * po, boolean bEnable)
    }
 
    IMENUCTL_SetActive(pme->m_pMainMenu, TRUE);
-   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMainWin);
+   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMenuLastSel[TSW_WHERE_FUCTION]);
    //XXX __end
 }
 
@@ -148,7 +148,10 @@ static boolean CWhereFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16
 
 	   if( AVK_SOFT2 == wParam )
 	   {
-			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE, 0);
+			CTopSoupApp* pOwner = pme->m_pOwner;
+		   
+		    CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE, 0);
+			pOwner->m_wMenuLastSel[TSW_WHERE_FUCTION] = 0;
 			return TRUE;
 	   }
    }

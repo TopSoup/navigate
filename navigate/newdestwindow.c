@@ -123,6 +123,8 @@ static void CNewDestWin_Delete(IWindow * po)
    CNewDestWin *  pme = (CNewDestWin *)po;
 
    //XXX __begin
+   if(pme->m_pMainMenu)
+	   pme->m_pOwner->m_wMenuLastSel[TSW_DEST_NEW] = IMENUCTL_GetSel(pme->m_pMainMenu); 
    TS_RELEASEIF(pme->m_pTextCtl);
    TS_RELEASEIF(pme->m_pMainMenu);
    //XXX _end
@@ -148,7 +150,7 @@ static void CNewDestWin_Enable(IWindow * po, boolean bEnable)
    }
 
    IMENUCTL_SetActive(pme->m_pMainMenu, TRUE);
-   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMainWin);
+   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMenuLastSel[TSW_DEST_NEW]);
    //XXX __end
 
 }
@@ -232,7 +234,7 @@ static void CNewDestWin_Redraw(IWindow * po)
 		// Active Menu
 		ITEXTCTL_SetActive( pme->m_pTextCtl, FALSE);
 		IMENUCTL_SetActive( pme->m_pMainMenu, TRUE);
-		IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMainWin);
+		IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMenuLastSel[TSW_DEST_NEW]);
 		IMENUCTL_Redraw(pme->m_pMainMenu);
 
 		{
@@ -289,7 +291,7 @@ static void CNewDestWin_Redraw(IWindow * po)
 
 		 
 		if (pme->m_pMainMenu)
-			pme->m_pOwner->m_wMainWin = IMENUCTL_GetSel(pme->m_pMainMenu);
+			pme->m_pOwner->m_wMenuLastSel[TSW_DEST_NEW] = IMENUCTL_GetSel(pme->m_pMainMenu);
 
 		SETAEERECT( &rRect, 0, TS_TITLE_Y, cx, pme->m_pOwner->m_rectWin.dy );
 
@@ -395,7 +397,10 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			
 			if( AVK_SOFT2 == wParam )
 			{
+				CTopSoupApp* pOwner = pme->m_pOwner;
+
 				CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_DEST, 0);
+				pOwner->m_wMenuLastSel[TSW_DEST_NEW] = 0;
 				return TRUE;
 			}
 		}
