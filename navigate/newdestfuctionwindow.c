@@ -55,6 +55,10 @@ IWindow * CNewdestFuctionWin_New(CTopSoupApp * pOwner)
 
 	  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_FUCTION,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
 	  TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
+
+
+	  //下级子菜单全部重置 XXX-使用结构来递归组织数据,提供统一的重置接口
+	  pme->m_pOwner->m_wMenuLastSel[TSW_LOCATION_RANGE_INFO] = 0;
 	  //XXX __end
 
 
@@ -150,10 +154,7 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 
 	   if( AVK_SOFT2 == wParam )
 	   {
-			CTopSoupApp* pOwner = pme->m_pOwner;
-		   
 		    CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DEST_NEW, 0);
-			pOwner->m_wMenuLastSel[TSW_DEST_NEW_FUCTION] = 0;
 			return TRUE;
 	   }
    }

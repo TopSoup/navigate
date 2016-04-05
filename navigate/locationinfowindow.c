@@ -147,10 +147,7 @@ static boolean CLocationInfoWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16
       //·µ»ØÎÒÔÚÄÄ
       if( AVK_SOFT2 == wParam )
       {
-         CTopSoupApp* pOwner = pme->m_pOwner;
-
 		 CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DEST_NEW_FUCTION, 0);
-		 pOwner->m_wMenuLastSel[TSW_LOCATION_RANGE_INFO] = 0;
          return TRUE;
       }
    }

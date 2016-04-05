@@ -149,11 +149,8 @@ static boolean CDestlistFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uin
 	   }
 
 	   if( AVK_SOFT2 == wParam )
-	   {
-		    CTopSoupApp* pOwner = pme->m_pOwner;
-			
+	   {	
 		    CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DEST_LIST, 0);
-			pOwner->m_wMenuLastSel[TSW_DEST_LIST_FUCTION] = 0;
 			return TRUE;
 	   }
    }

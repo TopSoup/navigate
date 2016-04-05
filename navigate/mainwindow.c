@@ -55,6 +55,10 @@ IWindow * CMainWin_New(CTopSoupApp * pOwner)
 
 	  ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_TITLE,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
 	  TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
+
+	  pme->m_pOwner->m_wMenuLastSel[TSW_NAVIGATE_DEST] = 0;
+	  pme->m_pOwner->m_wMenuLastSel[TSW_WHERE] = 0;
+	  pme->m_pOwner->m_wMenuLastSel[TSW_SOS] = 0;
 	  //XXX __end
 
 

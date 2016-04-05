@@ -148,10 +148,7 @@ static boolean CWhereFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16
 
 	   if( AVK_SOFT2 == wParam )
 	   {
-			CTopSoupApp* pOwner = pme->m_pOwner;
-		   
 		    CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE, 0);
-			pOwner->m_wMenuLastSel[TSW_WHERE_FUCTION] = 0;
 			return TRUE;
 	   }
    }

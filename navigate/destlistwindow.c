@@ -64,6 +64,9 @@ IWindow * CDestListWin_New(CTopSoupApp * pOwner)
 */
 	ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DEST_LIST,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
 	TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,IDS_STRING_SELECT);
+
+	//下级子菜单全部重置
+	pme->m_pOwner->m_wMenuLastSel[TSW_DEST_LIST_FUCTION] = 0;
 	//XXX __end
    }
 
@@ -209,10 +212,7 @@ static boolean CDestListWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPa
 
 	   if( AVK_SOFT2 == wParam )
 	   {
-		   CTopSoupApp* pOwner = pme->m_pOwner;
-
-		    CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_DEST, 0);
-			pOwner->m_wMenuLastSel[TSW_DEST_LIST] = 0;
+     	    CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_DEST, 0);
 			return TRUE;
 	   }
    }

@@ -52,6 +52,8 @@ IWindow * CNavigateDestWin_New(CTopSoupApp * pOwner)
 
 	  ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NAVIGATE,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
 	  TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
+
+	  pme->m_pOwner->m_wMenuLastSel[TSW_DEST_NEW] = 0;
 	  //XXX __end
 
 
@@ -140,10 +142,7 @@ static boolean CNavigateDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16
 	   //ÍË³ö³ÌÐò
 	   if( AVK_SOFT2 == wParam )
 	   {
-			CTopSoupApp* pOwner = pme->m_pOwner;
-		   
 		    CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
-			pOwner->m_wMenuLastSel[TSW_NAVIGATE_DEST] = 0;
 			return TRUE;
 	   }
    }

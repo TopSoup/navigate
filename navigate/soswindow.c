@@ -138,10 +138,7 @@ static boolean CSOSWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, 
 	   //ÍË³ö³ÌÐò
 	   if( AVK_SOFT2 == wParam )
 	   {
-		    CTopSoupApp* pOwner = pme->m_pOwner;
-		    
 			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
-			pOwner->m_wMenuLastSel[TSW_SOS] = 0;
 			return TRUE;
 	   }
    }

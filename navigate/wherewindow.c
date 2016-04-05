@@ -115,6 +115,8 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 	//TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,0);
 	TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,0);
 
+	pme->m_pOwner->m_wMenuLastSel[TSW_WHERE_FUCTION] = 0;
+
    return (IWindow *)pme;
 }
 
@@ -432,10 +434,7 @@ static boolean CWhereWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam
 
 		case AVK_SOFT2:
 			{
-				CTopSoupApp* pOwner = pme->m_pOwner;
-
 				CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
-				pOwner->m_wMenuLastSel[TSW_WHERE] = 0;
 				bRet = TRUE;
 				break;
 
