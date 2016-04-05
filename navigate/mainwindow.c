@@ -117,6 +117,7 @@ static void CMainWin_Redraw(IWindow * po)
    //XXX __begin
    IDISPLAY_ClearScreen(pme->m_pIDisplay);
 
+   TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
    TS_DrawBackgroud(po);
    IMENUCTL_Redraw(pme->m_pMainMenu);
    
