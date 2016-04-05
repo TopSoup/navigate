@@ -16,14 +16,13 @@ static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
 =============================================================================== */
 #define USAGE_SMS_TX_UNICODE    0
 #define USAGE_SMS_TX_ASCII      1
-
-
-// PHONE NUMBER
-#define DESTINATION_NUMBER "15511823090" 
  
 // ascii 短信内容，对于unicode短信内容，必须由资源文件bar中获取，否则编码不对 
 #define MO_TEXT_ASCII "Destination:Beijing#lat:37.123456#lon:114.121345" 
 
+//解析短信内容
+//格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
+static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg);
 static boolean    CTopSoupApp_ReceiveSMSMessage(CTopSoupApp *pme, uint32 uMsgId);
 static void		  CTopSoupApp_MakeSOSCall(CTopSoupApp * pme, char* szNumber);
 static void		  CTopSoupApp_EndSOSCall(CTopSoupApp * pme);
@@ -107,6 +106,11 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
    AEERect           rect1;
    int				 nErr;
    
+   {
+	   //格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
+	   //char *str = "目标位置:1111#纬度:E,20.012345#经度:N,120.012345";
+	   //CTopSoupApp_SaveSMSMessage(pme, str);
+   }
    // Get screen pixel count
    pdi = MALLOC(sizeof(AEEDeviceInfo));
    if (!pdi)
@@ -659,20 +663,89 @@ static void CTopSoupApp_ReleaseRes(CTopSoupApp * pme)
 //格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
 static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 {
+	char *pszTok = NULL, *pszDot = NULL;
 	char szBuf[128];
+	char *pBuf = NULL;
+	char szTmp[32];
+	char szDesc[32], szLon[32], szLat[32];
+	AECHAR textDesc[32], textLon[32], textLat[32];
+	int len = 0;
+	AECHAR prompt[32];
 	
 	if (szMsg == NULL || STRLEN(szMsg) < 10)
 		return FALSE;
 
 	STRCPY(szBuf, szMsg);
+	pBuf = szBuf;
 	
 	//解析短信
 	
-	//#
-	//		:
+	//#1
+	pszTok = STRCHR(pBuf, '#');
+	if (pszTok == NULL)
+		return FALSE;
+	len = pszTok-pBuf;
+	MEMCPY(szTmp, pBuf, len);
+	szTmp[len] = 0;
+	pBuf = pszTok + 1;	//偏移过#
 	
+	pszTok = STRCHR(szTmp, ':');
+	if (pszTok == NULL)
+		return FALSE;
+
+	STRCPY(szDesc, pszTok+1);
+	WSTRTOSTR(textDesc, szDesc, 32);
+	DBGPRINTF("@textDesc:%s", szDesc);
+
+	//#2
+	pszTok = STRCHR(pBuf, '#');
+	if (pszTok == NULL)
+		return FALSE;
+
+	len = pszTok-pBuf;
+	MEMCPY(szTmp, pBuf, len);
+	szTmp[len] = 0;
+	pBuf = pszTok + 1;	//偏移过#
+
+	pszTok = STRCHR(szTmp, ',');
+	if (pszTok == NULL)
+		return FALSE;
+
+	STRCPY(szLat, pszTok+1);
+	WSTRTOSTR(textLat, szLat, 32);
+	DBGPRINTF("@szLat: %s", szLat);
+
+	//#3
+	pszTok = STRCHR(pBuf, ',');
+	if (pszTok == NULL)
+		return FALSE;
+
+	STRCPY(szLon, pszTok+1);
+	WSTRTOSTR(textLon, szLon, 32);
+	DBGPRINTF("@szLon:%s", szLon);
+
 	//保存到数据库
-	//TS_ADD
+	if (!TS_AddExpenseItem(pme, textDesc, textLat, textLon))
+	{
+		DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
+		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_SAVE,prompt,sizeof(prompt));
+		
+		//提示窗口
+		MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
+		WSTRCPY(pme->m_pTextctlText, textDesc);	   
+		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+		TS_DrawSplash(pme,prompt,1500,0, 0);
+		return TRUE;
+	} else
+	{
+		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
+
+		//提示窗口
+		MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
+		WSTRCPY(pme->m_pTextctlText, textDesc);	   
+		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+		TS_DrawSplash(pme,prompt,500,0, 0);
+	}
 	
 	//提示信息
 	//TS_SPLAH
@@ -702,12 +775,13 @@ static boolean CTopSoupApp_ReceiveSMSMessage(CTopSoupApp* pme, uint32 uMsgId)
 			///        目标位置:北京天安门#经度:E,114.000#纬度:N,33.2222
 			if(ISMSMSG_GetOpt(pSMS, MSGOPT_PAYLOAD_WSZ,&TmpOpt)==AEE_SUCCESS) {
 				WSTRTOUTF8((AECHAR*)TmpOpt.pVal,WSTRLEN((AECHAR*)TmpOpt.pVal), (byte*)szText, sizeof(szText));
-				//WSTRTOSTR((AECHAR*)TmpOpt.pVal,WSTRLEN((AECHAR*)TmpOpt.pVal), (char*)szText)//, sizeof(szText));
+				//WSTRTOSTR((AECHAR*)TmpOpt.pVal, (char*)szText, WSTRLEN((AECHAR*)TmpOpt.pVal));//, sizeof(szText));
 				DBGPRINTF("WSZ msg from %s: %s",szPhone,szText);
-
+				CTopSoupApp_SaveSMSMessage(pme, szText);
 			} else if( ISMSMSG_GetOpt(pSMS,MSGOPT_PAYLOAD_SZ,&TmpOpt) == AEE_SUCCESS ) {
 				STRCPY(szText,(const char*)(TmpOpt.pVal));
 				DBGPRINTF("SZ msg from %s: %s",szPhone,szText);
+				CTopSoupApp_SaveSMSMessage(pme, szText);
 			} else {
 				DBGPRINTF("Can not get sms text");
 				return FALSE;

@@ -11,7 +11,7 @@
 #ifdef AEE_SIMULATOR
 #define WATCHER_TIMER	15
 #else
-#define WATCHER_TIMER	40
+#define WATCHER_TIMER	30
 #endif
 
 // Where window: Displays main menu.
@@ -122,7 +122,7 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 		struct _GetGPSInfo *pGetGPSInfo = &pme->m_pOwner->m_gpsInfo;
 		ZEROAT(pGetGPSInfo);
 
-		pme->m_gpsMode = AEEGPS_MODE_TRACK_NETWORK;//AEEGPS_MODE_TRACK_STANDALONE;
+		pme->m_gpsMode = AEEGPS_MODE_TRACK_STANDALONE;//AEEGPS_MODE_TRACK_NETWORK;
 
 		//Æô¶¯¶¨Î»
 		CWhereWin_LocStart((IWindow*)pme);
