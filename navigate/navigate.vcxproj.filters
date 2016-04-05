@@ -19,6 +19,9 @@
     <Filter Include="location">
       <UniqueIdentifier>{8e60c207-1a8f-404d-9ec9-4e5115ebca7c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="controls">
+      <UniqueIdentifier>{086eecba-9488-4517-b721-d88b1c1fd75c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AEEAppGen.c">
@@ -89,6 +92,21 @@
     </ClCompile>
     <ClCompile Include="wherewindow.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="locationinfowindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="locinfowindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wheredetailswindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\gmenuctl.c">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\TQueueList.c">
+      <Filter>controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -164,15 +182,24 @@
     <ClInclude Include="wherewindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="locationinfowindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="locinfowindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wheredetailswindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\gmenuctl.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\TQueueList.h">
+      <Filter>controls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="navigate.bid" />
-    <None Include="backimg.brx">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="kitimg.brx">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="navigate.brx">

@@ -146,6 +146,7 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
 		   if (pme->m_bVersion == TRUE)
 		   {
 			   CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
+			   pme->m_bVersion = FALSE;
 		   }
 		   else
 		   {

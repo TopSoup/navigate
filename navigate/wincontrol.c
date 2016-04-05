@@ -46,7 +46,7 @@ boolean TS_AddMenuItem(IMenuCtl * pMenu, uint16 wTextID, AECHAR * pText, uint16 
    // Fill in the CtlAddItem structure values
    ai.pText = pText;
    ai.pImage = NULL;
-   ai.pszResImage = KITIMG_RES_FILE;
+   ai.pszResImage = NAVIGATE_RES_FILE;
    ai.pszResText = NAVIGATE_RES_FILE;
    ai.wText = wTextID;
    ai.wFont = AEE_FONT_LARGE;

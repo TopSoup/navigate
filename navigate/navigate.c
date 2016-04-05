@@ -128,7 +128,7 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
 
    //XXX __begin
    //Header
-   pme->m_pHdrImage = ISHELL_LoadResImage(pme->a.m_pIShell, BACKIMG_RES_FILE, IDI_OBJECT_5003);
+   pme->m_pHdrImage = ISHELL_LoadResImage(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDI_OBJECT_5003);
    if (!pme->m_pHdrImage) {
 	   CTopSoupApp_ReleaseRes(pme);    
 	   return FALSE;
@@ -146,7 +146,7 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_TITLE,pme->m_pHdrText,sizeof(pme->m_pHdrText));
 
    
-   pme->m_pBackImage = ISHELL_LoadResImage(pme->a.m_pIShell,BACKIMG_RES_FILE,IDI_OBJECT_5000);
+   pme->m_pBackImage = ISHELL_LoadResImage(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDI_OBJECT_5000);
    if (!pme->m_pBackImage) {	
 		CTopSoupApp_ReleaseRes(pme);  	
 	   return FALSE;
@@ -154,7 +154,7 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
    IImage_GetInfo(pme->m_pBackImage,&info);
    SETAEERECT(&pme->m_rectBack,0,0,info.cx,info.cy);
 
-   pme->m_pBottomImage = ISHELL_LoadResImage(pme->a.m_pIShell,BACKIMG_RES_FILE,IDI_OBJECT_5004);
+   pme->m_pBottomImage = ISHELL_LoadResImage(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDI_OBJECT_5004);
    if (!pme->m_pBottomImage){
        CTopSoupApp_ReleaseRes(pme);  	
 	   return FALSE;
