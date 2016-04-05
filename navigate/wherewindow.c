@@ -9,9 +9,9 @@
 /* TIMER CONTROL                                                        */
 /************************************************************************/
 #ifdef AEE_SIMULATOR
-#define WATCHER_TIMER	20
+#define WATCHER_TIMER	15
 #else
-#define WATCHER_TIMER	60
+#define WATCHER_TIMER	40
 #endif
 
 // Where window: Displays main menu.
@@ -35,6 +35,7 @@ struct CWhereWin
 	AEECallback		m_cbWatcherTimer;
 	AEEGPSMode		m_gpsMode;			//GPS模式
 	boolean			m_bGetGpsInfo;
+	ts_time_t		m_getGpsTime;
 };
 
 typedef struct CWhereWin CWhereWin;
@@ -275,7 +276,6 @@ static void CWhereWin_Redraw(IWindow * po)
 			AECHAR wBuf[MP_MAX_STRLEN], wBuf2[MP_MAX_STRLEN];
 			AECHAR bufRes[MP_MAX_STRLEN], bufRes2[MP_MAX_STRLEN], bufRes3[MP_MAX_STRLEN];
 			AECHAR bufLat[MP_MAX_STRLEN], bufLon[MP_MAX_STRLEN], bufVel[MP_MAX_STRLEN], bufHeading[MP_MAX_STRLEN];
-			ts_time_t now;
 			int a = 0, b = 0;
 			int h = 0, xx = 0, yy = 0, dxx = 0, dyy = 0;
 			AEERect rect;
@@ -296,10 +296,8 @@ static void CWhereWin_Redraw(IWindow * po)
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MONTH, bufRes2, sizeof(bufRes));
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DAY, bufRes3, sizeof(bufRes));
 			
-			TS_GetTimeNow(&now);
-			
-			WSPRINTF(wBuf, sizeof(wBuf), L"%02d%s%02d%s ", now.month, bufRes2, now.day, bufRes3);
-			WSPRINTF(wBuf2, sizeof(wBuf2), L"%02d:%02d:%02d", now.hour, now.minute, now.second);
+			WSPRINTF(wBuf, sizeof(wBuf), L"%02d%s%02d%s ", pme->m_getGpsTime.month, bufRes2, pme->m_getGpsTime.day, bufRes3);
+			WSPRINTF(wBuf2, sizeof(wBuf2), L"%02d:%02d:%02d", pme->m_getGpsTime.hour, pme->m_getGpsTime.minute, pme->m_getGpsTime.second);
 			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s%s", bufRes, wBuf, wBuf2);
 			xx = xMargin;
 			yy += h;
@@ -451,7 +449,29 @@ static boolean CWhereWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam
 			break;
 		case AVK_SOFT1:
 			if (pme->m_bGetGpsInfo)
+			{			  
+			 
+				//记录经纬度
+			  TS_FLT2SZ(pme->m_pOwner->m_szTextLat, pme->m_pOwner->m_gpsInfo.theInfo.lat);
+			  TS_FLT2SZ(pme->m_pOwner->m_szTextLon, pme->m_pOwner->m_gpsInfo.theInfo.lon);
+
+			  //如果位置名称为空, 则使用默认日志编号格式名称
+			  if (WSTRLEN(pme->m_pOwner->m_szTextDesc) == 0)
+			  {
+				  ts_time_t tw;
+				  AECHAR szTmp[32];
+				  
+				  TS_GetTimeNow(&tw);
+				  
+				  WSPRINTF(szTmp, sizeof(szTmp), 
+					  L"%04d%02d%02d%02d", tw.year, tw.month, tw.day, tw.hour);
+				  
+				  WSPRINTF(pme->m_pOwner->m_szTextDesc, sizeof(pme->m_pOwner->m_szTextDesc), 
+					  L"%s%02d%02d", szTmp, tw.minute, tw.second);
+			  }
+
 				CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE_FUCTION, 0);
+			}
 
 			bRet = TRUE;
 			break;
@@ -512,7 +532,7 @@ static void CWhereWin_LocStart( IWindow *po )
 	pGetGPSInfo->theInfo.gpsConfig.optim = 1;
 	pGetGPSInfo->theInfo.gpsConfig.mode = pme->m_gpsMode;
 	pGetGPSInfo->theInfo.gpsConfig.nFixes = 0;
-	pGetGPSInfo->theInfo.gpsConfig.nInterval = 20;
+	pGetGPSInfo->theInfo.gpsConfig.nInterval = 10;
 	
 	if( ISHELL_CreateInstance( pme->m_pIShell, AEECLSID_POSDET,(void **)&pGetGPSInfo->pPosDet ) == SUCCESS ) {
 		
@@ -566,6 +586,11 @@ static void CWhereWin_GetGPSInfo_Callback( IWindow *po )
 		{
 			pme->m_bGetGpsInfo = TRUE;
 			pGetGPSInfo->wIdleCount = 0;
+			TS_GetTimeNow(&pme->m_getGpsTime);
+		}
+		else
+		{
+			pme->m_bGetGpsInfo = FALSE;
 		}
 
 		CWhereWin_Redraw(po);

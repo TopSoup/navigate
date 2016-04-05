@@ -221,10 +221,10 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 		   TS_GetTimeNow(&tw);
 		   
 		   WSPRINTF(szTmp, sizeof(szTmp), 
-			   L"%04d%02d%02d%02d%02d", tw.year, tw.month, tw.day, tw.hour, tw.minute);
+			   L"%04d%02d%02d%02d", tw.year, tw.month, tw.day, tw.hour);
 		   
 		   WSPRINTF(pme->m_pOwner->m_szTextDesc, sizeof(pme->m_pOwner->m_szTextDesc), 
-			   L"%s%02d", szTmp, tw.second);
+			   L"%s%02d%02d", szTmp, tw.minute, tw.second);
 	   }
 
 	   pme->m_pOwner->m_pPreNaviWin = TSW_DEST_NEW_FUCTION;
@@ -284,10 +284,10 @@ static boolean CNewdestFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uint
 				  TS_GetTimeNow(&tw);
 				  
 				  WSPRINTF(szTmp, sizeof(szTmp), 
-					  L"%04d%02d%02d%02d%02d", tw.year, tw.month, tw.day, tw.hour, tw.minute);
+					  L"%04d%02d%02d%02d", tw.year, tw.month, tw.day, tw.hour);
 				  
 				  WSPRINTF(pme->m_pOwner->m_szTextDesc, sizeof(pme->m_pOwner->m_szTextDesc), 
-					  L"%s%02d", szTmp, tw.second);
+					  L"%s%02d%02d", szTmp, tw.minute, tw.second);
 			  }
 			  
 			  if (!TS_AddExpenseItem(pme->m_pOwner,pme->m_pOwner->m_szTextDesc,pme->m_pOwner->m_szTextLat, pme->m_pOwner->m_szTextLon))

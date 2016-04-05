@@ -232,6 +232,9 @@
 	<String Id="1047" Name="IDS_STRING_SPEED_KM">
 		<Text>公里/小时</Text>
 	</String>
+	<String Id="1048" Name="IDS_STRING_PROMPT_INVALID_UPDATE">
+		<Text>更新失败</Text>
+	</String>
 </Strings>
 <Objects MimeType="image/png">
 	<Object Id="10000" Name="IDP_NAVIGATOR">

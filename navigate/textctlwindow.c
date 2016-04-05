@@ -235,11 +235,18 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			WSTRTOSTR(textLon, szBuf, WSTRLEN(textLon) + 1);
 			DBGPRINTF("Lon: %s", szBuf);
 
-			//数据库操作
+			//数据判断
 			if (WSTRLEN(textLat) == 0 || WSTRLEN(textLon) == 0 || WSTRLEN(pTextDesc) == 0)
 			{
-			DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
-			return TRUE;
+				ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_COORD,prompt,sizeof(prompt));
+				
+				//提示窗口
+				MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
+				WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
+				//TS_DrawSplash(pme->m_pOwner,prompt,1500,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+				TS_DrawSplash(pme->m_pOwner,prompt,1500,0, 0);
+				return TRUE;
+
 			}
 
 			if ( pme->m_pOwner->m_op == 0 )
@@ -247,16 +254,30 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 				if (!TS_AddExpenseItem(pme->m_pOwner, pTextDesc, textLat, textLon))
 				{
 					DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
+					ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_SAVE,prompt,sizeof(prompt));
+					
+					//提示窗口
+					MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
+					WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
+					//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+					TS_DrawSplash(pme->m_pOwner,prompt,1500,0, 0);
 					return TRUE;
 				}  
 
-			} else if( pme->m_pOwner->m_op == 2 ){
+			} else {
 				MEMSET(textLat,0,sizeof(textLat));
 				MEMSET(textLon,0,sizeof(textLon));
 				TS_GetExpenseItem(pme->m_pOwner,pme->m_wRecID,NULL,textLat,textLon);
 				if (!TS_UpdateExpenseItem(pme->m_pOwner, pme->m_wRecID,pTextDesc, textLat, textLon))
 				{
 					DBGPRINTF("UPDATE DATA ERROR!");//TODO 界面提示
+					ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_UPDATE,prompt,sizeof(prompt));
+					
+					//提示窗口
+					MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
+					WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
+					//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+					TS_DrawSplash(pme->m_pOwner,prompt,1500,0, 0);
 					return TRUE;
 				}  
 			}
@@ -280,9 +301,23 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			   TS_GetExpenseItem(pme->m_pOwner,pme->m_wRecID,desc,lat,lon);
 			   CTopSoupApp_SendSMSMessage(pme->m_pOwner, 0, desc,lat,lon,szNum);  //XXX
 		   }
-		   else if( pme->m_pOwner->m_op == 0 )
+		   else
 		   {
-			   CTopSoupApp_SendSMSMessage(pme->m_pOwner, 0, pTextDesc,NULL,NULL,szNum);  //XXX
+			   //数据判断
+			   if (WSTRLEN(pme->m_pOwner->m_szTextLat) == 0 || WSTRLEN(pme->m_pOwner->m_szTextLon) == 0 || WSTRLEN(pme->m_pOwner->m_szTextDesc) == 0)
+			   {
+				   ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_COORD,prompt,sizeof(prompt));
+				   
+				   //提示窗口
+				   MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
+				   WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
+				   //TS_DrawSplash(pme->m_pOwner,prompt,1500,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+				   TS_DrawSplash(pme->m_pOwner,prompt,1500,0, 0);
+				   return TRUE;
+				   
+			   }
+			   
+			   CTopSoupApp_SendSMSMessage(pme->m_pOwner, 0, pme->m_pOwner->m_szTextDesc, pme->m_pOwner->m_szTextLat, pme->m_pOwner->m_szTextLon,szNum);  //XXX
 		   }
 				
 		  

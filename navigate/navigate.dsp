@@ -288,54 +288,6 @@ SOURCE=.\window.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # Begin Source File
 
-SOURCE=.\backimg.brx
-
-!IF  "$(CFG)" == "navigate - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "navigate - Win32 Debug"
-
-# Begin Custom Build
-InputPath=.\backimg.brx
-
-BuildCmds= \
-	"$(BREWDIR)\tools\ResourceEditor\brewrc.exe" -s -o ./backimg.bar -h ./backimg.brh $(InputPath)
-
-"backimg.bar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"backimg.brh" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\kitimg.brx
-
-!IF  "$(CFG)" == "navigate - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "navigate - Win32 Debug"
-
-# Begin Custom Build
-InputPath=.\kitimg.brx
-
-BuildCmds= \
-	"$(BREWDIR)\tools\ResourceEditor\brewrc.exe" -s -o ./kitimg.bar -h ./kitimg.brh $(InputPath)
-
-"kitimg.bar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"kitimg.brh" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
 SOURCE=.\navigate.brx
 
 !IF  "$(CFG)" == "navigate - Win32 Release"

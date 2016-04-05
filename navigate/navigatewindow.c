@@ -9,9 +9,9 @@
 /* TIMER CONTROL                                                        */
 /************************************************************************/
 #ifdef AEE_SIMULATOR
-#define WATCHER_TIMER	20
+#define WATCHER_TIMER	15
 #else
-#define WATCHER_TIMER	60
+#define WATCHER_TIMER	40
 #endif
 
 // Navigate window: Displays main menu.
@@ -524,6 +524,10 @@ static void CNavigateWin_GetGPSInfo_Callback( IWindow *po )
 		{
 			pme->m_bGetGpsInfo = TRUE;
 			pGetGPSInfo->wIdleCount = 0;
+		}
+		else
+		{
+			pme->m_bGetGpsInfo = FALSE;
 		}
 
 		CNavigateWin_Redraw(po);

@@ -171,6 +171,10 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
    switch (wParam)
    {
       case IDS_STRING_MY_LOCATION:
+		  //打开新建目的地界面前,清空历史记录
+		  MEMSET(pme->m_pOwner->m_szTextLat, 0, sizeof(pme->m_pOwner->m_szTextLat));
+		  MEMSET(pme->m_pOwner->m_szTextLon, 0, sizeof(pme->m_pOwner->m_szTextLon));
+		  MEMSET(pme->m_pOwner->m_szTextDesc, 0, sizeof(pme->m_pOwner->m_szTextDesc));
 		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE, 0);
          break;
 
