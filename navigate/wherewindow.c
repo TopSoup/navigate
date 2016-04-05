@@ -560,10 +560,15 @@ static void CWhereWin_GetGPSInfo_Callback( IWindow *po )
 		pGetGPSInfo->dwFixNumber++;
 		pGetGPSInfo->dwFixDuration += pGetGPSInfo->wProgress;
 		pGetGPSInfo->wProgress = 0;
-		pGetGPSInfo->wIdleCount = 0;
 		DBGPRINTF("@GetGPSInfo fix:%d", pGetGPSInfo->dwFixNumber);
 
-		pme->m_bGetGpsInfo = TRUE;
+		//经纬度有效时才算定位成功
+		if (FABS(pGetGPSInfo->theInfo.lat) > 0 && FABS(pGetGPSInfo->theInfo.lon) > 0)
+		{
+			pme->m_bGetGpsInfo = TRUE;
+			pGetGPSInfo->wIdleCount = 0;
+		}
+
 		CWhereWin_Redraw(po);
 	}
 	else if( pGetGPSInfo->theInfo.nErr == EIDLE ) {

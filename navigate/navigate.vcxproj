@@ -199,12 +199,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="navigate.bid" />
-    <CustomBuild Include="navigate.brx">
-      <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cmd /s $(BREWDIR)\tools\ResourceEditor\brewrc.exe -s -o navigate.bar -h navigate.brh  $(InputPath)</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">navigate.bar;navigate.brh;</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">BREW RES Build Tools</Message>
-    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

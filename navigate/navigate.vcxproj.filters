@@ -201,9 +201,4 @@
   <ItemGroup>
     <None Include="navigate.bid" />
   </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="navigate.brx">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
-  </ItemGroup>
 </Project>

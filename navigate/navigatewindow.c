@@ -178,7 +178,7 @@ static void CNavigateWin_Delete(IWindow * po)
 	CNavigateWin *  pme = (CNavigateWin *)po;
 	
 	//释放定位模块
-	CNavigateWin_LocStop(po);
+	CNavigateWin_LocStop(pme);
 	
 	CALLBACK_Cancel(&pme->m_cbWatcherTimer);
 
@@ -415,8 +415,8 @@ static boolean CNavigateWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPa
 		case AVK_1://FOR TEST
 			DBGPRINTF("Mode: NETWORK");
 			pme->m_gpsMode = AEEGPS_MODE_TRACK_NETWORK;
-			CNavigateWin_LocStop((IWindow*)pme);
-			CNavigateWin_LocStart((IWindow*)pme);
+			CNavigateWin_LocStop(pme);
+			CNavigateWin_LocStart(pme);
 			//STRTOWSTR("NETWORK", pme->m_szMode, sizeof(pme->m_szMode));
 			//CWhereWin_Redraw((IWindow*)pme);
 			bRet = TRUE;
@@ -425,8 +425,8 @@ static boolean CNavigateWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPa
 		case AVK_2://FOR TEST
 			DBGPRINTF("STANDALONE MODE");
 			pme->m_gpsMode = AEEGPS_MODE_TRACK_STANDALONE;
-			CNavigateWin_LocStop((IWindow*)pme);
-			CNavigateWin_LocStart((IWindow*)pme);
+			CNavigateWin_LocStop(pme);
+			CNavigateWin_LocStart(pme);
 			//STRTOWSTR("Mode: STANDALONE", pme->m_szMode, sizeof(pme->m_szMode));
 			//CWhereWin_Redraw((IWindow*)pme);
 			bRet = TRUE;
@@ -517,10 +517,15 @@ static void CNavigateWin_GetGPSInfo_Callback( IWindow *po )
 		pGetGPSInfo->dwFixNumber++;
 		pGetGPSInfo->dwFixDuration += pGetGPSInfo->wProgress;
 		pGetGPSInfo->wProgress = 0;
-		pGetGPSInfo->wIdleCount = 0;
 		DBGPRINTF("@GetGPSInfo fix:%d", pGetGPSInfo->dwFixNumber);
 
-		pme->m_bGetGpsInfo = TRUE;
+		//经纬度有效时才算定位成功
+		if (FABS(pGetGPSInfo->theInfo.lat) > 0 && FABS(pGetGPSInfo->theInfo.lon) > 0)
+		{
+			pme->m_bGetGpsInfo = TRUE;
+			pGetGPSInfo->wIdleCount = 0;
+		}
+
 		CNavigateWin_Redraw(po);
 	}
 	else if( pGetGPSInfo->theInfo.nErr == EIDLE ) {
