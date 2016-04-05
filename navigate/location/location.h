@@ -61,7 +61,8 @@ typedef struct _GetGPSInfo {
    uint32       dwFixDuration;
    uint32       dwFail;
    uint32       dwTimeout;
-   uint16       wProgress;
+   uint32       wProgress;
+   uint32       wIdleCount;
    boolean      bPaused;
    uint16       wMainMenuEntry;
    boolean      bAbort;
