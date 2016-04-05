@@ -263,12 +263,12 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
 	   }
-	   else if (pme->m_pOwner->m_op == 1)	//短信发送
+	   else if (pme->m_pOwner->m_op == 1 || pme->m_pOwner->m_op == 3)	//短信发送
 	   {
 		   char szNum[TS_MAX_STRLEN];
 		   WSTRTOSTR(pTextDesc, szNum, TS_MAX_STRLEN);
 
-		   if( pme->m_pOwner->m_op == 2 ) {
+		   if( pme->m_pOwner->m_op == 3 ) {
 			   AECHAR lat[TS_MAX_STRLEN];
 			   AECHAR lon[TS_MAX_STRLEN];
 			   AECHAR desc[TS_MAX_STRLEN];

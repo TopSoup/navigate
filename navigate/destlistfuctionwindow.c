@@ -171,7 +171,7 @@ static boolean CDestlistFuctionWin_HandleEvent(IWindow * po, AEEEvent eCode, uin
 		  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_RECIPIENT,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
 		  pme->m_pOwner->m_pTextctlMode = AEE_TM_NUMBERS;
 		  pme->m_pOwner->m_pTextctlWin = TSW_DEST_LIST;
-		  pme->m_pOwner->m_op = 1;
+		  pme->m_pOwner->m_op = 3;
 		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_TEXTCTL, pme->m_wRecID);
          break;
 
