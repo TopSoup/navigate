@@ -675,6 +675,10 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	if (szMsg == NULL || STRLEN(szMsg) < 10)
 		return FALSE;
 
+	MEMSET(textDesc,0,sizeof(textDesc));
+	MEMSET(textLat,0,sizeof(textLat));
+	MEMSET(textLon,0,sizeof(textLon));
+	
 	STRCPY(szBuf, szMsg);
 	pBuf = szBuf;
 	
@@ -694,7 +698,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 		return FALSE;
 
 	STRCPY(szDesc, pszTok+1);
-	WSTRTOSTR(textDesc, szDesc, 32);
+	STRTOWSTR(szDesc,textDesc,sizeof(textDesc));
 	DBGPRINTF("@textDesc:%s", szDesc);
 
 	//#2
@@ -712,7 +716,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 		return FALSE;
 
 	STRCPY(szLat, pszTok+1);
-	WSTRTOSTR(textLat, szLat, 32);
+	STRTOWSTR(szLat,textLat,sizeof(textLat));
 	DBGPRINTF("@szLat: %s", szLat);
 
 	//#3
@@ -721,7 +725,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 		return FALSE;
 
 	STRCPY(szLon, pszTok+1);
-	WSTRTOSTR(textLon, szLon, 32);
+	STRTOWSTR(szLon,textLon,sizeof(textLon));
 	DBGPRINTF("@szLon:%s", szLon);
 
 	//保存到数据库
