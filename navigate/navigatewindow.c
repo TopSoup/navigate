@@ -11,7 +11,7 @@
 #ifdef AEE_SIMULATOR
 #define WATCHER_TIMER	15
 #else
-#define WATCHER_TIMER	30
+#define WATCHER_TIMER	60
 #endif
 
 // Navigate window: Displays main menu.
@@ -458,7 +458,7 @@ static void CNavigateWin_LocStart(CNavigateWin *pme)
 	pGetGPSInfo->theInfo.gpsConfig.optim = 1;
 	pGetGPSInfo->theInfo.gpsConfig.mode = pme->m_gpsMode;
 	pGetGPSInfo->theInfo.gpsConfig.nFixes = 0;
-	pGetGPSInfo->theInfo.gpsConfig.nInterval = 10;
+	pGetGPSInfo->theInfo.gpsConfig.nInterval = 5;
 
 	//if (pDest != NULL)
 	{
@@ -525,10 +525,10 @@ static void CNavigateWin_GetGPSInfo_Callback( IWindow *po )
 			pme->m_bGetGpsInfo = TRUE;
 			pGetGPSInfo->wIdleCount = 0;
 		}
-		else
-		{
-			pme->m_bGetGpsInfo = FALSE;
-		}
+		//else
+		//{
+		//	pme->m_bGetGpsInfo = FALSE;
+		//}
 
 		CNavigateWin_Redraw(po);
 	}

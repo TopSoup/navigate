@@ -560,7 +560,7 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 	  case TSW_NAVIGATE:
 		  {
 			  //使用当前选择的项作为领航目标
-				TS_GetExpenseItem(pme,(uint16)dwParam,NULL,pme->m_szTextLat,pme->m_szTextLon);
+				TS_GetExpenseItem(pme,(uint16)dwParam,pme->m_szTextDesc,pme->m_szTextLat,pme->m_szTextLon);
 
 				pme->m_pWin = (IWindow*)CNavigateWin_New(pme);
 

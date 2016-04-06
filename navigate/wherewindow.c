@@ -11,7 +11,7 @@
 #ifdef AEE_SIMULATOR
 #define WATCHER_TIMER	15
 #else
-#define WATCHER_TIMER	30
+#define WATCHER_TIMER	60
 #endif
 
 // Where window: Displays main menu.
@@ -532,7 +532,7 @@ static void CWhereWin_LocStart( IWindow *po )
 	pGetGPSInfo->theInfo.gpsConfig.optim = 1;
 	pGetGPSInfo->theInfo.gpsConfig.mode = pme->m_gpsMode;
 	pGetGPSInfo->theInfo.gpsConfig.nFixes = 0;
-	pGetGPSInfo->theInfo.gpsConfig.nInterval = 10;
+	pGetGPSInfo->theInfo.gpsConfig.nInterval = 5;
 	
 	if( ISHELL_CreateInstance( pme->m_pIShell, AEECLSID_POSDET,(void **)&pGetGPSInfo->pPosDet ) == SUCCESS ) {
 		
@@ -588,10 +588,10 @@ static void CWhereWin_GetGPSInfo_Callback( IWindow *po )
 			pGetGPSInfo->wIdleCount = 0;
 			TS_GetTimeNow(&pme->m_getGpsTime);
 		}
-		else
-		{
-			pme->m_bGetGpsInfo = FALSE;
-		}
+		//else
+		//{
+		//	pme->m_bGetGpsInfo = FALSE;
+		//}
 
 		CWhereWin_Redraw(po);
 	}
