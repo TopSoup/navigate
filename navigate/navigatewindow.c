@@ -520,7 +520,7 @@ static void CNavigateWin_GetGPSInfo_Callback( IWindow *po )
 		DBGPRINTF("@GetGPSInfo fix:%d", pGetGPSInfo->dwFixNumber);
 
 		//经纬度有效时才算定位成功
-		if (FABS(pGetGPSInfo->theInfo.lat) > 0 && FABS(pGetGPSInfo->theInfo.lon) > 0)
+		if (FCMP_G(pGetGPSInfo->theInfo.lat,0) && FCMP_G(pGetGPSInfo->theInfo.lon,0))
 		{
 			pme->m_bGetGpsInfo = TRUE;
 			pGetGPSInfo->wIdleCount = 0;
