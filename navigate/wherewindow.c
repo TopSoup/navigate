@@ -117,6 +117,7 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 	//初始化定位信息
 
    //初始化定位信息
+    if(FALSE == pme->m_bGetGpsInfo)
 	{
 		int nErr = SUCCESS;
 		struct _GetGPSInfo *pGetGPSInfo = &pme->m_pOwner->m_gpsInfo;
@@ -132,12 +133,14 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 		ISHELL_SetTimerEx(pme->m_pIShell, 1000, &pme->m_cbWatcherTimer);
 
 		pme->m_bGetGpsInfo = FALSE;
+
+		TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,0);
+	} else {
+		TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,0);
 	}
 	
 	ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MY_LOCATION,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
-	//TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,0);
-	TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,0);
-
+	
 	pme->m_pOwner->m_wMenuLastSel[TSW_WHERE_FUCTION] = 0;
 
    return (IWindow *)pme;
@@ -486,23 +489,23 @@ static boolean CWhereWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam
 
 
 		case AVK_1://FOR TEST
-			DBGPRINTF("Mode: NETWORK");
+			/*DBGPRINTF("Mode: NETWORK");
 			pme->m_gpsMode = AEEGPS_MODE_TRACK_NETWORK;
 			CWhereWin_LocStop((IWindow*)pme);
 			CWhereWin_LocStart((IWindow*)pme);
 			STRTOWSTR("NETWORK", pme->m_szMode, sizeof(pme->m_szMode));
 			CWhereWin_Redraw((IWindow*)pme);
-			bRet = TRUE;
+			bRet = TRUE;*/
 			break;
 
 		case AVK_2://FOR TEST
-			DBGPRINTF("STANDALONE MODE");
+		/*	DBGPRINTF("STANDALONE MODE");
 			pme->m_gpsMode = AEEGPS_MODE_TRACK_STANDALONE;
 			CWhereWin_LocStop((IWindow*)pme);
 			CWhereWin_LocStart((IWindow*)pme);
 			STRTOWSTR("Mode: STANDALONE", pme->m_szMode, sizeof(pme->m_szMode));
 			CWhereWin_Redraw((IWindow*)pme);
-			bRet = TRUE;
+			bRet = TRUE;*/
 			break;
 
 

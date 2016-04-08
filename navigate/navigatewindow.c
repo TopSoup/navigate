@@ -413,23 +413,23 @@ static boolean CNavigateWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPa
 			break;
 
 		case AVK_1://FOR TEST
-			DBGPRINTF("Mode: NETWORK");
-			pme->m_gpsMode = AEEGPS_MODE_TRACK_NETWORK;
-			CNavigateWin_LocStop(pme);
-			CNavigateWin_LocStart(pme);
-			//STRTOWSTR("NETWORK", pme->m_szMode, sizeof(pme->m_szMode));
-			//CWhereWin_Redraw((IWindow*)pme);
-			bRet = TRUE;
+			//DBGPRINTF("Mode: NETWORK");
+			//pme->m_gpsMode = AEEGPS_MODE_TRACK_NETWORK;
+			//CNavigateWin_LocStop(pme);
+			//CNavigateWin_LocStart(pme);
+			////STRTOWSTR("NETWORK", pme->m_szMode, sizeof(pme->m_szMode));
+			////CWhereWin_Redraw((IWindow*)pme);
+			//bRet = TRUE;
 			break;
 
 		case AVK_2://FOR TEST
-			DBGPRINTF("STANDALONE MODE");
-			pme->m_gpsMode = AEEGPS_MODE_TRACK_STANDALONE;
-			CNavigateWin_LocStop(pme);
-			CNavigateWin_LocStart(pme);
-			//STRTOWSTR("Mode: STANDALONE", pme->m_szMode, sizeof(pme->m_szMode));
-			//CWhereWin_Redraw((IWindow*)pme);
-			bRet = TRUE;
+			//DBGPRINTF("STANDALONE MODE");
+			//pme->m_gpsMode = AEEGPS_MODE_TRACK_STANDALONE;
+			//CNavigateWin_LocStop(pme);
+			//CNavigateWin_LocStart(pme);
+			////STRTOWSTR("Mode: STANDALONE", pme->m_szMode, sizeof(pme->m_szMode));
+			////CWhereWin_Redraw((IWindow*)pme);
+			//bRet = TRUE;
 			break;
 
 		default:
