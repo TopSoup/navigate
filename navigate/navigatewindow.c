@@ -367,10 +367,15 @@ static void CNavigateWin_Redraw(IWindow * po)
 			
 			//FLOATTOWSTR(distance, bufDis, 32);
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DISTANCE, bufRes, sizeof(bufRes));
-			WSPRINTF(szBuf, sizeof(szBuf), L"%s: %s", bufRes, TS_FLT2SZ(bufDis, distance));
+			WSPRINTF(szBuf, sizeof(szBuf), L"%s: %sm", bufRes, TS_FLT2SZ(bufDis, distance));
+			//WSPRINTF(szBuf, sizeof(szBuf), L"%s: %sm", bufRes, bufDis);
 			h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 2;
 			xx = xMargin;
+#ifdef AEE_SIMULATOR
+			yy += h-5;
+#else
 			yy += h;
+#endif
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);

@@ -349,8 +349,11 @@ static void CWhereWin_Redraw(IWindow * po)
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SPEED_KN, knRes, sizeof(knRes));
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SPEED_KM, kmRes, sizeof(kmRes));
 			//FLOATTOWSTR(pGetGpsInfo->theInfo.velocityHor, bufVel, 32);
+			//FLOATTOWSTR(kn, szKn, 32);
 			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s%s(%s%s)", 
 				bufRes, TS_FLT2SZ(szKn, kn), knRes, TS_FLT2SZ(bufVel, pGetGpsInfo->theInfo.velocityHor), kmRes);
+			//WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s%s(%s%s)", 
+			//	bufRes, szKn, knRes, bufVel, kmRes);
 			xx = xMargin;
 			yy += h;
 			dxx = pme->m_pOwner->m_cxWidth - 2;
@@ -363,6 +366,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_HEADING, bufRes, sizeof(bufRes));
 			//FLOATTOWSTR(pGetGpsInfo->theInfo.heading, bufHeading, 32);
 			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, TS_FLT2SZ(bufHeading, pGetGpsInfo->theInfo.heading));
+			//WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, bufHeading);
 			xx = xMargin;
 			yy += h;
 			dxx = pme->m_pOwner->m_cxWidth - 2;
@@ -452,8 +456,10 @@ static boolean CWhereWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam
 			{			  
 			 
 				//记录经纬度
-			  TS_FLT2SZ(pme->m_pOwner->m_szTextLat, pme->m_pOwner->m_gpsInfo.theInfo.lat);
-			  TS_FLT2SZ(pme->m_pOwner->m_szTextLon, pme->m_pOwner->m_gpsInfo.theInfo.lon);
+			    TS_FLT2SZ(pme->m_pOwner->m_szTextLat, pme->m_pOwner->m_gpsInfo.theInfo.lat);
+			    TS_FLT2SZ(pme->m_pOwner->m_szTextLon, pme->m_pOwner->m_gpsInfo.theInfo.lon);
+				//FLOATTOWSTR(pme->m_pOwner->m_gpsInfo.theInfo.lat, pme->m_pOwner->m_szTextLat, 32);
+				//FLOATTOWSTR(pme->m_pOwner->m_gpsInfo.theInfo.lon, pme->m_pOwner->m_szTextLon, 32);
 
 			  //如果位置名称为空, 则使用默认日志编号格式名称
 			  if (WSTRLEN(pme->m_pOwner->m_szTextDesc) == 0)
