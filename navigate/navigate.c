@@ -435,6 +435,21 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 						 DBGPRINTF("Rece unkown mask sms: %x",wp->dwMask);
 						 return FALSE;
 					 }
+				 }else if(wp->cls == AEECLSID_SHELL) 
+				 {
+					 //NMASK_SHELL_KEY
+					 if((wp->dwMask & NMASK_SHELL_KEY) == NMASK_SHELL_KEY)
+					 {
+						 NotifyKeyEvent *pKevEvent = (NotifyKeyEvent*)wp->pData;
+
+						 if(pKevEvent->wParam == AVK_END)
+						 {
+							 DBGPRINTF("recv notify key:AVK_END");
+
+							 ISHELL_CloseApplet((IShell*)pme->a.m_pIShell, FALSE);
+							 return TRUE;
+						 }
+					 }
 				 }
 			 }
 			 return (TRUE);
