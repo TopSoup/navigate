@@ -29,9 +29,13 @@ void TS_FreeWin(IWindow ** ppif)
 ===========================================================================*/
 AECHAR* TS_FLT2SZ(AECHAR* szBuf, double val)
 {
+#if 1
 	double tmp = 0, tt = 0, min = 0;
 	int d = 0, m = 0;
-	
+	int zero_pad = 0;
+	char strZero[6];
+	AECHAR szZero[16];
+
 	if (szBuf == NULL)
 		return NULL;
 
@@ -42,6 +46,41 @@ AECHAR* TS_FLT2SZ(AECHAR* szBuf, double val)
 		d = FLTTOINT(tt);
 		m = FLTTOINT(FMUL(FSUB(tmp, tt), 10000000.0));
 		m = (m % 10 >= 5) ? (m + 10) / 10 : m / 10;
+		if (m > 0)
+		{
+			if (m < 100000)		//0.012345
+			{
+				zero_pad++;
+			}
+
+			if (m < 10000)	//0.001234
+			{
+				zero_pad++;
+			}
+
+			if (m < 1000)	//0.000123
+			{
+				zero_pad++;
+			}
+
+			if (m < 100)	//0.000012
+			{
+				zero_pad++;
+			}
+
+			if (m < 10)	//0.000001
+			{
+				zero_pad++;
+			}
+
+			//补充后面的0
+			if (zero_pad > 0)
+			{
+				STRNCPY(strZero, "000000", zero_pad);
+				strZero[zero_pad] = 0;
+				STRTOWSTR(strZero, szZero, 16);
+			}
+		}
 	}
 	else
 	{
@@ -49,8 +88,14 @@ AECHAR* TS_FLT2SZ(AECHAR* szBuf, double val)
 		m = 0;
 	}
 	
-	WSPRINTF(szBuf, 32, L"%d.%d", d, m);
+	if (zero_pad > 0)
+		WSPRINTF(szBuf, 32, L"%d.%s%d", d, szZero, m);
+	else
+		WSPRINTF(szBuf, 32, L"%d.%d", d, m);
 	return szBuf;
+#else
+	FLOATTOWSTR(val, szBuf, 32);
+#endif
 }
 
 //绘制文字

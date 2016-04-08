@@ -228,10 +228,12 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	   if (pme->m_pOwner->m_op == 0 || pme->m_pOwner->m_op == 2)	//0=保存位置 2=重命名
   	   {
 			TS_FLT2SZ(textLat, pme->m_pOwner->m_gpsInfo.theInfo.lat);
+		    //FLOATTOWSTR(pme->m_pOwner->m_gpsInfo.theInfo.lat, textLat, 32);
 			WSTRTOSTR(textLat, szBuf, sizeof(szBuf));
 			DBGPRINTF("Lat: %s", szBuf);
 
 			TS_FLT2SZ(textLon, pme->m_pOwner->m_gpsInfo.theInfo.lon);
+			//FLOATTOWSTR(pme->m_pOwner->m_gpsInfo.theInfo.lon, textLon, 32);
 			WSTRTOSTR(textLon, szBuf, sizeof(szBuf));
 			DBGPRINTF("Lon: %s", szBuf);
 
