@@ -194,7 +194,7 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	   char	szBuf[32];
 
 	   pTextDesc = ITEXTCTL_GetTextPtr( pme->m_pTextCtl );  
-	   WSTRTOSTR(pTextDesc, szBuf, WSTRLEN(pTextDesc) + 1);
+	   WSTRTOSTR(pTextDesc, szBuf, sizeof(szBuf));
 	   DBGPRINTF("Desc: %s", szBuf);
 
 	   //XXX __begin
@@ -228,11 +228,11 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 	   if (pme->m_pOwner->m_op == 0 || pme->m_pOwner->m_op == 2)	//0=保存位置 2=重命名
   	   {
 			TS_FLT2SZ(textLat, pme->m_pOwner->m_gpsInfo.theInfo.lat);
-			WSTRTOSTR(textLat, szBuf, WSTRLEN(textLat) + 1);
+			WSTRTOSTR(textLat, szBuf, sizeof(szBuf));
 			DBGPRINTF("Lat: %s", szBuf);
 
 			TS_FLT2SZ(textLon, pme->m_pOwner->m_gpsInfo.theInfo.lon);
-			WSTRTOSTR(textLon, szBuf, WSTRLEN(textLon) + 1);
+			WSTRTOSTR(textLon, szBuf, sizeof(szBuf));
 			DBGPRINTF("Lon: %s", szBuf);
 
 			//数据判断

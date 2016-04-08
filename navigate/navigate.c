@@ -1053,18 +1053,18 @@ void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDes
 				if ( NULL == lat || NULL == lon ){
 					char szBuf[32];
 					TS_FLT2SZ(szLat, pme->m_gpsInfo.theInfo.lat);
-					WSTRTOSTR(szLat, szBuf, WSTRLEN(szLat) + 1);
+					WSTRTOSTR(szLat, szBuf, sizeof(szBuf));
 					DBGPRINTF("Lat: %s", szBuf);
 
 					TS_FLT2SZ(szLon, pme->m_gpsInfo.theInfo.lon);
-					WSTRTOSTR(szLon, szBuf, WSTRLEN(szLon) + 1);
+					WSTRTOSTR(szLon, szBuf, sizeof(szBuf));
 					DBGPRINTF("Lon: %s", szBuf);
 				} else {
 					MEMSET(szLat,0,sizeof(szLat));
 					MEMSET(szLon,0,sizeof(szLon));
 
-					MEMCPY(szLat,lat,WSTRLEN(lat));
-					MEMCPY(szLon,lon,WSTRLEN(lon));
+					MEMCPY(szLat,lat,sizeof(szLat));
+					MEMCPY(szLon,lon,sizeof(szLon));
 				}
 			}
 			

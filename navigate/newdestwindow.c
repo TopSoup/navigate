@@ -454,7 +454,7 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			AECHAR * pText=NULL;
 			char	szBuf[64];
 			pText = ITEXTCTL_GetTextPtr( pme->m_pTextCtl );  
-			WSTRTOSTR(pText, szBuf, WSTRLEN(pText) + 1);
+			WSTRTOSTR(pText, szBuf, sizeof(szBuf));
 
 			if (pme->m_eEditType == EDIT_LAT)
 			{
