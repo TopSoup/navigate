@@ -50,8 +50,8 @@ IWindow * CMainWin_New(CTopSoupApp * pOwner)
       TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth,&((CTopSoupApp*)pme->m_pOwner)->m_rectWin , 0);
       TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_MY_LOCATION, NULL, IDI_OBJECT_15201, IDS_STRING_MY_LOCATION, 0);
       TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_NAVIGATE,   NULL, IDI_OBJECT_15202, IDS_STRING_NAVIGATE,   0);
-	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SOS,   NULL, IDI_OBJECT_15203, IDS_STRING_SOS,   0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_APPINFO,    NULL, IDI_OBJECT_15204, IDS_STRING_APPINFO,    0);
+	 // TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SOS,   NULL, IDI_OBJECT_15203, IDS_STRING_SOS,   0);
+      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_APPINFO,    NULL, IDI_OBJECT_15203, IDS_STRING_APPINFO,    0);
 
 	  ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_TITLE,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
 	  TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
