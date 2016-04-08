@@ -12,7 +12,7 @@ INITIALIZATION & SEQUENCING REQUIREMENTS:
 
 	See Exported Routines
 
-       Copyright © 2002 QUALCOMM Incorporated.
+       Copyright ?2002 QUALCOMM Incorporated.
                All Rights Reserved.
             QUALCOMM Proprietary/GTDR
 ******************************************************************************/
@@ -48,4 +48,6 @@ extern boolean TS_GetExpenseItem( CTopSoupApp* pApp, uint16 nRecordID, AECHAR* p
 extern boolean TS_GetExpenseList( CTopSoupApp * pApp, IMenuCtl* pMenu, uint32* pnTotal);
 extern void    TS_EmptyExpenseDatabase( CTopSoupApp* pApp );
 
+//FIXME
+extern int TS_AddExpenseItemOnce( CTopSoupApp* pApp, AECHAR* psDesc, AECHAR* psLat, AECHAR* psLon );
 #endif

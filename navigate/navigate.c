@@ -729,7 +729,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	DBGPRINTF("@szLon:%s", szLon);
 
 	//保存到数据库
-	if (!TS_AddExpenseItem(pme, textDesc, textLat, textLon))
+	if ( -1 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon))
 	{
 		DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
 		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_SAVE,prompt,sizeof(prompt));
@@ -740,7 +740,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
 		TS_DrawSplash(pme,prompt,1500,0, 0);
 		return TRUE;
-	} else
+	} else if( 0 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon) )
 	{
 		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
 
@@ -749,6 +749,8 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 		WSTRCPY(pme->m_pTextctlText, textDesc);	   
 		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
 		TS_DrawSplash(pme,prompt,500,0, 0);
+	}else if( 1 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon) ) {
+        DBGPRINTF("DATA EXIST!");
 	}
 	
 	//提示信息
@@ -820,8 +822,9 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 
 	WSTRCPY(textLon, pszTok+1);
 
+
 	//保存到数据库
-	if (!TS_AddExpenseItem(pme, textDesc, textLat, textLon))
+	if ( -1 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon))
 	{
 		DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
 		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_SAVE,prompt,sizeof(prompt));
@@ -832,7 +835,7 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
 		TS_DrawSplash(pme,prompt,1500,0, 0);
 		return TRUE;
-	} else
+	} else if ( 0 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon) )
 	{
 		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
 
@@ -841,6 +844,8 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 		WSTRCPY(pme->m_pTextctlText, textDesc);	   
 		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
 		TS_DrawSplash(pme,prompt,500,0, 0);
+	} else if( 1 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon) ) {
+		DBGPRINTF("DATA EXIST!");//TODO 界面提示
 	}
 
 	//提示信息

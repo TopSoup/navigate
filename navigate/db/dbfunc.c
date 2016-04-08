@@ -13,7 +13,7 @@ INITIALIZATION & SEQUENCING REQUIREMENTS:
 
 	See Exported Routines
 
-       Copyright © 2002 QUALCOMM Incorporated.
+       Copyright ?2002 QUALCOMM Incorporated.
                All Rights Reserved.
             QUALCOMM Proprietary/GTDR
 ******************************************************************************/
@@ -554,4 +554,64 @@ void TS_EmptyExpenseDatabase( CTopSoupApp* pApp )
   {
     IDBRECORD_Remove( pRecord );
   }
+}
+
+
+int TS_AddExpenseItemOnce( CTopSoupApp* pApp, AECHAR* psDesc, AECHAR* psLat, AECHAR* psLon )
+{
+	IDBRecord* pRecord;
+	AEEDBField pFieldArray[ NUM_DB_RECORD_FIELDS ];
+    boolean bExist =FALSE;
+
+	{
+		IDBRecord* pRecord;
+		AECHAR desc[MAX_DESC_SIZE + 2],lat[MAX_DESC_SIZE+2], lon[MAX_DESC_SIZE+2];
+		uint32 total = 0;
+
+		// Reset the database's record index
+		IDATABASE_Reset( pApp->m_pDatabase );
+
+		// Get each record in the database, one at a time
+		while( (pRecord = IDATABASE_GetNextRecord( pApp->m_pDatabase )) != NULL )
+		{
+			MEMSET(desc,0,sizeof(desc));
+			MEMSET(lat,0,sizeof(lat));
+			MEMSET(lon,0,sizeof(lon));
+
+			// Parse the description from the current record
+			TS_ParseExpenseRecord( pRecord, desc,lat, lon );
+
+			// Check exist
+			if( 0 == WSTRICMP(psDesc,desc) && 0 == WSTRICMP(psLat,lat) && 0 == WSTRICMP(psLon,lon)) {
+				bExist = TRUE;
+				break;
+			}
+			
+			// Release the current record
+			IDBRECORD_Release( pRecord );
+		}
+	}
+
+	//check if data exist
+	if( TRUE == bExist )
+		return 1;
+
+	// Fill-in the AEEDBField field array
+
+	TS_InitExpenseFieldStruct( pFieldArray, psDesc, psLat, psLon );
+
+	// Create a new record based on the AEEDBField field array values
+
+	pRecord = IDATABASE_CreateRecord( pApp->m_pDatabase, pFieldArray, NUM_DB_RECORD_FIELDS );
+
+	// Return false if the record could not be created
+
+	if( !pRecord )
+		return -1;
+
+	// Release the record
+
+	IDBRECORD_Release( pRecord );
+
+	return 0;
 }
