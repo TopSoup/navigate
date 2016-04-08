@@ -149,11 +149,16 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
 	   {
 		   if (pme->m_bVersion == TRUE)
 		   {
+			   DBGPRINTF("@@!");
+			   if (pme->m_pMainMenu)
+					pme->m_pOwner->m_wMenuLastSel[TSW_MAIN] = IMENUCTL_GetSel(pme->m_pMainMenu);
+
 			   CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
-			   pme->m_bVersion = FALSE;
+			   pme->m_bVersion = FALSE;			   
 		   }
 		   else
 		   {
+			   DBGPRINTF("@@!!");
 			   ISHELL_CloseApplet(pme->m_pIShell, FALSE);
 		   }
 			
@@ -209,9 +214,12 @@ static void CMainWin_About(IWindow * po)
 {
    CMainWin *  pme = (CMainWin *)po;
 
-	CTopSoupApp_DisableWin(pme->m_pOwner);
+   DBGPRINTF("@@!--BEGIN");
+   //CTopSoupApp_DisableWin(pme->m_pOwner);
 
    IDISPLAY_ClearScreen(pme->m_pIDisplay);
    TS_DrawBackgroud(po);
    ISHELL_ShowCopyright(pme->m_pIShell);
+
+   DBGPRINTF("@@!--END");
 }

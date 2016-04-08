@@ -167,13 +167,43 @@ static boolean CTextCtlWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 {
    CTextCtlWin *  pme = (CTextCtlWin *)po;
    boolean     bRet = TRUE;
-
+   int32 pos = 0;
+   
    DBGPRINTF("eCode:%x wParam:%x", eCode, wParam);
    
     //XXX __begin
    if (ITEXTCTL_HandleEvent( pme->m_pTextCtl, eCode, wParam, dwParam ))
 	   return TRUE;
 
+//   {
+//	   AECHAR * pTextDesc=NULL;
+//	   pos = ITEXTCTL_GetCursorPos( pme->m_pTextCtl);
+//	   pTextDesc = ITEXTCTL_GetTextPtr( pme->m_pTextCtl );  
+//
+//	   if (WSTRLEN(pTextDesc) == 0 && pos == 0)
+//	   {
+//		   if (pme->m_pOwner->m_op == 0 || pme->m_pOwner->m_op == 2)
+//		   {
+//				TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_STRING_SAVE);	   
+//		   }
+//		   else
+//		   {
+//				TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_STRING_SEND);
+//		   }
+//	   }
+//	   else
+//	   {
+//		   if (pme->m_pOwner->m_op == 0 || pme->m_pOwner->m_op == 2)
+//		   {
+//				TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_STRING_SAVE);	   
+//		   }
+//		   else
+//		   {
+//				TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_STRING_SEND);
+//		   }
+//	   }
+//   }   
+	
    //ÏìÓ¦·µ»Ø¼ü
    if ( TS_ISSOFT(eCode)){
 	   if( AVK_SOFT2 == wParam )
