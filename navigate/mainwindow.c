@@ -175,6 +175,7 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
 		  MEMSET(pme->m_pOwner->m_szTextLat, 0, sizeof(pme->m_pOwner->m_szTextLat));
 		  MEMSET(pme->m_pOwner->m_szTextLon, 0, sizeof(pme->m_pOwner->m_szTextLon));
 		  MEMSET(pme->m_pOwner->m_szTextDesc, 0, sizeof(pme->m_pOwner->m_szTextDesc));
+		  pme->m_pOwner->m_bGetGpsInfo =FALSE;
 		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE, 0);
          break;
 

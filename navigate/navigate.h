@@ -125,6 +125,8 @@ struct CTopSoupApp
 	//GPS
 	GetGPSInfo		  m_gpsInfo;	//
 
+    boolean			  m_bGetGpsInfo; //where win gpsstatus
+
 	//SMS
 	ISMS              *m_pISMS;      
     ISMSMsg           *m_pISMSMsg;       // To encapsulate composed/sent message 

@@ -34,7 +34,6 @@ struct CWhereWin
 
 	AEECallback		m_cbWatcherTimer;
 	AEEGPSMode		m_gpsMode;			//GPS模式
-	boolean			m_bGetGpsInfo;
 	ts_time_t		m_getGpsTime;
 };
 
@@ -117,7 +116,7 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 	//初始化定位信息
 
    //初始化定位信息
-    if(FALSE == pme->m_bGetGpsInfo)
+    if(FALSE == pme->m_pOwner->m_bGetGpsInfo)
 	{
 		int nErr = SUCCESS;
 		struct _GetGPSInfo *pGetGPSInfo = &pme->m_pOwner->m_gpsInfo;
@@ -132,7 +131,7 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 		CALLBACK_Init(&pme->m_cbWatcherTimer, CWhereWin_GetGPSInfo_SecondTicker, pme);
 		ISHELL_SetTimerEx(pme->m_pIShell, 1000, &pme->m_cbWatcherTimer);
 
-		pme->m_bGetGpsInfo = FALSE;
+		pme->m_pOwner->m_bGetGpsInfo = FALSE;
 
 		TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,0);
 	} else {
@@ -257,7 +256,7 @@ static void CWhereWin_Redraw(IWindow * po)
 	IDISPLAY_ClearScreen(pme->m_pIDisplay);
 
 	//更新底部文字
-	if (pme->m_bGetGpsInfo)
+	if (pme->m_pOwner->m_bGetGpsInfo)
 	{
 		TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,0);
 	}
@@ -272,7 +271,7 @@ static void CWhereWin_Redraw(IWindow * po)
 
 	//当取得定位结果时更新显示
 	if (pGetGpsInfo->pPosDet 
-		&& pme->m_bGetGpsInfo)
+		&& pme->m_pOwner->m_bGetGpsInfo)
 	{
 		//if (pGetGpsInfo->theInfo.nErr == SUCCESS)
 		{
@@ -446,12 +445,12 @@ static boolean CWhereWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam
 		switch (wParam)
 		{
 		case AVK_SELECT:
-			pme->m_bGetGpsInfo = TRUE;	//FOR TEST
+			pme->m_pOwner->m_bGetGpsInfo = TRUE;	//FOR TEST
 			bRet = TRUE;
 			CWhereWin_Redraw((IWindow*)pme);
 			break;
 		case AVK_SOFT1:
-			if (pme->m_bGetGpsInfo)
+			if (pme->m_pOwner->m_bGetGpsInfo)
 			{			  
 			 
 				//记录经纬度
@@ -559,7 +558,6 @@ static void CWhereWin_LocStop( IWindow *po )
 	CWhereWin *pme = (CWhereWin*)po;
 	struct _GetGPSInfo *pGetGPSInfo = &pme->m_pOwner->m_gpsInfo;
 
-	pme->m_bGetGpsInfo = FALSE;
 	if (pGetGPSInfo->pPosDet)
 	{
 		Loc_Stop(pGetGPSInfo->pts);
@@ -587,13 +585,13 @@ static void CWhereWin_GetGPSInfo_Callback( IWindow *po )
 		//经纬度有效时才算定位成功
 	    if (FCMP_G(pGetGPSInfo->theInfo.lat,0) && FCMP_G(pGetGPSInfo->theInfo.lon,0))
 		{
-			pme->m_bGetGpsInfo = TRUE;
+			pme->m_pOwner->m_bGetGpsInfo = TRUE;
 			pGetGPSInfo->wIdleCount = 0;
 			TS_GetTimeNow(&pme->m_getGpsTime);
 		}
 		//else
 		//{
-		//	pme->m_bGetGpsInfo = FALSE;
+		//	pme->m_pOwner->m_bGetGpsInfo = FALSE;
 		//}
 
 		CWhereWin_Redraw(po);
