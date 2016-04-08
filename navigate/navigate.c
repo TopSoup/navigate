@@ -1053,7 +1053,7 @@ void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDes
 				}
 			}
 			
-			WSPRINTF(pszBuf, sizeof(pszBuf), L"%s:%s#%s:E,%s#%s:N,%s", textDest, szDesc, textLon, szLon, textLat, szLat);
+			WSPRINTF(pszBuf, sizeof(pszBuf), L"%s:%s#%s:E,%s#%s:N,%s", textDest, szDesc, textLat, szLat, textLon, szLon);
 #endif
 			awo[i].pVal = (void *)pszBuf;   
 			i++;   
