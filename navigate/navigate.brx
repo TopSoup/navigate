@@ -235,6 +235,12 @@
 	<String Id="1048" Name="IDS_STRING_PROMPT_INVALID_UPDATE">
 		<Text>更新失败</Text>
 	</String>
+	<String Id="1049" Name="IDS_STRING_LOCATION_INVALID_COORD">
+		<Text>经纬度坐标长度: 12位</Text>
+	</String>
+	<String Id="1050" Name="IDS_STRING_LOCATION_INVALID_DESC">
+		<Text>目的地名称长度: 30位</Text>
+	</String>
 </Strings>
 <Objects MimeType="image/png">
 	<Object Id="10000" Name="IDP_NAVIGATOR">

@@ -122,11 +122,11 @@ IWindow * CNewDestWin_New(CTopSoupApp * pOwner)
 
 		if (WSTRLEN(pme->m_pOwner->m_szTextDesc) > 0)
 		{
-			ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextDesc,sizeof(pme->m_szTextDesc));
+			WSTRCPY(pme->m_szTextDesc, pme->m_pOwner->m_szTextDesc);	
 		}
 		else
 		{
-			WSTRCPY(pme->m_szTextDesc, pme->m_pOwner->m_szTextDesc);
+			ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextDesc,sizeof(pme->m_szTextDesc));
 		}
 		
 
@@ -272,12 +272,30 @@ static void CNewDestWin_Redraw(IWindow * po)
 			AEERect rect;
 			int xMargin = 0;
 			
-			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATION_RANGE_INFO_LON_0, bufRes, sizeof(bufRes));
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATION_INVALID_COORD, bufRes, sizeof(bufRes));
 			h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 2;
 			xx = xMargin;
 			yy = pme->m_pOwner->m_rectWin.dy/2+36;
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy = h;
+			SETAEERECT(&rect, xx, yy, dxx, dyy);
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+			
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATION_INVALID_DESC, bufRes, sizeof(bufRes));
+			h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 2;
+			xx = xMargin;
+			yy += h;
+			dxx = pme->m_pOwner->m_cxWidth - 2;
+			dyy = h;
+			SETAEERECT(&rect, xx, yy, dxx, dyy);
+			TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+			
+			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATION_RANGE_INFO_LON_0, bufRes, sizeof(bufRes));
+			h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 2;
+			xx = xMargin;
+			yy = pme->m_pOwner->m_rectWin.dy/2+36;
+			dxx = pme->m_pOwner->m_cxWidth - 2;
+			dyy += h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
 			TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
 			
@@ -483,7 +501,8 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			if (pme->m_eEditType == EDIT_LAT)
 			{
 				//校验经纬度
-				if (TS_CheckLat(pText) == FALSE)
+				if (TS_CheckLat(pText) == FALSE
+					|| (WSTRLEN(pText) > 12))
 				{
 					AECHAR prompt[TS_MAX_STRLEN];
 					DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
@@ -506,7 +525,8 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			else if (pme->m_eEditType == EDIT_LON)
 			{
 				//校验经纬度
-				if (TS_CheckLon(pText) == FALSE )
+				if (TS_CheckLon(pText) == FALSE 
+					|| (WSTRLEN(pText) > 12))
 				{
 					AECHAR prompt[TS_MAX_STRLEN];
 					DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
@@ -528,6 +548,23 @@ static boolean CNewDestWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPar
 			}
 			else if (pme->m_eEditType == EDIT_DESC)
 			{
+				//校验目的地名称长度
+				if (WSTRLEN(pText) > 30)
+				{
+					AECHAR prompt[TS_MAX_STRLEN];
+					DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
+					
+					ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_DESC,prompt,sizeof(prompt));
+					
+					//提示窗口
+					MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
+					WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
+					//TS_DrawSplash(pme->m_pOwner,prompt,1500,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+					TS_DrawSplash(pme->m_pOwner,prompt,1500,0, 0);
+					
+					return TRUE;
+				}
+
 				WSTRCPY(pme->m_szTextDesc, pText);
 				WSTRCPY(pme->m_pOwner->m_szTextDesc, pText);
 				DBGPRINTF("GetDesc pText:%s", szBuf);
