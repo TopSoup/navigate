@@ -99,12 +99,36 @@ IWindow * CNewDestWin_New(CTopSoupApp * pOwner)
 		IMENUCTL_SetStyle( pme->m_pMainMenu, &rNormalStyle, &rSelStyle );   
 		*/
 		
-		//初始为0
+		//尝试使用父窗口数据初始化，否则初始为0
 		ITEXTCTL_SetRect( pme->m_pTextCtl, &pme->m_pOwner->m_rectWin);
 
-		WSTRCPY(pme->m_szTextLat, L"0.0");
-		WSTRCPY(pme->m_szTextLon, L"0.0");	
-		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextDesc,sizeof(pme->m_szTextDesc));
+		if (WSTRLEN(pme->m_pOwner->m_szTextLat) > 0)
+		{
+			WSTRCPY(pme->m_szTextLat, pme->m_pOwner->m_szTextLat);
+		}
+		else
+		{
+			WSTRCPY(pme->m_szTextLat, L"0.0");
+		}
+
+		if (WSTRLEN(pme->m_pOwner->m_szTextLon) > 0)
+		{
+			WSTRCPY(pme->m_szTextLon, pme->m_pOwner->m_szTextLon);
+		}
+		else
+		{
+			WSTRCPY(pme->m_szTextLon, L"0.0");
+		}
+
+		if (WSTRLEN(pme->m_pOwner->m_szTextDesc) > 0)
+		{
+			ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextDesc,sizeof(pme->m_szTextDesc));
+		}
+		else
+		{
+			WSTRCPY(pme->m_szTextDesc, pme->m_pOwner->m_szTextDesc);
+		}
+		
 
 		pme->m_eViewType = VIEW_MAIN;
 

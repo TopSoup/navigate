@@ -134,7 +134,7 @@ static void CNewdestFuctionWin_onSplashDrawOver(void * po)
 	CTopSoupApp* pme = (CTopSoupApp*)po;
 
 	//if (pme->m_nStatus == 0)
-	CTopSoupApp_SetWindow(pme, TSW_DEST_NEW_FUCTION, 0);
+	CTopSoupApp_SetWindow(pme, TSW_DEST_NEW, 0);
 
 }
 
