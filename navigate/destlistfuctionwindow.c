@@ -56,7 +56,7 @@ IWindow * CDestlistFuctionWin_New(CTopSoupApp * pOwner,uint16 wRectID)
       TS_AddMenuItem(pme->m_pMainMenu,IDS_STRING_DELETE_ALL,   NULL, IDI_OBJECT_15205, IDS_STRING_DELETE_ALL,   0);
 
 	  ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_FUCTION,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
-	  TS_SetSoftButtonText(pme->m_pOwner,NULL,IDS_STRING_BACK,IDS_STRING_SELECT);
+	  TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_STRING_SELECT);
 	  //XXX __end
 
 

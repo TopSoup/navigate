@@ -50,8 +50,8 @@ IWindow * CMainWin_New(CTopSoupApp * pOwner)
       TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth,&((CTopSoupApp*)pme->m_pOwner)->m_rectWin , 0);
       TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_MY_LOCATION, NULL, IDI_OBJECT_15201, IDS_STRING_MY_LOCATION, 0);
       TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_NAVIGATE,   NULL, IDI_OBJECT_15202, IDS_STRING_NAVIGATE,   0);
-	 // TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SOS,   NULL, IDI_OBJECT_15203, IDS_STRING_SOS,   0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_APPINFO,    NULL, IDI_OBJECT_15203, IDS_STRING_APPINFO,    0);
+      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SOS,   NULL, IDI_OBJECT_15203, IDS_STRING_SOS,   0);
+      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_APPINFO,    NULL, IDI_OBJECT_15204, IDS_STRING_APPINFO,    0);
 
 	  ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_TITLE,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
 	  TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
@@ -144,7 +144,7 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
 		   return IMENUCTL_HandleEvent(pme->m_pMainMenu, EVT_KEY, AVK_SELECT, 0);
 	   }
 
-	   //ÍË³ö³ÌÐò
+	   //ï¿½Ë³ï¿½ï¿½ï¿½ï¿½ï¿½
 	   if( AVK_SOFT2 == wParam )
 	   {
 		   if (pme->m_bVersion == TRUE)
@@ -154,20 +154,20 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
 					pme->m_pOwner->m_wMenuLastSel[TSW_MAIN] = IMENUCTL_GetSel(pme->m_pMainMenu);
 
 			   CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
-			   pme->m_bVersion = FALSE;			   
+			   pme->m_bVersion = FALSE;
 		   }
 		   else
 		   {
 			   DBGPRINTF("@@!!");
 			   ISHELL_CloseApplet(pme->m_pIShell, FALSE);
 		   }
-			
+
 			return TRUE;
 	   }
    }
-   
 
-   if (TS_ISEVTKEY(eCode)) 
+
+   if (TS_ISEVTKEY(eCode))
       return IMENUCTL_HandleEvent(pme->m_pMainMenu, eCode, wParam, dwParam);
 
    if (!TS_ISEVTCMD(eCode))
@@ -176,7 +176,7 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
    switch (wParam)
    {
       case IDS_STRING_MY_LOCATION:
-		  //´ò¿ªÐÂ½¨Ä¿µÄµØ½çÃæÇ°,Çå¿ÕÀúÊ·¼ÇÂ¼
+		  //ï¿½ï¿½ï¿½Â½ï¿½Ä¿ï¿½ÄµØ½ï¿½ï¿½ï¿½Ç°,ï¿½ï¿½ï¿½ï¿½ï¿½Ê·ï¿½ï¿½Â¼
 		  MEMSET(pme->m_pOwner->m_szTextLat, 0, sizeof(pme->m_pOwner->m_szTextLat));
 		  MEMSET(pme->m_pOwner->m_szTextLon, 0, sizeof(pme->m_pOwner->m_szTextLon));
 		  MEMSET(pme->m_pOwner->m_szTextDesc, 0, sizeof(pme->m_pOwner->m_szTextDesc));
@@ -189,7 +189,7 @@ static boolean CMainWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam,
 		  break;
 
 	  case IDS_STRING_SOS:
-		  //CTopSoupApp_SetWindow(pme->m_pOwner, TSW_SOS, 0);
+		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_SOS, 0);
 		  break;
 
       case IDS_STRING_APPINFO:

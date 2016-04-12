@@ -17,11 +17,11 @@ static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
 #define USAGE_SMS_TX_UNICODE    0
 #define USAGE_SMS_TX_ASCII      1
  
-// ascii ¶ÌÐÅÄÚÈÝ£¬¶ÔÓÚunicode¶ÌÐÅÄÚÈÝ£¬±ØÐëÓÉ×ÊÔ´ÎÄ¼þbarÖÐ»ñÈ¡£¬·ñÔò±àÂë²»¶Ô 
+// ascii ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½ï¿½unicodeï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½Ä¼ï¿½barï¿½Ð»ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë²»ï¿½ï¿½ 
 #define MO_TEXT_ASCII "Destination:Beijing#lat:37.123456#lon:114.121345" 
 
-//½âÎö¶ÌÐÅÄÚÈÝ
-//¸ñÊ½: Ä¿±êÎ»ÖÃ:1111#Î³¶È:E,20.012345#¾­¶È:N,120.012345
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½Ê½: Ä¿ï¿½ï¿½Î»ï¿½ï¿½:1111#Î³ï¿½ï¿½:E,20.012345#ï¿½ï¿½ï¿½ï¿½:N,120.012345
 static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg);
 static boolean    CTopSoupApp_ReceiveSMSMessage(CTopSoupApp *pme, uint32 uMsgId);
 static void		  CTopSoupApp_MakeSOSCall(CTopSoupApp * pme, char* szNumber);
@@ -107,8 +107,8 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
    int				 nErr;
    
    {
-	   //¸ñÊ½: Ä¿±êÎ»ÖÃ:1111#Î³¶È:E,20.012345#¾­¶È:N,120.012345
-	   //char *str = "Ä¿±êÎ»ÖÃ:1111#Î³¶È:E,20.012345#¾­¶È:N,120.012345";
+	   //ï¿½ï¿½Ê½: Ä¿ï¿½ï¿½Î»ï¿½ï¿½:1111#Î³ï¿½ï¿½:E,20.012345#ï¿½ï¿½ï¿½ï¿½:N,120.012345
+	   //char *str = "Ä¿ï¿½ï¿½Î»ï¿½ï¿½:1111#Î³ï¿½ï¿½:E,20.012345#ï¿½ï¿½ï¿½ï¿½:N,120.012345";
 	   //CTopSoupApp_SaveSMSMessage(pme, str);
    }
    // Get screen pixel count
@@ -574,7 +574,7 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 
 	  case TSW_NAVIGATE:
 		  {
-			  //Ê¹ÓÃµ±Ç°Ñ¡ÔñµÄÏî×÷ÎªÁìº½Ä¿±ê
+			  //Ê¹ï¿½Ãµï¿½Ç°Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ìº½Ä¿ï¿½ï¿½
 				TS_GetExpenseItem(pme,(uint16)dwParam,pme->m_szTextDesc,pme->m_szTextLat,pme->m_szTextLon);
 
 				pme->m_pWin = (IWindow*)CNavigateWin_New(pme);
@@ -595,6 +595,15 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 	  case TSW_NAVIGATE_EX:     
 		  pme->m_pWin = CNavigateWin_New(pme); 
 		  break;
+
+      //SOSå­ç•Œé¢
+      case TSW_SOS_RELATIVE:
+           pme->m_pWin = CSOSRelativeWin_New(pme);
+           break;
+
+      case TSW_SOS_INFO:
+           pme->m_pWin = CSOSInfoWin_New(pme);
+           break;
 
       case TSW_NONE:       
          return TRUE; 
@@ -674,8 +683,8 @@ static void CTopSoupApp_ReleaseRes(CTopSoupApp * pme)
                         SMS & TELEPHONE TEST
 =============================================================================== */
 
-//½âÎö¶ÌÐÅÄÚÈÝ
-//¸ñÊ½: Ä¿±êÎ»ÖÃ:1111#Î³¶È:E,20.012345#¾­¶È:N,120.012345
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½Ê½: Ä¿ï¿½ï¿½Î»ï¿½ï¿½:1111#Î³ï¿½ï¿½:E,20.012345#ï¿½ï¿½ï¿½ï¿½:N,120.012345
 static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 {
 	char *pszTok = NULL, *pszDot = NULL;
@@ -697,7 +706,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	STRCPY(szBuf, szMsg);
 	pBuf = szBuf;
 	
-	//½âÎö¶ÌÐÅ
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	
 	//#1
 	pszTok = STRCHR(pBuf, '#');
@@ -706,7 +715,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	len = pszTok-pBuf;
 	MEMCPY(szTmp, pBuf, len);
 	szTmp[len] = 0;
-	pBuf = pszTok + 1;	//Æ«ÒÆ¹ý#
+	pBuf = pszTok + 1;	//Æ«ï¿½Æ¹ï¿½#
 	
 	pszTok = STRCHR(szTmp, ':');
 	if (pszTok == NULL)
@@ -724,7 +733,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	len = pszTok-pBuf;
 	MEMCPY(szTmp, pBuf, len);
 	szTmp[len] = 0;
-	pBuf = pszTok + 1;	//Æ«ÒÆ¹ý#
+	pBuf = pszTok + 1;	//Æ«ï¿½Æ¹ï¿½#
 
 	pszTok = STRCHR(szTmp, ',');
 	if (pszTok == NULL)
@@ -743,13 +752,13 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	STRTOWSTR(szLon,textLon,sizeof(textLon));
 	DBGPRINTF("@szLon:%s", szLon);
 
-	//±£´æµ½Êý¾Ý¿â
+	//ï¿½ï¿½ï¿½æµ½ï¿½ï¿½ï¿½Ý¿ï¿½
 	if ( -1 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon))
 	{
-		DBGPRINTF("SAVE DATA ERROR!");//TODO ½çÃæÌáÊ¾
+		DBGPRINTF("SAVE DATA ERROR!");//TODO ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
 		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_SAVE,prompt,sizeof(prompt));
 		
-		//ÌáÊ¾´°¿Ú
+		//ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
 		MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
 		WSTRCPY(pme->m_pTextctlText, textDesc);	   
 		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
@@ -759,7 +768,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	{
 		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
 
-		//ÌáÊ¾´°¿Ú
+		//ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
 		MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
 		WSTRCPY(pme->m_pTextctlText, textDesc);	   
 		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
@@ -768,7 +777,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
         DBGPRINTF("DATA EXIST!");
 	}
 	
-	//ÌáÊ¾ÐÅÏ¢
+	//ï¿½ï¿½Ê¾ï¿½ï¿½Ï¢
 	//TS_SPLAH
 	
 	return TRUE;
@@ -797,7 +806,7 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	WSTRCPY(szBuf, szMsg);
 	pBuf = szBuf;
 
-	//½âÎö¶ÌÐÅ
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	//#1
 	pszTok = WSTRCHR(pBuf, L'#');
@@ -806,7 +815,7 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	len = pszTok-pBuf;
 	MEMCPY(szTmp, pBuf, len*sizeof(AECHAR));
 	szTmp[len] = 0;
-	pBuf = pszTok + 1;	//Æ«ÒÆ¹ý#
+	pBuf = pszTok + 1;	//Æ«ï¿½Æ¹ï¿½#
 
 	pszTok = WSTRCHR(szTmp, L':');
 	if (pszTok == NULL)
@@ -822,7 +831,7 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	len = pszTok-pBuf;
 	MEMCPY(szTmp, pBuf, len*sizeof(AECHAR));
 	szTmp[len] = 0;
-	pBuf = pszTok + 1;	//Æ«ÒÆ¹ý#
+	pBuf = pszTok + 1;	//Æ«ï¿½Æ¹ï¿½#
 
 	pszTok = WSTRCHR(szTmp, L',');
 	if (pszTok == NULL)
@@ -838,13 +847,13 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	WSTRCPY(textLon, pszTok+1);
 
 
-	//±£´æµ½Êý¾Ý¿â
+	//ï¿½ï¿½ï¿½æµ½ï¿½ï¿½ï¿½Ý¿ï¿½
 	if ( -1 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon))
 	{
-		DBGPRINTF("SAVE DATA ERROR!");//TODO ½çÃæÌáÊ¾
+		DBGPRINTF("SAVE DATA ERROR!");//TODO ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
 		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_SAVE,prompt,sizeof(prompt));
 
-		//ÌáÊ¾´°¿Ú
+		//ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
 		MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
 		WSTRCPY(pme->m_pTextctlText, textDesc);	   
 		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
@@ -854,16 +863,16 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	{
 		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
 
-		//ÌáÊ¾´°¿Ú
+		//ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
 		MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
 		WSTRCPY(pme->m_pTextctlText, textDesc);	   
 		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
 		TS_DrawSplash(pme,prompt,500,0, 0);
 	} else if( 1 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon) ) {
-		DBGPRINTF("DATA EXIST!");//TODO ½çÃæÌáÊ¾
+		DBGPRINTF("DATA EXIST!");//TODO ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
 	}
 
-	//ÌáÊ¾ÐÅÏ¢
+	//ï¿½ï¿½Ê¾ï¿½ï¿½Ï¢
 	//TS_SPLAH
 
 	return TRUE;
@@ -880,14 +889,14 @@ static boolean CTopSoupApp_ReceiveSMSMessage(CTopSoupApp* pme, uint32 uMsgId)
 
 		if(ISMSMSG_GetOpt(pSMS, MSGOPT_FROM_DEVICE_SZ,&TmpOpt)==AEE_SUCCESS) {
 			STRCPY(szPhone, (char*)TmpOpt.pVal);
-			//@yao ¶ÌÐÅÖÐÐÄºÍÇ×ÇéºÅÂë
+			//@yao ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			//if( NULL == STRSTR("10659031107260,18931880692,18903110989",szPhone) ) {
 			//	DBGPRINTF("sms sender is not in center list");
 			//	return FALSE;
 			//}
 
-			//¶ÌÐÅÄÚÈÝ:Ä¿±êÎ»ÖÃ:±±¾©Ìì°²ÃÅ,¾­¶È:E,114.000Î³¶È:N,33.2222
-			///        Ä¿±êÎ»ÖÃ:±±¾©Ìì°²ÃÅ#¾­¶È:E,114.000#Î³¶È:N,33.2222
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:Ä¿ï¿½ï¿½Î»ï¿½ï¿½:ï¿½ï¿½ï¿½ï¿½ï¿½ì°²ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½:E,114.000Î³ï¿½ï¿½:N,33.2222
+			///        Ä¿ï¿½ï¿½Î»ï¿½ï¿½:ï¿½ï¿½ï¿½ï¿½ï¿½ì°²ï¿½ï¿½#ï¿½ï¿½ï¿½ï¿½:E,114.000#Î³ï¿½ï¿½:N,33.2222
 			if(ISMSMSG_GetOpt(pSMS, MSGOPT_PAYLOAD_WSZ,&TmpOpt)==AEE_SUCCESS) {
 				//WSTRTOUTF8((AECHAR*)TmpOpt.pVal,WSTRLEN((AECHAR*)TmpOpt.pVal), (byte*)szText, sizeof(szText));
 				//WSTRTOSTR((AECHAR*)TmpOpt.pVal, (char*)szText, WSTRLEN((AECHAR*)TmpOpt.pVal));//, sizeof(szText));
@@ -936,7 +945,7 @@ static void SMSCallBack_Send(void *p)
          break;
    }
 
-   // ¶ÌÐÅ·¢ËÍÍê±Ïºó£¬ÊÍ·ÅISMSMsg£¬·ñÔòËü½«±£ÁôÔÚÆäÖÐ£¬¶ÔÏÂÒ»Ìõ¶ÌÐÅ²úÉúÓ°Ïì   
+   // ï¿½ï¿½ï¿½Å·ï¿½ï¿½ï¿½ï¿½ï¿½Ïºï¿½ï¿½Í·ï¿½ISMSMsgï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Å²ï¿½ï¿½ï¿½Ó°ï¿½ï¿½   
    if(pme->m_pISMSMsg != NULL)   
    {   
        ISMSMSG_Release(pme->m_pISMSMsg);   

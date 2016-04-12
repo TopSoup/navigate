@@ -78,7 +78,10 @@ typedef enum TSWindow
 	
 	//输入信息[位置名称, 短信联系人, ]
 	TSW_TEXTCTL,
-	
+
+	TSW_SOS_RELATIVE,		//1 SOS亲属号码设定
+	TSW_SOS_INFO,			//2 SOS功能说明
+
 	TSW_LAST
 } TSWindow;
 

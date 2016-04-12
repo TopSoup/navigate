@@ -82,6 +82,8 @@ LOCAL_OBJS =$(OBJSDIR)\AEEAppGen.o\
 			$(OBJSDIR)\locationinfowindow.o \
 			$(OBJSDIR)\locinfowindow.o \
 			$(OBJSDIR)\soswindow.o \
+			$(OBJSDIR)\sosrelativewindow.o \
+			$(OBJSDIR)\sosinfowindow.o \
 			$(OBJSDIR)\dbfunc.o \
 			$(OBJSDIR)\e_asin.o \
 			$(OBJSDIR)\location.o \

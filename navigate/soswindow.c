@@ -1,14 +1,14 @@
-#include "mainwindow.h"
+#include "soswindow.h"
 
 
 
 // SOS window: Displays main menu.
 struct CSOSWin
 {
-	INHERIT_CWindow(IWindow);
+    INHERIT_CWindow(IWindow);
 
-	//XXX
-	IMenuCtl *     m_pMainMenu;
+    //XXX
+    IMenuCtl *     m_pMainMenu;
 };
 
 typedef struct CSOSWin CSOSWin;
@@ -31,33 +31,34 @@ static void       CSOSWin_About(IWindow * po);
 ===========================================================================*/
 IWindow * CSOSWin_New(CTopSoupApp * pOwner)
 {
-   CSOSWin *        pme;
-   VTBL(IWindow)     vtbl;
-   
-   IWINDOW_SETVTBL(&vtbl, CSOSWin_Enable, CSOSWin_Redraw, CSOSWin_HandleEvent, CSOSWin_Delete);
-   pme = (CSOSWin *)CWindow_New(sizeof(CSOSWin), pOwner, &vtbl);
-   if (!pme)
-      return NULL;
+    CSOSWin *        pme;
+    VTBL(IWindow)     vtbl;
 
-   {
-	  //XXX __begin
-      //Initialize logo below the header
-      if (ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_MENUCTL, (void **)&pme->m_pMainMenu))
-         TS_WINERR_RETURN(pme);
+    IWINDOW_SETVTBL(&vtbl, CSOSWin_Enable, CSOSWin_Redraw, CSOSWin_HandleEvent, CSOSWin_Delete);
+    pme = (CSOSWin *)CWindow_New(sizeof(CSOSWin), pOwner, &vtbl);
+    if (!pme)
+        return NULL;
 
-      TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth,&((CTopSoupApp*)pme->m_pOwner)->m_rectWin , 0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_MY_LOCATION, NULL, IDI_OBJECT_15201, IDS_STRING_MY_LOCATION, 0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_NAVIGATE,   NULL, IDI_OBJECT_15202, IDS_STRING_NAVIGATE,   0);
-	  TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SOS,   NULL, IDI_OBJECT_15203, IDS_STRING_SOS,   0);
-      TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_APPINFO,    NULL, IDI_OBJECT_15203, IDS_STRING_APPINFO,    0);
+    {
+        //XXX __begin
+        //Initialize logo below the header
+        if (ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_MENUCTL, (void **)&pme->m_pMainMenu))
+        TS_WINERR_RETURN(pme);
 
-	  TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_SELECT,IDS_STRING_BACK,0);
-	  //XXX __end
+        TS_SetMenuAttr(pme->m_pMainMenu, AEECLSID_MENUCTL,pme->m_pOwner->m_nColorDepth,&((CTopSoupApp*)pme->m_pOwner)->m_rectWin , 0);
+        TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_SET_RELATIVE, NULL, IDI_OBJECT_15201, IDS_STRING_SET_RELATIVE, 0);
+        TS_AddMenuItem(pme->m_pMainMenu, IDS_STRING_DEST_INFO,   NULL, IDI_OBJECT_15202, IDS_STRING_DEST_INFO,   0);
 
+        ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
+        TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_STRING_SELECT);
 
-   }
+        //TODO
+        pme->m_pOwner->m_wMenuLastSel[TSW_SOS_RELATIVE] = 0;
 
-   return (IWindow *)pme;
+        //XXX __end
+    }
+
+    return (IWindow *)pme;
 }
 
 /*===========================================================================
@@ -65,15 +66,15 @@ IWindow * CSOSWin_New(CTopSoupApp * pOwner)
 ===========================================================================*/
 static void CSOSWin_Delete(IWindow * po)
 {
-   CSOSWin *  pme = (CSOSWin *)po;
+    CSOSWin *  pme = (CSOSWin *)po;
 
-   //XXX __begin
-   if (pme->m_pMainMenu)
-	   pme->m_pOwner->m_wMenuLastSel[TSW_SOS] = IMENUCTL_GetSel(pme->m_pMainMenu);
-   TS_RELEASEIF(pme->m_pMainMenu);
-   //XXX _end
+    //XXX __begin
+    if (pme->m_pMainMenu)
+        pme->m_pOwner->m_wMenuLastSel[TSW_SOS] = IMENUCTL_GetSel(pme->m_pMainMenu);
+    TS_RELEASEIF(pme->m_pMainMenu);
+    //XXX _end
 
-   FREE(pme);
+    FREE(pme);
 }
 
 /*===========================================================================
@@ -81,23 +82,23 @@ static void CSOSWin_Delete(IWindow * po)
 ===========================================================================*/
 static void CSOSWin_Enable(IWindow * po, boolean bEnable)
 {
-   CSOSWin *  pme = (CSOSWin *)po;
- 
-
-   if (!CWindow_ProcessEnable(po, bEnable))
-	   return;
+    CSOSWin *  pme = (CSOSWin *)po;
 
 
-   //XXX __begin
-   if (!pme->m_bActive)
-   {
-      IMENUCTL_SetActive(pme->m_pMainMenu, FALSE);
-      return;
-   }
+    if (!CWindow_ProcessEnable(po, bEnable))
+        return;
 
-   IMENUCTL_SetActive(pme->m_pMainMenu, TRUE);
-   IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMenuLastSel[TSW_SOS]);
-   //XXX __end
+
+    //XXX __begin
+    if (!pme->m_bActive)
+    {
+        IMENUCTL_SetActive(pme->m_pMainMenu, FALSE);
+        return;
+    }
+
+    IMENUCTL_SetActive(pme->m_pMainMenu, TRUE);
+    IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMenuLastSel[TSW_SOS]);
+    //XXX __end
 }
 
 /*===========================================================================
@@ -105,21 +106,21 @@ static void CSOSWin_Enable(IWindow * po, boolean bEnable)
 ===========================================================================*/
 static void CSOSWin_Redraw(IWindow * po)
 {
-   CSOSWin *  pme = (CSOSWin *)po;
+    CSOSWin *  pme = (CSOSWin *)po;
 
-   if (!pme->m_bActive)
-      return;
+    if (!pme->m_bActive)
+        return;
 
-   
-   //XXX __begin
-   IDISPLAY_ClearScreen(pme->m_pIDisplay);
 
-   TS_DrawBackgroud(po);
-   IMENUCTL_Redraw(pme->m_pMainMenu);
-   
+    //XXX __begin
+    IDISPLAY_ClearScreen(pme->m_pIDisplay);
 
-   IDISPLAY_Update(pme->m_pIDisplay);
-   //XXX _end
+    TS_DrawBackgroud(po);
+    IMENUCTL_Redraw(pme->m_pMainMenu);
+
+
+    IDISPLAY_Update(pme->m_pIDisplay);
+    //XXX _end
 }
 
 /*===========================================================================
@@ -127,54 +128,48 @@ static void CSOSWin_Redraw(IWindow * po)
 ===========================================================================*/
 static boolean CSOSWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam)
 {
-   CSOSWin *  pme = (CSOSWin *)po;
-   boolean     bRet = TRUE;
+    CSOSWin *  pme = (CSOSWin *)po;
+    boolean     bRet = TRUE;
 
-   //XXX __begin
-   if ( TS_ISSOFT(eCode)){
-	   if( AVK_SOFT1 == wParam )
-		   return TRUE;
+    //XXX __begin
+    if ( TS_ISSOFT(eCode)){
+        if( AVK_SOFT1 == wParam )
+        {
+            return IMENUCTL_HandleEvent(pme->m_pMainMenu, EVT_KEY, AVK_SELECT, 0);
+        }
 
-	   //ÍË³ö³ÌÐò
-	   if( AVK_SOFT2 == wParam )
-	   {
-			CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
-			return TRUE;
-	   }
-   }
-   
+        //é€€å‡ºç¨‹åº
+        if( AVK_SOFT2 == wParam )
+        {
+            CTopSoupApp_SetWindow(pme->m_pOwner, TSW_MAIN, 0);
+            return TRUE;
+        }
+    }
 
-   if (TS_ISEVTKEY(eCode)) 
-      return IMENUCTL_HandleEvent(pme->m_pMainMenu, eCode, wParam, dwParam);
 
-   if (!TS_ISEVTCMD(eCode))
-      return FALSE;
+    if (TS_ISEVTKEY(eCode))
+        return IMENUCTL_HandleEvent(pme->m_pMainMenu, eCode, wParam, dwParam);
 
-   switch (wParam)
-   {
-      case IDS_STRING_MY_LOCATION:
-		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE, 0);
-         break;
+    if (!TS_ISEVTCMD(eCode))
+        return FALSE;
 
-      case IDS_STRING_NAVIGATE:
-		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_DEST, 0);
-		  break;
+    switch (wParam)
+    {
+        case IDS_STRING_SET_RELATIVE:
+            CTopSoupApp_SetWindow(pme->m_pOwner, TSW_SOS_RELATIVE, 0);
+            break;
 
-	  case IDS_STRING_SOS:
-		  CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_DEST, 0);
-		  break;
+        case IDS_STRING_DEST_INFO:
+            CTopSoupApp_SetWindow(pme->m_pOwner, TSW_SOS_INFO, 0);
+            break;
 
-      case IDS_STRING_APPINFO:
-         CSOSWin_About((IWindow*)pme);
-		 break;
-	 
-      default:
-         bRet = FALSE;
-         break;
-   }
-   //XXX __end
+        default:
+            bRet = FALSE;
+            break;
+    }
+    //XXX __end
 
-   return bRet;
+    return bRet;
 }
 
 /*===========================================================================
@@ -182,11 +177,11 @@ static boolean CSOSWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, 
 ===========================================================================*/
 static void CSOSWin_About(IWindow * po)
 {
-   CSOSWin *  pme = (CSOSWin *)po;
+    CSOSWin *  pme = (CSOSWin *)po;
 
-	CTopSoupApp_DisableWin(pme->m_pOwner);
+    CTopSoupApp_DisableWin(pme->m_pOwner);
 
-   IDISPLAY_ClearScreen(pme->m_pIDisplay);
-   TS_DrawBackgroud(po);
-   ISHELL_ShowCopyright(pme->m_pIShell);
+    IDISPLAY_ClearScreen(pme->m_pIDisplay);
+    TS_DrawBackgroud(po);
+    ISHELL_ShowCopyright(pme->m_pIShell);
 }
