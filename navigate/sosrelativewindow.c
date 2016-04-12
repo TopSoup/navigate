@@ -9,6 +9,12 @@
 
 #define WIN_FONT AEE_FONT_NORMAL
 
+#ifdef AEE_SIMULATOR
+#	define RELATIVE_ADDRESS_CFG					"fs:/shared/relative_address.cfg"
+#else
+#	define RELATIVE_ADDRESS_CFG					"fs:/mod/navigate/relative_address.cfg"
+#endif // AEE_SIMULATOR
+
 //界面状态控制
 typedef enum
 {
@@ -51,6 +57,16 @@ static void       CSOSRelativeWin_Delete(IWindow * po);
 static void       CSOSRelativeWin_Enable(IWindow * po, boolean bEnable);
 static void       CSOSRelativeWin_Redraw(IWindow * po);
 static boolean    CSOSRelativeWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam);
+
+/************************************************************************/
+/* 从配置文件加载亲友联系方式                                           */
+/************************************************************************/
+static uint32 LoadConfig(CSOSRelativeWin *pme);
+
+/************************************************************************/
+/* 保存亲友联系方式到配置文件                                           */
+/************************************************************************/
+static uint32 SaveConfig(CSOSRelativeWin *pme);
 
 /*===============================================================================
 
@@ -102,37 +118,22 @@ IWindow * CSOSRelativeWin_New(CTopSoupApp * pOwner)
 		//尝试使用父窗口数据初始化，否则初始为0
 		ITEXTCTL_SetRect( pme->m_pTextCtl, &pme->m_pOwner->m_rectWin);
 
-       ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextA,sizeof(pme->m_szTextA));
-       ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextB,sizeof(pme->m_szTextB));
-       ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextC,sizeof(pme->m_szTextC));
-       /*
-		if (WSTRLEN(pme->m_pOwner->m_szTextLon) > 0)
-		{
-			WSTRCPY(pme->m_szTextA, pme->m_pOwner->m_szTextLon);
-		}
-		else
-		{
-			WSTRCPY(pme->m_szTextA, L"0.0");
-		}
+       LoadConfig(pme);
 
-		if (WSTRLEN(pme->m_pOwner->m_szTextLat) > 0)
-		{
-			WSTRCPY(pme->m_szTextB, pme->m_pOwner->m_szTextLat);
-		}
-		else
-		{
-			WSTRCPY(pme->m_szTextB, L"0.0");
-		}
+       if (WSTRLEN(pme->m_szTextA) == 0)
+       {
+           ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextA,sizeof(pme->m_szTextA));
+       }
 
-		if (WSTRLEN(pme->m_pOwner->m_szTextDesc) > 0)
-		{
-			WSTRCPY(pme->m_szTextC, pme->m_pOwner->m_szTextDesc);
-		}
-		else
-		{
-			ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextC,sizeof(pme->m_szTextC));
-		}
-        */
+       if (WSTRLEN(pme->m_szTextB) == 0)
+       {
+           ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextB,sizeof(pme->m_szTextB));
+       }
+
+       if (WSTRLEN(pme->m_szTextC) == 0)
+       {
+           ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextC,sizeof(pme->m_szTextC));
+       }
 
 		pme->m_eViewType = VIEW_MAIN;
 
@@ -217,8 +218,8 @@ static void CSOSRelativeWin_Redraw(IWindow * po)
 
 		// 1 Fill in the CtlAddItem structure values
 		//ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LON,szBuf,sizeof(szBuf));
-		//WSPRINTF(szText, MP_MAX_STRLEN, L"%s:\t%s", szBuf, pme->m_szTextB);
-		WSPRINTF(szText, MP_MAX_STRLEN, L"1.  \t%s", pme->m_szTextB);
+		//WSPRINTF(szText, MP_MAX_STRLEN, L"%s:\t%s", szBuf, pme->m_szTextA);
+		WSPRINTF(szText, MP_MAX_STRLEN, L"1.  \t%s", pme->m_szTextA);
 		ai.pText = szText;
 		ai.pImage = NULL;
 		ai.pszResImage = NULL;//KITIMG_RES_FILE;
@@ -234,8 +235,8 @@ static void CSOSRelativeWin_Redraw(IWindow * po)
 
 		// 2 Fill in the CtlAddItem structure values
 		//ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LAT,szBuf,sizeof(szBuf));
-		//WSPRINTF(szText, MP_MAX_STRLEN, L"%s:\t%s", szBuf, pme->m_szTextA);
-        WSPRINTF(szText, MP_MAX_STRLEN, L"2.  \t%s", pme->m_szTextA);
+		//WSPRINTF(szText, MP_MAX_STRLEN, L"%s:\t%s", szBuf, pme->m_szTextB);
+        WSPRINTF(szText, MP_MAX_STRLEN, L"2.  \t%s", pme->m_szTextB);
 		ai.pText = szText;
 		ai.pImage = NULL;
 		ai.pszResImage = NULL;//KITIMG_RES_FILE;
@@ -252,7 +253,7 @@ static void CSOSRelativeWin_Redraw(IWindow * po)
 		// 3 Fill in the CtlAddItem structure values
 		//ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_DESC,szBuf,sizeof(szBuf));
 		//WSPRINTF(szText, MP_MAX_STRLEN, L"%s:\t%s", szBuf, pme->m_szTextC);
-        WSPRINTF(szText, MP_MAX_STRLEN, L"3.  \t%s", pme->m_szTextA);
+        WSPRINTF(szText, MP_MAX_STRLEN, L"3.  \t%s", pme->m_szTextC);
 		ai.pText = szText;
 		ai.pImage = NULL;
 		ai.pszResImage = NULL;//KITIMG_RES_FILE;
@@ -352,7 +353,7 @@ static void CSOSRelativeWin_Redraw(IWindow * po)
             TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_OK);
             TS_DrawBackgroud(po);
             ITEXTCTL_SetInputMode( pme->m_pTextCtl, AEE_TM_NUMBERS );
-            ITEXTCTL_SetText( pme->m_pTextCtl, pme->m_szTextB, -1);
+            ITEXTCTL_SetText( pme->m_pTextCtl, pme->m_szTextA, -1);
             break;
                 
 		case EDIT_B:
@@ -360,7 +361,7 @@ static void CSOSRelativeWin_Redraw(IWindow * po)
 			TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_OK);
 			TS_DrawBackgroud(po);
 			ITEXTCTL_SetInputMode( pme->m_pTextCtl, AEE_TM_NUMBERS );
-			ITEXTCTL_SetText( pme->m_pTextCtl, pme->m_szTextA, -1);
+			ITEXTCTL_SetText( pme->m_pTextCtl, pme->m_szTextB, -1);
 			break;
 
 		case EDIT_C:
@@ -395,52 +396,6 @@ static boolean CSOSRelativeWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 
 	{
 		//XXX __begin
 		if ( TS_ISSOFT(eCode)){
-			if( AVK_SOFT1 == wParam )
-			{
-				CTopSoupApp_SetWindow(pme->m_pOwner, TSW_DEST_NEW_FUCTION, 0);
-				return TRUE;
-			}
-
-			//{
-
-			/*
-			//保存到数据库文件记录中
-			AECHAR * pTextLat=NULL;
-			AECHAR * pTextLon=NULL;
-			AECHAR * pTextDesc=NULL;
-			char	szBuf[64];
-
-			  pTextLat= ITEXTCTL_GetTextPtr( pme->m_pTextLat );
-			  pTextLon = ITEXTCTL_GetTextPtr( pme->m_pTextLon );
-			  pTextDesc = ITEXTCTL_GetTextPtr( pme->m_pTextDesc );
-
-				WSTRTOSTR(pTextLat, szBuf, WSTRLEN(pTextLat) + 1);
-				DBGPRINTF("LAT:%s", szBuf);
-				WSTRTOSTR(pTextLon, szBuf, WSTRLEN(pTextLon) + 1);
-				DBGPRINTF("LON:%s", szBuf);
-				WSTRTOSTR(pTextDesc, szBuf, WSTRLEN(pTextDesc) + 1);
-				DBGPRINTF("DESC:%s", szBuf);
-
-				  if (WSTRLEN(pTextLat) == 0 || WSTRLEN(pTextLon) == 0 || WSTRLEN(pTextDesc) == 0)
-				  {
-				  DBGPRINTF("Re Input!");//TODO
-				  return TRUE;
-				  }
-
-					if (TS_AddExpenseItem(pme->m_pOwner, pTextDesc, pTextLat, pTextLon))
-					{
-					//TODO 应该跳转到哪个页面,还是停留在当前?
-					CTopSoupApp_SetWindow(pme->m_pOwner, TSW_NAVIGATE_DEST, 0);
-					}
-					else
-					{
-					DBGPRINTF("SAVE ERROR!");//TODO
-					return TRUE;
-					}
-				*/
-				//return TRUE;
-			//}
-
 			if( AVK_SOFT2 == wParam )
 			{
 				CTopSoupApp_SetWindow(pme->m_pOwner, TSW_SOS, 0);
@@ -498,87 +453,43 @@ static boolean CSOSRelativeWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 
 			pText = ITEXTCTL_GetTextPtr( pme->m_pTextCtl );
 			WSTRTOSTR(pText, szBuf, sizeof(szBuf));
 
-			if (pme->m_eEditType == EDIT_B)
-			{
-				//校验经纬度
-				if (TS_CheckLat(pText) == FALSE
-					|| (WSTRLEN(pText) > 12))
-				{
-					AECHAR prompt[TS_MAX_STRLEN];
-					DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
+            //校验联系方式长度
+            if ((WSTRLEN(pText) > 16))
+            {
+                AECHAR prompt[TS_MAX_STRLEN];
+                DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
 
-					ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_LAT,prompt,sizeof(prompt));
+                ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_PHONE_NUM,prompt,sizeof(prompt));
 
-					//提示窗口
-					MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));
-					WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);
-					//TS_DrawSplash(pme->m_pOwner,prompt,1500,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
-					TS_DrawSplash(pme->m_pOwner,prompt,1500,0, 0);
+                //提示窗口
+                TS_DrawSplash(pme->m_pOwner,prompt,1500,0, 0);
+                return TRUE;
+            }
 
-					return TRUE;
-				}
-
-				WSTRCPY(pme->m_szTextA, pText);
-				WSTRCPY(pme->m_pOwner->m_szTextLon, pText);
-				DBGPRINTF("GetLat pText:%s", szBuf);
-			}
-			else if (pme->m_eEditType == EDIT_A)
-			{
-				//校验经纬度
-				if (TS_CheckLon(pText) == FALSE
-					|| (WSTRLEN(pText) > 12))
-				{
-					AECHAR prompt[TS_MAX_STRLEN];
-					DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
-
-					ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_LON,prompt,sizeof(prompt));
-
-					//提示窗口
-					MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));
-					WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);
-					//TS_DrawSplash(pme->m_pOwner,prompt,1500,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
-					TS_DrawSplash(pme->m_pOwner,prompt,1500,0, 0);
-
-					return TRUE;
-				}
-
-				WSTRCPY(pme->m_szTextB, pText);
-				WSTRCPY(pme->m_pOwner->m_szTextLat, pText);
-				DBGPRINTF("GetLon pText:%s", szBuf);
-			}
+            if (pme->m_eEditType == EDIT_A)
+            {
+                WSTRCPY(pme->m_szTextA, pText);
+                DBGPRINTF("GetB pText:%s", szBuf);
+            }
+			else if (pme->m_eEditType == EDIT_B)
+            {
+                WSTRCPY(pme->m_szTextB, pText);
+                DBGPRINTF("GetA pText:%s", szBuf);
+            }
 			else if (pme->m_eEditType == EDIT_C)
 			{
-				//校验目的地名称长度
-				if (WSTRLEN(pText) > 30)
-				{
-					AECHAR prompt[TS_MAX_STRLEN];
-					DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
-					
-					ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_DESC,prompt,sizeof(prompt));
-					
-					//提示窗口
-					MEMSET(pme->m_pOwner->m_pTextctlText,0,sizeof(pme->m_pOwner->m_pTextctlText));	  
-					WSTRCPY(pme->m_pOwner->m_pTextctlText, pme->m_pOwner->m_szTextDesc);	   
-					//TS_DrawSplash(pme->m_pOwner,prompt,1500,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
-					TS_DrawSplash(pme->m_pOwner,prompt,1500,0, 0);
-					
-					return TRUE;
-				}
-
 				WSTRCPY(pme->m_szTextC, pText);
-				WSTRCPY(pme->m_pOwner->m_szTextDesc, pText);
-				DBGPRINTF("GetDesc pText:%s", szBuf);
+				DBGPRINTF("GetC pText:%s", szBuf);
 			}
 			else
 			{
 				return TRUE;
 			}
-			
-			
+
 			//切回主页面
 			pme->m_eEditType = 0;
 			pme->m_eViewType = VIEW_MAIN;
-			
+			SaveConfig(pme);
 			CSOSRelativeWin_Redraw((IWindow*)pme);
 			
 			return TRUE;
@@ -587,4 +498,216 @@ static boolean CSOSRelativeWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 
 	}
 	
 	return bRet;
+}
+
+
+//过滤空格
+int TrimSpace(char *inbuf, char *outbuf)
+{
+    char *tmpBuf = inbuf;
+    while (*tmpBuf != '\0')
+    {
+        if ((*tmpBuf) != ' '){
+            *outbuf++ = *tmpBuf;
+        }
+        tmpBuf++;
+    }
+    *outbuf = '\0';
+    return 0;
+}
+
+/************************************************************************/
+/* 从配置文件加载亲友联系方式                                           */
+/************************************************************************/
+static uint32 LoadConfig(CSOSRelativeWin *pme)
+{
+    IFileMgr	*pIFileMgr = NULL;
+    IFile		*pIFile = NULL;
+    IShell		*pIShell = NULL;
+
+    char    *pszBufOrg = NULL;
+    char    *pszBuf = NULL, *pBuf = NULL;
+    char    *pszTok = NULL;
+    char    *pszDelimiter = ";";
+    int32	nResult = 0;
+    FileInfo	fiInfo;
+    char    szA[32], szB[32], szC[32];
+    int len = 0;
+
+    pIShell = pme->m_pIShell;
+
+    // Create the instance of IFileMgr
+    nResult = ISHELL_CreateInstance(pIShell, AEECLSID_FILEMGR, (void**)&pIFileMgr);
+    if (SUCCESS != nResult) {
+        return nResult;
+    }
+
+    nResult = IFILEMGR_Test(pIFileMgr, RELATIVE_ADDRESS_CFG);
+    if (nResult != SUCCESS)
+    {
+        DBGPRINTF("CONFIG NOT EXIST!");
+        IFILEMGR_Release(pIFileMgr);
+        return SUCCESS;
+    }
+
+    pIFile = IFILEMGR_OpenFile(pIFileMgr, RELATIVE_ADDRESS_CFG, _OFM_READWRITE);
+    if (!pIFile) {
+        DBGPRINTF("Open Configure File Failed! %s", RELATIVE_ADDRESS_CFG);
+        IFILEMGR_Release(pIFileMgr);
+        return EFAILED;
+    }
+
+    if (SUCCESS != IFILE_GetInfo(pIFile, &fiInfo)) {
+        IFILE_Release(pIFile);
+        IFILEMGR_Release(pIFileMgr);
+        return EFAILED;
+    }
+
+    if (fiInfo.dwSize == 0) {
+        IFILE_Release(pIFile);
+        IFILEMGR_Release(pIFileMgr);
+        return EFAILED;
+    }
+
+    // Allocate enough memory to read the full text into memory
+    pszBufOrg = MALLOC(fiInfo.dwSize);
+    pszBuf = MALLOC(fiInfo.dwSize);
+    pBuf = pszBuf;
+
+    nResult = IFILE_Read(pIFile, pszBufOrg, fiInfo.dwSize);
+    if ((uint32)nResult < fiInfo.dwSize) {
+        FREE(pszBuf);
+        return EFAILED;
+    }
+
+    TrimSpace(pszBufOrg, pszBuf);
+    FREE(pszBufOrg);
+
+    //查找第一个联系人号码
+    MEMSET(szA,0,sizeof(szA));
+    pszTok = STRCHR(pszBuf, '#');
+    if (pszTok == NULL) {
+        FREE(pszBuf);
+        IFILE_Release(pIFile);
+        IFILEMGR_Release(pIFileMgr);
+        return EFAILED;
+    }
+    len = pszTok-pszBuf;
+    MEMCPY(szA, pszBuf, len*sizeof(char));
+    szA[len] = 0;
+    pszBuf = pszTok + 1;
+    DBGPRINTF("szA:%s", szA);
+
+    //查找第二个联系人号码
+    MEMSET(szB,0,sizeof(szB));
+    pszTok = STRCHR(pszBuf, '#');
+    if (pszTok == NULL) {
+        FREE(pszBuf);
+        IFILE_Release(pIFile);
+        IFILEMGR_Release(pIFileMgr);
+        return EFAILED;
+    }
+    len = pszTok-pszBuf;
+    MEMCPY(szB, pszBuf, len*sizeof(char));
+    szB[len] = 0;
+    pszBuf = pszTok + 1;
+    DBGPRINTF("szB:%s", szB);
+
+    //查找第三个联系人号码
+    MEMSET(szC,0,sizeof(szC));
+    len = fiInfo.dwSize-(pszBuf-pBuf);
+    if (len > 6 && len < 30)
+    {
+        MEMCPY(szC, pszBuf, len);
+        szC[len] = 0;
+    }
+    DBGPRINTF("szC:%s", szC);
+
+    if (STRLEN(szA) > 6)
+    {
+        STRTOWSTR(szA, pme->m_szTextA, sizeof(pme->m_szTextA));
+    }
+
+    if (STRLEN(szB) > 6)
+    {
+        STRTOWSTR(szB, pme->m_szTextB, sizeof(pme->m_szTextB));
+    }
+
+    if (STRLEN(szC) > 6)
+    {
+        STRTOWSTR(szC, pme->m_szTextC, sizeof(pme->m_szTextC));
+    }
+
+    FREE(pszBuf);
+    IFILE_Release(pIFile);
+    IFILEMGR_Release(pIFileMgr);
+
+    return SUCCESS;
+}
+
+/************************************************************************/
+/* 保存亲友联系方式到配置文件                                           */
+/************************************************************************/
+static uint32 SaveConfig(CSOSRelativeWin *pme)
+{
+
+    IFileMgr	*pIFileMgr = NULL;
+    IFile		*pIFile = NULL;
+    IShell		*pIShell = NULL;
+
+    int32	nResult = 0;
+    FileInfo	fiInfo;
+    char    szBuf[64];
+    char    szA[32], szB[32], szC[32];
+    uint32     len = 0;
+
+    pIShell = pme->m_pIShell;
+
+    // Create the instance of IFileMgr
+    nResult = ISHELL_CreateInstance(pIShell, AEECLSID_FILEMGR, (void**)&pIFileMgr);
+    if (SUCCESS != nResult) {
+        return nResult;
+    }
+
+    pIFile = IFILEMGR_OpenFile(pIFileMgr, RELATIVE_ADDRESS_CFG, _OFM_READWRITE);
+    if (!pIFile) {
+        DBGPRINTF("Open Configure File Failed! %s", RELATIVE_ADDRESS_CFG);
+        IFILEMGR_Release(pIFileMgr);
+        return EFAILED;
+    }
+
+    MEMSET(szA,0,sizeof(szA));
+    MEMSET(szB,0,sizeof(szB));
+    MEMSET(szC,0,sizeof(szC));
+    if (WSTRLEN(pme->m_szTextA) > 6)
+    {
+        WSTRTOSTR(pme->m_szTextA, szA, sizeof(szA));
+    }
+
+    if (WSTRLEN(pme->m_szTextB) > 6)
+    {
+        WSTRTOSTR(pme->m_szTextB, szB, sizeof(szB));
+    }
+
+    if (WSTRLEN(pme->m_szTextC) > 6)
+    {
+        WSTRTOSTR(pme->m_szTextC, szC, sizeof(szC));
+    }
+
+    //构建配置内容: A#B#C
+    SPRINTF(szBuf, "%s#%s#%s", szA, szB, szC);
+    len = STRLEN(szBuf);
+    DBGPRINTF("Save Relative address:%s len:%d", szBuf, len);
+
+    nResult = IFILE_Write(pIFile, szBuf, len);
+    if ((uint32)nResult < len) {
+        IFILE_Release(pIFile);
+        IFILEMGR_Release(pIFileMgr);
+        return EFAILED;
+    }
+
+    IFILE_Release(pIFile);
+    IFILEMGR_Release(pIFileMgr);
+
+    return SUCCESS;
 }
