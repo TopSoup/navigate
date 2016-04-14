@@ -346,7 +346,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			AECHAR kmRes[10];
 			double kn = 0;
 
-			kn = FDIV(pGetGpsInfo->theInfo.velocityHor, 1852.0);	//1节=1.852公里 velocityHor为m/s
+			kn = FMUL(FDIV(pGetGpsInfo->theInfo.velocityHor, 1852.0), 3600.0);	//1节=1.852公里/小时 velocityHor为m/s --> 1节 = V*3600/1852
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_VEL, bufRes, sizeof(bufRes));
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SPEED_KN, knRes, sizeof(knRes));
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SPEED_KM, kmRes, sizeof(kmRes));
