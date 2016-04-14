@@ -616,24 +616,24 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
     //查找第三个联系人号码
     MEMSET(szC,0,sizeof(szC));
     len = fiInfo.dwSize-(pszBuf-pBuf);
-    if (len > 6 && len < 30)
+    if (len > TS_MIN_RELATIVE_NUM && len < TS_MAX_RELATIVE_NUM)
     {
         MEMCPY(szC, pszBuf, len);
         szC[len] = 0;
     }
     DBGPRINTF("szC:%s", szC);
 
-    if (STRLEN(szA) > 6)
+    if (STRLEN(szA) > TS_MIN_RELATIVE_NUM)
     {
         STRTOWSTR(szA, pme->m_szTextA, sizeof(pme->m_szTextA));
     }
 
-    if (STRLEN(szB) > 6)
+    if (STRLEN(szB) > TS_MIN_RELATIVE_NUM)
     {
         STRTOWSTR(szB, pme->m_szTextB, sizeof(pme->m_szTextB));
     }
 
-    if (STRLEN(szC) > 6)
+    if (STRLEN(szC) > TS_MIN_RELATIVE_NUM)
     {
         STRTOWSTR(szC, pme->m_szTextC, sizeof(pme->m_szTextC));
     }
@@ -679,17 +679,17 @@ static uint32 SaveConfig(CSOSRelativeWin *pme)
     MEMSET(szA,0,sizeof(szA));
     MEMSET(szB,0,sizeof(szB));
     MEMSET(szC,0,sizeof(szC));
-    if (WSTRLEN(pme->m_szTextA) > 6)
+    if (WSTRLEN(pme->m_szTextA) > TS_MIN_RELATIVE_NUM)
     {
         WSTRTOSTR(pme->m_szTextA, szA, sizeof(szA));
     }
 
-    if (WSTRLEN(pme->m_szTextB) > 6)
+    if (WSTRLEN(pme->m_szTextB) > TS_MIN_RELATIVE_NUM)
     {
         WSTRTOSTR(pme->m_szTextB, szB, sizeof(szB));
     }
 
-    if (WSTRLEN(pme->m_szTextC) > 6)
+    if (WSTRLEN(pme->m_szTextC) > TS_MIN_RELATIVE_NUM)
     {
         WSTRTOSTR(pme->m_szTextC, szC, sizeof(szC));
     }

@@ -20,6 +20,11 @@ static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
 // ascii 短信内容，对于unicode短信内容，必须由资源文件bar中获取，否则编码不对 
 #define MO_TEXT_ASCII "Destination:Beijing#lat:37.123456#lon:114.121345" 
 
+/*===============================================================================
+                        SOS Call
+=============================================================================== */
+#define TS_EVT_SOS_CALL 0xe04d
+
 //解析短信内容
 //格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
 static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg);
@@ -472,7 +477,19 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 							 return TRUE;
 						 }
 					 }
-				 }
+				 }else if(wp->cls == AEECLSID_SOS)
+                 {
+                     char			szA[32];
+                     char			szB[32];
+                     char			szC[32];
+
+                     //加载配置文件
+                     if (SUCCESS == LoadConfig(pIShell, szA, szB, szC))
+                     {
+                         CTopSoupApp_MakeSOSCall(pme, szA);
+                         CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_UNICODE, L"TIANANMEN");
+                     }
+                 }
 			 }
 			 return (TRUE);
 
@@ -489,7 +506,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				}
 
 				//FOR TEL TEST
-				if (wParam == AVK_1)
+				if (wParam == AVK_PTT)
 				{
 					DBGPRINTF("CALL TEST ...");
 					//CTopSoupApp_MakeSOSCall(pme, "15511823090");
@@ -1215,7 +1232,140 @@ static void CTopSoupApp_EndSOSCall(CTopSoupApp * pme)
 	}
 }
 
+/************************************************************************/
+/* 从配置文件加载亲友联系方式                                           */
+/************************************************************************/
+static uint32 LoadConfig(IShell *iShell, char *pszA, char *pszB, char *pszC)
+{
+	IFileMgr	*pIFileMgr = NULL;
+	IFile		*pIFile = NULL;
+	IShell		*pIShell = NULL;
 
+	char    *pszBufOrg = NULL;
+	char    *pszBuf = NULL, *pBuf = NULL;
+	char    *pszTok = NULL;
+	char    *pszDelimiter = ";";
+	int32	nResult = 0;
+	FileInfo	fiInfo;
+	char    szA[32], szB[32], szC[32];
+	int len = 0;
+
+    if (iShell == NULL)
+    {
+        DBGPRINTF("LoadConfig Error : iShell is NULL!");
+        return EFAILED;
+    }
+
+	pIShell = iShell;
+
+	// Create the instance of IFileMgr
+	nResult = ISHELL_CreateInstance(pIShell, AEECLSID_FILEMGR, (void**)&pIFileMgr);
+	if (SUCCESS != nResult) {
+		return nResult;
+	}
+
+	nResult = IFILEMGR_Test(pIFileMgr, RELATIVE_ADDRESS_CFG);
+	if (nResult != SUCCESS)
+	{
+		DBGPRINTF("CONFIG NOT EXIST!");
+		IFILEMGR_Release(pIFileMgr);
+		return SUCCESS;
+	}
+
+	pIFile = IFILEMGR_OpenFile(pIFileMgr, RELATIVE_ADDRESS_CFG, _OFM_READWRITE);
+	if (!pIFile) {
+		DBGPRINTF("Open Configure File Failed! %s", RELATIVE_ADDRESS_CFG);
+		IFILEMGR_Release(pIFileMgr);
+		return EFAILED;
+	}
+
+	if (SUCCESS != IFILE_GetInfo(pIFile, &fiInfo)) {
+		IFILE_Release(pIFile);
+		IFILEMGR_Release(pIFileMgr);
+		return EFAILED;
+	}
+
+	if (fiInfo.dwSize == 0) {
+		IFILE_Release(pIFile);
+		IFILEMGR_Release(pIFileMgr);
+		return EFAILED;
+	}
+
+	// Allocate enough memory to read the full text into memory
+	pszBufOrg = MALLOC(fiInfo.dwSize);
+	pszBuf = MALLOC(fiInfo.dwSize);
+	pBuf = pszBuf;
+
+	nResult = IFILE_Read(pIFile, pszBufOrg, fiInfo.dwSize);
+	if ((uint32)nResult < fiInfo.dwSize) {
+		FREE(pszBuf);
+		return EFAILED;
+	}
+
+	TrimSpace(pszBufOrg, pszBuf);
+	FREE(pszBufOrg);
+
+	//查找第一个联系人号码
+	MEMSET(szA,0,sizeof(szA));
+	pszTok = STRCHR(pszBuf, '#');
+	if (pszTok == NULL) {
+		FREE(pszBuf);
+		IFILE_Release(pIFile);
+		IFILEMGR_Release(pIFileMgr);
+		return EFAILED;
+	}
+	len = pszTok-pszBuf;
+	MEMCPY(szA, pszBuf, len*sizeof(char));
+	szA[len] = 0;
+	pszBuf = pszTok + 1;
+	DBGPRINTF("szA:%s", szA);
+
+	//查找第二个联系人号码
+	MEMSET(szB,0,sizeof(szB));
+	pszTok = STRCHR(pszBuf, '#');
+	if (pszTok == NULL) {
+		FREE(pszBuf);
+		IFILE_Release(pIFile);
+		IFILEMGR_Release(pIFileMgr);
+		return EFAILED;
+	}
+	len = pszTok-pszBuf;
+	MEMCPY(szB, pszBuf, len*sizeof(char));
+	szB[len] = 0;
+	pszBuf = pszTok + 1;
+	DBGPRINTF("szB:%s", szB);
+
+	//查找第三个联系人号码
+	MEMSET(szC,0,sizeof(szC));
+	len = fiInfo.dwSize-(pszBuf-pBuf);
+	if (len > TS_MIN_RELATIVE_NUM && len < TS_MAX_RELATIVE_NUM)
+	{
+		MEMCPY(szC, pszBuf, len);
+		szC[len] = 0;
+	}
+	DBGPRINTF("szC:%s", szC);
+
+	if (STRLEN(szA) > TS_MIN_RELATIVE_NUM)
+	{
+		STRCPY(pszA, szA);
+	}
+
+	if (STRLEN(szB) > TS_MIN_RELATIVE_NUM)
+	{
+        STRCPY(pszB, szB);
+	}
+
+	if (STRLEN(szC) > TS_MIN_RELATIVE_NUM)
+	{
+        STRCPY(pszC, szC);
+	}
+
+	FREE(pszBuf);
+	IFILE_Release(pIFile);
+	IFILEMGR_Release(pIFileMgr);
+
+	return SUCCESS;
+}
 
 
 

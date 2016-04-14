@@ -19,8 +19,6 @@ static void       CSOSWin_Enable(IWindow * po, boolean bEnable);
 static void       CSOSWin_Redraw(IWindow * po);
 static boolean    CSOSWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, uint32 dwParam);
 
-static void       CSOSWin_About(IWindow * po);
-
 /*===============================================================================
 
                      CSOSWin Functions
@@ -172,16 +170,3 @@ static boolean CSOSWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam, 
     return bRet;
 }
 
-/*===========================================================================
-   This function displays the About dialog of the app.
-===========================================================================*/
-static void CSOSWin_About(IWindow * po)
-{
-    CSOSWin *  pme = (CSOSWin *)po;
-
-    CTopSoupApp_DisableWin(pme->m_pOwner);
-
-    IDISPLAY_ClearScreen(pme->m_pIDisplay);
-    TS_DrawBackgroud(po);
-    ISHELL_ShowCopyright(pme->m_pIShell);
-}

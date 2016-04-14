@@ -4,12 +4,14 @@
     <file url="file://$PROJECT_DIR$/navigate/logicmacro.c" charset="GBK" />
     <file url="file://$PROJECT_DIR$/navigate/logicmacro.h" charset="GBK" />
     <file url="file://$PROJECT_DIR$/navigate/mainwindow.c" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/navigate/navigate.c" charset="GBK" />
     <file url="file://$PROJECT_DIR$/navigate/navigate.h" charset="GBK" />
     <file url="file://$PROJECT_DIR$/navigate/navigatedestwindow.c" charset="GBK" />
     <file url="file://$PROJECT_DIR$/navigate/newdestwindow.c" charset="GBK" />
     <file url="file://$PROJECT_DIR$/navigate/sosinfowindow.c" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/navigate/sosrelativewindow.c" charset="GBK" />
     <file url="file://$PROJECT_DIR$/navigate/soswindow.c" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/navigate/textctlwindow.c" charset="GBK" />
     <file url="file://$PROJECT_DIR$/navigate/wherewindow.c" charset="GBK" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
