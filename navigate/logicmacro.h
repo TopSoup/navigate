@@ -17,6 +17,7 @@ void       TS_FreeIF(IBase ** ppif);
 void       TS_FreeWin(IWindow ** ppif);
 
 AECHAR*	   TS_FLT2SZ(AECHAR* szBuf, double val);
+AECHAR*    TS_FLT2SZ_3(AECHAR* szBuf, double val);
 
 //»æÖÆÎÄ×Ö
 void       TS_DrawText(IDisplay* pIDisplay, AEEFont nFont, AECHAR* pText, AEERect *rect);

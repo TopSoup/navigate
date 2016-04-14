@@ -344,16 +344,17 @@ static void CWhereWin_Redraw(IWindow * po)
 			AECHAR szKn[32];
 			AECHAR knRes[10];
 			AECHAR kmRes[10];
-			double kn = 0;
+			double kn = 0, km = 0;
 
 			kn = FMUL(FDIV(pGetGpsInfo->theInfo.velocityHor, 1852.0), 3600.0);	//1节=1.852公里/小时 velocityHor为m/s --> 1节 = V*3600/1852
+            km = FMUL(pGetGpsInfo->theInfo.velocityHor, 3.6);  //m/s --> km/h
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_VEL, bufRes, sizeof(bufRes));
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SPEED_KN, knRes, sizeof(knRes));
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SPEED_KM, kmRes, sizeof(kmRes));
 			//FLOATTOWSTR(pGetGpsInfo->theInfo.velocityHor, bufVel, 32);
 			//FLOATTOWSTR(kn, szKn, 32);
 			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s%s(%s%s)", 
-				bufRes, TS_FLT2SZ(szKn, kn), knRes, TS_FLT2SZ(bufVel, pGetGpsInfo->theInfo.velocityHor), kmRes);
+				bufRes, TS_FLT2SZ_3(szKn, kn), knRes, TS_FLT2SZ_3(bufVel, km), kmRes);
 			//WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s%s(%s%s)", 
 			//	bufRes, szKn, knRes, bufVel, kmRes);
 			xx = xMargin;
@@ -367,7 +368,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			//方向
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_HEADING, bufRes, sizeof(bufRes));
 			//FLOATTOWSTR(pGetGpsInfo->theInfo.heading, bufHeading, 32);
-			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, TS_FLT2SZ(bufHeading, pGetGpsInfo->theInfo.heading));
+			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, TS_FLT2SZ_3(bufHeading, pGetGpsInfo->theInfo.heading));
 			//WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, bufHeading);
 			xx = xMargin;
 			yy += h;

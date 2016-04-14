@@ -33,7 +33,7 @@ AECHAR* TS_FLT2SZ(AECHAR* szBuf, double val)
 	double tmp = 0, tt = 0, min = 0;
 	int d = 0, m = 0;
 	int zero_pad = 0;
-	char strZero[6];
+	char strZero[7];
 	AECHAR szZero[16];
 
 	if (szBuf == NULL)
@@ -88,6 +88,65 @@ AECHAR* TS_FLT2SZ(AECHAR* szBuf, double val)
 		m = 0;
 	}
 	
+	if (zero_pad > 0)
+		WSPRINTF(szBuf, 32, L"%d.%s%d", d, szZero, m);
+	else
+		WSPRINTF(szBuf, 32, L"%d.%d", d, m);
+	return szBuf;
+#else
+	FLOATTOWSTR(val, szBuf, 32);
+#endif
+}
+
+/*===========================================================================
+   This function format double num to AECHAR, 3 pos hold
+===========================================================================*/
+AECHAR* TS_FLT2SZ_3(AECHAR* szBuf, double val)
+{
+#if 1
+	double tmp = 0, tt = 0, min = 0;
+	int d = 0, m = 0;
+	int zero_pad = 0;
+	char strZero[4];
+	AECHAR szZero[16];
+
+	if (szBuf == NULL)
+		return NULL;
+
+	tmp = FABS(val);
+	if (FCMP_GE(tmp, 0.001))
+	{
+		tt = FFLOOR(tmp);
+		d = FLTTOINT(tt);
+		m = FLTTOINT(FMUL(FSUB(tmp, tt), 10000.0));
+		m = (m % 10 >= 5) ? (m + 10) / 10 : m / 10;
+		if (m > 0)
+		{
+			if (m < 100)	//0.012
+			{
+				zero_pad++;
+			}
+
+			if (m < 10)	    //0.001
+			{
+				zero_pad++;
+			}
+
+			//²¹³äºóÃæµÄ0
+			if (zero_pad > 0)
+			{
+				STRNCPY(strZero, "000", zero_pad);
+				strZero[zero_pad] = 0;
+				STRTOWSTR(strZero, szZero, 16);
+			}
+		}
+	}
+	else
+	{
+		d = 0;
+		m = 0;
+	}
+
 	if (zero_pad > 0)
 		WSPRINTF(szBuf, 32, L"%d.%s%d", d, szZero, m);
 	else

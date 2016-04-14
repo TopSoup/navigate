@@ -22,9 +22,9 @@ struct CNavigateWin
 	AECHAR          m_szText[MP_MAX_STRLEN];
 	IStatic *		m_pTitle;
 	
-	IStatic *		m_pTextDestination;	//Ä¿±êÃû³Æ
-	IStatic *		m_pTextDistance;	//¾àÀë
-	IStatic *		m_pTextInfo;		//ÐÅÏ¢
+	IStatic *		m_pTextDestination;	//Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	IStatic *		m_pTextDistance;	//ï¿½ï¿½ï¿½ï¿½
+	IStatic *		m_pTextInfo;		//ï¿½ï¿½Ï¢
 
 	IGraphics*      m_pGraphics;              // Pointer to the application IGraphics object
 	IBitmap*        m_pBitmap;                // Pointer to the IBitmap drawing canvas
@@ -32,7 +32,7 @@ struct CNavigateWin
 	int16		    m_nWindowXOrigin;         // The starting X coordinate of the canvas displayed in left most pixel of the viewport
 	uint16          m_nBitmapWidth;           // The width of the drawing canvas
 
-	IImageCtl *		m_pImageCtl;		//ÂÞÅÌÍ¼Æ¬
+	IImageCtl *		m_pImageCtl;		//ï¿½ï¿½ï¿½ï¿½Í¼Æ¬
 
 	AEECallback		m_cbWatcherTimer;
 	AEEGPSMode		m_gpsMode;			//GPSÄ£Ê½
@@ -89,7 +89,7 @@ IWindow * CNavigateWin_New(CTopSoupApp * pOwner)
 		    )
 			TS_WINERR_RETURN(pme);
 		
-		//±êÌâ+16
+		//ï¿½ï¿½ï¿½ï¿½+16
 		ISTATIC_SetRect(pme->m_pTitle, &rectTitle);
 		ISTATIC_SetProperties(pme->m_pTitle, ST_CENTERTEXT | ST_NOSCROLL);
 
@@ -116,7 +116,7 @@ IWindow * CNavigateWin_New(CTopSoupApp * pOwner)
 		SETAEERECT( &rect, 0, 0, pme->m_nBitmapWidth, pme->m_rViewportRect.dy );
 		IBITMAP_FillRect( pme->m_pBitmap, &rect, IBITMAP_RGBToNative( pme->m_pBitmap, MAKE_RGB(0x43,0xCD,0x80) ), AEE_RO_COPY );
 
-		//¶¨Î»ÂÞÅÌ+232
+		//ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½+232
 		if (ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_IMAGECTL, (void **)(&pme->m_pImageCtl)))
 			TS_WINERR_RETURN(pme);
 
@@ -131,7 +131,7 @@ IWindow * CNavigateWin_New(CTopSoupApp * pOwner)
 			IIMAGE_Release(pi);
 		}
 
-		//Ä¿µÄµØ,¾àÀëºÍÌáÊ¾ÐÅÏ¢
+		//Ä¿ï¿½Äµï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Ï¢
 		dy = 232+16+4;
 		SETAEERECT(&rect, 0, dy, cx, dy);
 		ISTATIC_SetRect(pme->m_pTextDestination, &rect);
@@ -143,7 +143,7 @@ IWindow * CNavigateWin_New(CTopSoupApp * pOwner)
 		ISTATIC_SetRect(pme->m_pTextInfo, &rect);
 	}
 
-	//³õÊ¼»¯¶¨Î»ÐÅÏ¢
+	//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½Ï¢
 	{
 		int nErr = SUCCESS;
 		struct _GetGPSInfo *pGetGPSInfo = &pme->m_pOwner->m_gpsInfo;
@@ -151,7 +151,7 @@ IWindow * CNavigateWin_New(CTopSoupApp * pOwner)
 
 		pme->m_gpsMode = AEEGPS_MODE_TRACK_STANDALONE;//AEEGPS_MODE_TRACK_NETWORK;
 
-		//Æô¶¯¶¨Î»
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»
 		CNavigateWin_LocStart(pme);
 
 		//Callback
@@ -177,7 +177,7 @@ static void CNavigateWin_Delete(IWindow * po)
 {
 	CNavigateWin *  pme = (CNavigateWin *)po;
 	
-	//ÊÍ·Å¶¨Î»Ä£¿é
+	//ï¿½Í·Å¶ï¿½Î»Ä£ï¿½ï¿½
 	CNavigateWin_LocStop(pme);
 	
 	CALLBACK_Cancel(&pme->m_cbWatcherTimer);
@@ -226,7 +226,7 @@ static void CNavigateWin_Redraw(IWindow * po)
 	
 	IDISPLAY_BitBlt( pme->m_pIDisplay, pme->m_rViewportRect.x, pme->m_rViewportRect.y, pme->m_rViewportRect.dx, pme->m_rViewportRect.dy, pme->m_pBitmap, pme->m_nWindowXOrigin, 0, AEE_RO_COPY );
 	
-		//¸üÐÂµ×²¿ÎÄ×Ö
+		//ï¿½ï¿½ï¿½Âµ×²ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (pme->m_bGetGpsInfo)
 	{
 		//TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_INFO,IDS_STRING_BACK,0);	//TODO
@@ -237,7 +237,7 @@ static void CNavigateWin_Redraw(IWindow * po)
 		TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,0);
 	}
 
-		//»æÖÆ±³¾°¼°¿ò¼Ü
+		//ï¿½ï¿½ï¿½Æ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	TS_DrawBackgroud(po);
 
 //	if (pme->m_pTitle)
@@ -247,7 +247,7 @@ static void CNavigateWin_Redraw(IWindow * po)
 //		TS_FitStaticText(pme->m_pIDisplay, pme->m_pTitle, AEE_FONT_NORMAL, pme->m_szText);
 //	}
 
-	//µ±È¡µÃ¶¨Î»½á¹ûÊ±¸üÐÂÏÔÊ¾
+	//ï¿½ï¿½È¡ï¿½Ã¶ï¿½Î»ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
 	if (pme->m_pOwner->m_gpsInfo.pPosDet
 		&& pme->m_bGetGpsInfo)
 	{
@@ -296,23 +296,23 @@ static void CNavigateWin_Redraw(IWindow * po)
 		return ;
 	}
 	
-	//ÏÔÊ¾ÂÞÅÌ
+	//ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
 	IIMAGECTL_Redraw(pme->m_pImageCtl);
 
-	// »æÖÆµ±Ç°·½ÏòÏßºÍ¼ýÍ·
+	// ï¿½ï¿½ï¿½Æµï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ßºÍ¼ï¿½Í·
 	IGRAPHICS_SetFillMode( pme->m_pGraphics, FALSE);
 	IGRAPHICS_SetPaintMode( pme->m_pGraphics, AEE_PAINT_COPY );
 	
 	IGRAPHICS_SetColor( pme->m_pGraphics, 255, 0, 0, 0 );
     IGRAPHICS_SetFillColor( pme->m_pGraphics, 255, 0, 0, 0 );
 
-	//ÂÞÅÌ¿Ì¶ÈÔ²
+	//ï¿½ï¿½ï¿½Ì¿Ì¶ï¿½Ô²
 	rCircle.cx = 120;
 	rCircle.cy = 114;
 	rCircle.r = FLTTOINT(r);
 	IGRAPHICS_DrawCircle( pme->m_pGraphics, &rCircle );
 
-	//µ±Ç°·½Ïò½ÇÖ±Ïß
+	//ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½
 	rLine.sx = 120;
 	rLine.sy = 114;
 	rLine.ex = 120+FLTTOINT(FMUL(r, FSIN(heading)));
@@ -320,7 +320,7 @@ static void CNavigateWin_Redraw(IWindow * po)
 	DBGPRINTF("@GetGpsInfo Line:(%d,%d)-(%d,%d)-r:%d", rLine.sx, rLine.sy, rLine.ex, rLine.ey, rCircle.r);
 	IGRAPHICS_DrawLine( pme->m_pGraphics, &rLine );
 	
-	//·½Ïò½ÇÖ±Ïß¼ýÍ·
+	//ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ß¼ï¿½Í·
 	IGRAPHICS_SetFillMode( pme->m_pGraphics, TRUE );
 	rTriangle.x0 = rLine.ex+FLTTOINT(FMUL(20, FSIN(FADD(FADD(M_PI, headingArrow), heading))));
 	rTriangle.y0 = rLine.ey-FLTTOINT(FMUL(20, FCOS(FADD(FADD(M_PI, headingArrow), heading))));
@@ -351,7 +351,7 @@ static void CNavigateWin_Redraw(IWindow * po)
 		SETAEERECT(&rect, xx, yy, dxx, dyy);
 		TS_DrawText(pme->m_pIDisplay, WIN_FONT, szBuf, &rect);
 
-		//Ä¿µÄµØ
+		//Ä¿ï¿½Äµï¿½
 		if (FCMP_G(distance, 0))
 		{
 			AECHAR bufDis[32];
@@ -367,7 +367,7 @@ static void CNavigateWin_Redraw(IWindow * po)
 			
 			//FLOATTOWSTR(distance, bufDis, 32);
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DISTANCE, bufRes, sizeof(bufRes));
-			WSPRINTF(szBuf, sizeof(szBuf), L"%s: %sm", bufRes, TS_FLT2SZ(bufDis, distance));
+			WSPRINTF(szBuf, sizeof(szBuf), L"%s: %sm", bufRes, TS_FLT2SZ_3(bufDis, distance));
 			//WSPRINTF(szBuf, sizeof(szBuf), L"%s: %sm", bufRes, bufDis);
 			h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 2;
 			xx = xMargin;
@@ -524,7 +524,7 @@ static void CNavigateWin_GetGPSInfo_Callback( IWindow *po )
 		pGetGPSInfo->wProgress = 0;
 		DBGPRINTF("@GetGPSInfo fix:%d", pGetGPSInfo->dwFixNumber);
 
-		//¾­Î³¶ÈÓÐÐ§Ê±²ÅËã¶¨Î»³É¹¦
+		//ï¿½ï¿½Î³ï¿½ï¿½ï¿½ï¿½Ð§Ê±ï¿½ï¿½ï¿½ã¶¨Î»ï¿½É¹ï¿½
 		if (FCMP_G(pGetGPSInfo->theInfo.lat,0) && FCMP_G(pGetGPSInfo->theInfo.lon,0))
 		{
 			pme->m_bGetGpsInfo = TRUE;
@@ -579,9 +579,9 @@ static void CNavigateWin_GetGPSInfo_SecondTicker( IWindow *po )
 		DBGPRINTF("@Where GetGPS wIdleCount:%d", pGetGPSInfo->wIdleCount);
 	}
 
-	//ÖØÐÂÆô¶¯
-	//1 ¿ÕÏÐ30Ãë
-	//2 ³¢ÊÔ2·ÖÖÓÎ´¶¨Î»³É¹¦
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//1 ï¿½ï¿½ï¿½ï¿½30ï¿½ï¿½
+	//2 ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½Î»ï¿½É¹ï¿½
 	if (pGetGPSInfo->wIdleCount > WATCHER_TIMER || pGetGPSInfo->wProgress > 60 * 2)
 	{
 		//play_tts(pme, L"restart location");
