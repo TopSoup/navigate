@@ -111,6 +111,11 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
 	   //char *str = "Ŀ��λ��:1111#γ��:E,20.012345#����:N,120.012345";
 	   //CTopSoupApp_SaveSMSMessage(pme, str);
    }
+
+
+   //init some data
+   pme->m_bBackground = FALSE;
+
    // Get screen pixel count
    pdi = MALLOC(sizeof(AEEDeviceInfo));
    if (!pdi)
@@ -405,11 +410,22 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
     {   
          case EVT_APP_START:   // Process Start event
             //XXX
-			pme->m_eActiveWin = TSW_MAIN;
-			CTopSoupApp_SetWindow(pme, TSW_MAIN, 0);
+			 if ( TRUE == pme->m_bBackground )
+			 {
+				 //resume opt
+				 CTopSoupApp_SetWindow(pme, pme->m_eSuspendWin, 0);
+				 pme->m_bBackground = FALSE;
+			 } else {
+				 pme->m_eActiveWin = TSW_MAIN;
+				 CTopSoupApp_SetWindow(pme, TSW_MAIN, 0);
+			 }
             return TRUE;
 
          case EVT_APP_STOP:        // process STOP event
+			 if ( TRUE == pme->m_bBackground )
+			 {
+				 *((boolean*)dwParam) = FALSE;
+			 }
             return (TRUE);
 
          case EVT_APP_SUSPEND:
@@ -444,7 +460,13 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 
 						 if(pKevEvent->wParam == AVK_END)
 						 {
-							 DBGPRINTF("recv notify key:AVK_END");
+							 DBGPRINTF("recv notify key:AVK_END, Set Background!");
+
+							 pme->m_bBackground = TRUE;
+
+							 //suspend opt
+							 pme->m_eSuspendWin = pme->m_eActiveWin;
+							 CTopSoupApp_SetWindow(pme, TSW_NONE, 0);
 
 							 ISHELL_CloseApplet((IShell*)pme->a.m_pIShell, FALSE);
 							 return TRUE;
