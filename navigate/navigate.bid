@@ -2,5 +2,6 @@
 #define NAVIGATE_BID
 
 #define AEECLSID_NAVIGATE	0x01010ef6
+#define AEECLSID_SOS		0x01010ef7
 
 #endif //NAVIGATE_BID

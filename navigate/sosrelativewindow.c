@@ -9,11 +9,7 @@
 
 #define WIN_FONT AEE_FONT_NORMAL
 
-#ifdef AEE_SIMULATOR
-#	define RELATIVE_ADDRESS_CFG					"fs:/shared/relative_address.cfg"
-#else
-#	define RELATIVE_ADDRESS_CFG					"fs:/mod/navigate/relative_address.cfg"
-#endif // AEE_SIMULATOR
+
 
 //½çÃæ×´Ì¬¿ØÖÆ
 typedef enum

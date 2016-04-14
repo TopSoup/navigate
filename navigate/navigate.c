@@ -484,10 +484,11 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
                      char			szC[32];
 
                      //¼ÓÔØÅäÖÃÎÄ¼þ
-                     if (SUCCESS == LoadConfig(pIShell, szA, szB, szC))
+                     if (SUCCESS == LoadConfig((IShell*)pme->a.m_pIShell, szA, szB, szC))
                      {
                          CTopSoupApp_MakeSOSCall(pme, szA);
-                         CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_UNICODE, L"TIANANMEN");
+                         //FIXME test
+						 CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_UNICODE, L"TIANANMEN",NULL,NULL,"18114498705");
                      }
                  }
 			 }
