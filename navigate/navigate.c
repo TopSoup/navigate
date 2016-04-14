@@ -17,7 +17,7 @@ static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
 #define USAGE_SMS_TX_UNICODE    0
 #define USAGE_SMS_TX_ASCII      1
  
-// ascii �������ݣ�����unicode�������ݣ���������Դ�ļ�bar�л�ȡ��������벻�� 
+// ascii �������ݣ�����unicode�������ݣ���������Դ�ļ�bar�л�ȡ��������벻��?
 #define MO_TEXT_ASCII "Destination:Beijing#lat:37.123456#lon:114.121345" 
 
 //������������
@@ -574,7 +574,7 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 
 	  case TSW_NAVIGATE:
 		  {
-			  //ʹ�õ�ǰѡ�������Ϊ�캽Ŀ��
+			  //ʹ�õ�ǰѡ�������Ϊ�캽Ŀ��?
 				TS_GetExpenseItem(pme,(uint16)dwParam,pme->m_szTextDesc,pme->m_szTextLat,pme->m_szTextLon);
 
 				pme->m_pWin = (IWindow*)CNavigateWin_New(pme);
@@ -596,13 +596,13 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 		  pme->m_pWin = CNavigateWin_New(pme); 
 		  break;
 
-      //SOS子界面
+      //SOS子界�?
       case TSW_SOS_RELATIVE:
-           pme->m_pWin = CSOSRelativeWin_New(pme);
+           pme->m_pWin = (IWindow*)CSOSRelativeWin_New(pme);
            break;
 
       case TSW_SOS_INFO:
-           pme->m_pWin = CSOSInfoWin_New(pme);
+           pme->m_pWin = (IWindow*)CSOSInfoWin_New(pme);
            break;
 
       case TSW_NONE:       
@@ -889,7 +889,7 @@ static boolean CTopSoupApp_ReceiveSMSMessage(CTopSoupApp* pme, uint32 uMsgId)
 
 		if(ISMSMSG_GetOpt(pSMS, MSGOPT_FROM_DEVICE_SZ,&TmpOpt)==AEE_SUCCESS) {
 			STRCPY(szPhone, (char*)TmpOpt.pVal);
-			//@yao �������ĺ��������
+			//@yao �������ĺ��������?
 			//if( NULL == STRSTR("10659031107260,18931880692,18903110989",szPhone) ) {
 			//	DBGPRINTF("sms sender is not in center list");
 			//	return FALSE;

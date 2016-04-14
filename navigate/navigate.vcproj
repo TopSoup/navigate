@@ -272,6 +272,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\sosinfowindow.c"
+				>
+			</File>
+			<File
+				RelativePath=".\sosrelativewindow.c"
+				>
+			</File>
+			<File
 				RelativePath=".\soswindow.c"
 				>
 			</File>
@@ -406,6 +414,14 @@
 			</File>
 			<File
 				RelativePath=".\newdestwindow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sosinfowindow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sosrelativewindow.h"
 				>
 			</File>
 			<File
