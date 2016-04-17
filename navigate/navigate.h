@@ -151,6 +151,10 @@ struct CTopSoupApp
     CallListener callListener;
 
     //SOS
+	AECHAR				m_szTextA[32];
+	AECHAR				m_szTextB[32];
+	AECHAR				m_szTextC[32];
+
 	boolean			  m_bEnableSOS;
     SOSOP             m_OP;
     int               m_id;                       //当前通知的号码索引

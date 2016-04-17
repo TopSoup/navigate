@@ -62,10 +62,6 @@ boolean		TS_CheckLat(AECHAR* szLon);
 #define TS_ISSELCHG(e)                 ((e) == EVT_CTL_SEL_CHANGED)
 #define TS_ISSEL(e, c)                 ((e) == EVT_KEY_PRESS && (c) == AVK_SELECT)
 
-#ifdef AEE_SIMULATOR
-#	define RELATIVE_ADDRESS_CFG					"fs:/shared/relative_address.cfg"
-#else
-#	define RELATIVE_ADDRESS_CFG					"fs:/mod/navigate/relative_address.cfg"
-#endif // AEE_SIMULATOR
+#	define RELATIVE_ADDRESS_CFG			"address.txt"
 
 #endif

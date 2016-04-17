@@ -114,6 +114,10 @@ IWindow * CSOSRelativeWin_New(CTopSoupApp * pOwner)
 		//尝试使用父窗口数据初始化，否则初始为0
 		ITEXTCTL_SetRect( pme->m_pTextCtl, &pme->m_pOwner->m_rectWin);
 
+       MEMSET(pme->m_pOwner->m_szTextA, 0, sizeof(pme->m_pOwner->m_szTextA));
+       MEMSET(pme->m_pOwner->m_szTextB, 0, sizeof(pme->m_pOwner->m_szTextB));
+       MEMSET(pme->m_pOwner->m_szTextC, 0, sizeof(pme->m_pOwner->m_szTextC));
+
        LoadConfig(pme);
 
        if (WSTRLEN(pme->m_szTextA) == 0)
@@ -314,6 +318,51 @@ static void CSOSRelativeWin_Redraw(IWindow * po)
                     WSTRCPY(bufRes, extRes);
                 }
 
+                IDISPLAY_MeasureTextEx(pme->m_pIDisplay, WIN_FONT, bufRes, -1, dxx, &nFits);
+                if (nFits < len) {
+                    xx = xMargin;
+                    yy += h;
+                    dxx = pme->m_pOwner->m_cxWidth - 2;
+                    dyy = h;
+                    SETAEERECT(&rect, xx, yy, dxx, dyy);
+
+                    WSTRCPY(extRes, &bufRes[nFits]);
+                    bufRes[nFits] = 0;
+                    TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+
+                    WSTRCPY(bufRes, extRes);
+                }
+
+                IDISPLAY_MeasureTextEx(pme->m_pIDisplay, WIN_FONT, bufRes, -1, dxx, &nFits);
+                if (nFits < len) {
+                    xx = xMargin;
+                    yy += h;
+                    dxx = pme->m_pOwner->m_cxWidth - 2;
+                    dyy = h;
+                    SETAEERECT(&rect, xx, yy, dxx, dyy);
+
+                    WSTRCPY(extRes, &bufRes[nFits]);
+                    bufRes[nFits] = 0;
+                    TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+
+                    WSTRCPY(bufRes, extRes);
+                }
+
+                IDISPLAY_MeasureTextEx(pme->m_pIDisplay, WIN_FONT, bufRes, -1, dxx, &nFits);
+                if (nFits < len) {
+                    xx = xMargin;
+                    yy += h;
+                    dxx = pme->m_pOwner->m_cxWidth - 2;
+                    dyy = h;
+                    SETAEERECT(&rect, xx, yy, dxx, dyy);
+
+                    WSTRCPY(extRes, &bufRes[nFits]);
+                    bufRes[nFits] = 0;
+                    TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+
+                    WSTRCPY(bufRes, extRes);
+                }
+
                 //IDISPLAY_MeasureTextEx(pme->m_pIDisplay, WIN_FONT, bufRes, -1, dxx,  &nFits);
                 //if (nFits < len)
                 {
@@ -350,7 +399,13 @@ static void CSOSRelativeWin_Redraw(IWindow * po)
             TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_OK);
             TS_DrawBackgroud(po);
             ITEXTCTL_SetInputMode( pme->m_pTextCtl, AEE_TM_NUMBERS );
-            ITEXTCTL_SetText( pme->m_pTextCtl, pme->m_szTextA, -1);
+            if (WSTRLEN(pme->m_pOwner->m_szTextA) > 0) {
+                ITEXTCTL_SetText(pme->m_pTextCtl, pme->m_pOwner->m_szTextA, -1);
+            }
+            else
+            {
+                ITEXTCTL_SetText(pme->m_pTextCtl, L"", -1);
+            }
             break;
                 
 		case EDIT_B:
@@ -358,7 +413,13 @@ static void CSOSRelativeWin_Redraw(IWindow * po)
 			TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_OK);
 			TS_DrawBackgroud(po);
 			ITEXTCTL_SetInputMode( pme->m_pTextCtl, AEE_TM_NUMBERS );
-			ITEXTCTL_SetText( pme->m_pTextCtl, pme->m_szTextB, -1);
+            if (WSTRLEN(pme->m_pOwner->m_szTextB) > 0) {
+                ITEXTCTL_SetText(pme->m_pTextCtl, pme->m_pOwner->m_szTextB, -1);
+            }
+            else
+            {
+                ITEXTCTL_SetText(pme->m_pTextCtl, L"", -1);
+            }
 			break;
 
 		case EDIT_C:
@@ -366,7 +427,13 @@ static void CSOSRelativeWin_Redraw(IWindow * po)
 			TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_OK);
 			TS_DrawBackgroud(po);
 			ITEXTCTL_SetInputMode( pme->m_pTextCtl, AEE_TM_NUMBERS );
-			ITEXTCTL_SetText( pme->m_pTextCtl, pme->m_szTextC, -1);
+            if (WSTRLEN(pme->m_pOwner->m_szTextC) > 0) {
+                ITEXTCTL_SetText(pme->m_pTextCtl, pme->m_pOwner->m_szTextC, -1);
+            }
+            else
+            {
+                ITEXTCTL_SetText(pme->m_pTextCtl, L"", -1);
+            }
 			break;
 
 		default:
@@ -451,10 +518,10 @@ static boolean CSOSRelativeWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 
 			WSTRTOSTR(pText, szBuf, sizeof(szBuf));
 
             //校验联系方式长度
-            if ((WSTRLEN(pText) > 16))
+            if ((WSTRLEN(pText) <= TS_MIN_RELATIVE_NUM))
             {
                 AECHAR prompt[TS_MAX_STRLEN];
-                DBGPRINTF("LOCATION DATA ERROR!");//TODO 界面提示
+                DBGPRINTF("Address Length ERROR!");
 
                 ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_PHONE_NUM,prompt,sizeof(prompt));
 
@@ -466,16 +533,19 @@ static boolean CSOSRelativeWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 
             if (pme->m_eEditType == EDIT_A)
             {
                 WSTRCPY(pme->m_szTextA, pText);
+                WSTRCPY(pme->m_pOwner->m_szTextA, pText);
                 DBGPRINTF("GetB pText:%s", szBuf);
             }
 			else if (pme->m_eEditType == EDIT_B)
             {
                 WSTRCPY(pme->m_szTextB, pText);
+                WSTRCPY(pme->m_pOwner->m_szTextB, pText);
                 DBGPRINTF("GetA pText:%s", szBuf);
             }
 			else if (pme->m_eEditType == EDIT_C)
 			{
 				WSTRCPY(pme->m_szTextC, pText);
+                WSTRCPY(pme->m_pOwner->m_szTextC, pText);
 				DBGPRINTF("GetC pText:%s", szBuf);
 			}
 			else
@@ -536,6 +606,7 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
     // Create the instance of IFileMgr
     nResult = ISHELL_CreateInstance(pIShell, AEECLSID_FILEMGR, (void**)&pIFileMgr);
     if (SUCCESS != nResult) {
+        DBGPRINTF("Create AEECLSID_FILEMGR Failed!");
         return nResult;
     }
 
@@ -547,7 +618,7 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
         return SUCCESS;
     }
 
-    pIFile = IFILEMGR_OpenFile(pIFileMgr, RELATIVE_ADDRESS_CFG, _OFM_READWRITE);
+    pIFile = IFILEMGR_OpenFile(pIFileMgr, RELATIVE_ADDRESS_CFG, _OFM_READ);
     if (!pIFile) {
         DBGPRINTF("Open Configure File Failed! %s", RELATIVE_ADDRESS_CFG);
         IFILEMGR_Release(pIFileMgr);
@@ -623,16 +694,19 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
     if (STRLEN(szA) > TS_MIN_RELATIVE_NUM)
     {
         STRTOWSTR(szA, pme->m_szTextA, sizeof(pme->m_szTextA));
+        WSTRCPY(pme->m_pOwner->m_szTextA, pme->m_szTextA);
     }
 
     if (STRLEN(szB) > TS_MIN_RELATIVE_NUM)
     {
         STRTOWSTR(szB, pme->m_szTextB, sizeof(pme->m_szTextB));
+        WSTRCPY(pme->m_pOwner->m_szTextB, pme->m_szTextB);
     }
 
     if (STRLEN(szC) > TS_MIN_RELATIVE_NUM)
     {
         STRTOWSTR(szC, pme->m_szTextC, sizeof(pme->m_szTextC));
+        WSTRCPY(pme->m_pOwner->m_szTextC, pme->m_szTextC);
     }
 
     FREE(pszBuf);
@@ -663,14 +737,20 @@ static uint32 SaveConfig(CSOSRelativeWin *pme)
     // Create the instance of IFileMgr
     nResult = ISHELL_CreateInstance(pIShell, AEECLSID_FILEMGR, (void**)&pIFileMgr);
     if (SUCCESS != nResult) {
+        DBGPRINTF("Create AEECLSID_FILEMGR Failed!");
         return nResult;
     }
 
     pIFile = IFILEMGR_OpenFile(pIFileMgr, RELATIVE_ADDRESS_CFG, _OFM_READWRITE);
     if (!pIFile) {
-        DBGPRINTF("Open Configure File Failed! %s", RELATIVE_ADDRESS_CFG);
-        IFILEMGR_Release(pIFileMgr);
-        return EFAILED;
+        DBGPRINTF("Configure File %s Not Exists. Create It ...!", RELATIVE_ADDRESS_CFG);
+        pIFile = IFILEMGR_OpenFile(pIFileMgr, RELATIVE_ADDRESS_CFG, _OFM_CREATE);
+        if (!pIFile)
+        {
+            DBGPRINTF("Open Configure File Failed! %s", RELATIVE_ADDRESS_CFG);
+            IFILEMGR_Release(pIFileMgr);
+            return EFAILED;
+        }
     }
 
     MEMSET(szA,0,sizeof(szA));

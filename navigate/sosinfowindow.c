@@ -1,7 +1,7 @@
 #include "soswindow.h"
 
 
-#define MP_MAX_STRLEN         64
+#define MP_MAX_STRLEN         128
 
 #define WIN_FONT  AEE_FONT_NORMAL
 
@@ -93,7 +93,7 @@ static void CSOSInfoWin_Redraw(IWindow * po)
       ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_INFO_0, bufRes, sizeof(bufRes));
       h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + yMargin;
       xx = xMargin;
-      yy = 64;
+      yy = 62;
       dxx = pme->m_pOwner->m_cxWidth - 2;
       dyy = h;
       SETAEERECT(&rect, xx, yy, dxx, dyy);
@@ -128,6 +128,51 @@ static void CSOSInfoWin_Redraw(IWindow * po)
 
 			WSTRCPY(bufRes, extRes);
 		}
+        IDISPLAY_MeasureTextEx(pme->m_pIDisplay, WIN_FONT, bufRes, -1, dxx,  &nFits);
+        if (nFits < len)
+        {
+          xx = xMargin;
+          yy += h;
+          dxx = pme->m_pOwner->m_cxWidth - 2;
+          dyy = h;
+          SETAEERECT(&rect, xx, yy, dxx, dyy);
+
+          WSTRCPY( extRes, &bufRes[nFits]);
+          bufRes[nFits] = 0;
+          TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+
+          WSTRCPY(bufRes, extRes);
+        }
+        IDISPLAY_MeasureTextEx(pme->m_pIDisplay, WIN_FONT, bufRes, -1, dxx,  &nFits);
+        if (nFits < len)
+        {
+          xx = xMargin;
+          yy += h;
+          dxx = pme->m_pOwner->m_cxWidth - 2;
+          dyy = h;
+          SETAEERECT(&rect, xx, yy, dxx, dyy);
+
+          WSTRCPY( extRes, &bufRes[nFits]);
+          bufRes[nFits] = 0;
+          TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+
+          WSTRCPY(bufRes, extRes);
+        }
+		IDISPLAY_MeasureTextEx(pme->m_pIDisplay, WIN_FONT, bufRes, -1, dxx,  &nFits);
+		if (nFits < len)
+		{
+		  xx = xMargin;
+		  yy += h;
+		  dxx = pme->m_pOwner->m_cxWidth - 2;
+		  dyy = h;
+		  SETAEERECT(&rect, xx, yy, dxx, dyy);
+
+		  WSTRCPY( extRes, &bufRes[nFits]);
+		  bufRes[nFits] = 0;
+		  TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
+
+		  WSTRCPY(bufRes, extRes);
+		}
 
 		//IDISPLAY_MeasureTextEx(pme->m_pIDisplay, WIN_FONT, bufRes, -1, dxx,  &nFits);
 		//if (nFits < len)
@@ -140,8 +185,7 @@ static void CSOSInfoWin_Redraw(IWindow * po)
 			TS_DrawText(pme->m_pIDisplay, WIN_FONT, bufRes, &rect);
 		}
 	  }
-
-	  yMargin += 2;
+       yy +=2;
       ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_INFO_1, bufRes, sizeof(bufRes));
       h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + yMargin;
       xx = xMargin;
