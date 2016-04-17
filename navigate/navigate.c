@@ -454,6 +454,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
             return (TRUE);
 
          case EVT_APP_RESUME:
+            DBGPRINTF("@EVT_APP_RESUME");
             CTopSoupApp_SetWindow(pme, pme->m_eSuspendWin, 0);
             return (TRUE);
 
@@ -501,7 +502,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 
         case EVT_SMS_END:
             //收到短信发送结束消息
-            if (pme->m_id > 0 && pme->m_id < MAX_SOS_NUM)
+            if (pme->m_id >= 0 && pme->m_id < MAX_SOS_NUM)
             {
                 CTopSoupApp_MakeSOSCall(pme, pme->m_szNum[pme->m_id]);
                 pme->m_OP = SOS_CALL_CALLING;
@@ -519,7 +520,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
         case EVT_CALL_END:
             //收到拨打电话结束消息
             pme->m_id ++;   //使用下一个
-            if (pme->m_id > 0 && pme->m_id < MAX_SOS_NUM && STRLEN(pme->m_szNum[pme->m_id]) > 0)
+            if (pme->m_id >= 0 && pme->m_id < MAX_SOS_NUM && STRLEN(pme->m_szNum[pme->m_id]) > 0)
             {
                 AECHAR szSOS[32];
                 DBGPRINTF("@SOS Send SMS To Num: %s", pme->m_szNum[pme->m_id]);
@@ -534,6 +535,13 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
                 pme->m_bEnableSOS = FALSE;
                 pme->m_OP = SOS_IDLE;
                 pme->m_id = -1;
+
+                //FOR TEST??
+//                if (!ISHELL_SendEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_APP_RESUME, 0, 0)) {
+//                    DBGPRINTF("ISHELL_SendEvent EVT_APP_RESUME failure");
+//                }
+//
+//                DBGPRINTF("ISHELL_SendEvent send EVT_APP_RESUME");
             }
 
             return (TRUE);
@@ -548,13 +556,15 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 					DBGPRINTF("SEND SMS TEST ...");
 					//CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_ASCII);
 					//CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_UNICODE, L"TIANANMEN");
+                    CTopSoupApp_StartSOS(pme);
 				}
 
 				//FOR TEL TEST
 				if (wParam == AVK_PTT)
 				{
-					DBGPRINTF("CALL TEST ...");
+					DBGPRINTF("SOS CALL TEST ...");
 					//CTopSoupApp_MakeSOSCall(pme, "15511823090");
+                    CTopSoupApp_StartSOS(pme);
 				}
 
 				if (wParam == AVK_2)
@@ -1040,7 +1050,7 @@ static void SMSCallBack_Send(void *p)
    if (pme->m_bEnableSOS && pme->m_OP == SOS_SMS_SENDING)
    {
        if (!ISHELL_SendEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
-           DBGPRINTF("PlayTTS ISHELL_SendEvent EVT_SMS_END failure");
+           DBGPRINTF("ISHELL_SendEvent EVT_SMS_END failure");
        }
    }
 }
@@ -1342,7 +1352,7 @@ static void CTopSoupApp_OriginateListener(CTopSoupApp *pme, ModelEvent *pEvent)
         if (pme->m_bEnableSOS && pme->m_OP == SOS_CALL_CALLING)
         {
             if (!ISHELL_SendEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_CALL_END, 0, 0)) {
-                DBGPRINTF("PlayTTS ISHELL_SendEvent EVT_CALL_END failure");
+                DBGPRINTF("ISHELL_SendEvent EVT_CALL_END failure");
             }
         }
     }

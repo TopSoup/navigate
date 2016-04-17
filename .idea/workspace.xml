@@ -13,12 +13,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7e0fdb48-a700-4f68-8dd1-57c7cff4b812" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/logicmacro.h" afterPath="$PROJECT_DIR$/navigate/logicmacro.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/navigate.brx" afterPath="$PROJECT_DIR$/navigate/navigate.brx" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/navigate.h" afterPath="$PROJECT_DIR$/navigate/navigate.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/sosinfowindow.c" afterPath="$PROJECT_DIR$/navigate/sosinfowindow.c" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/sosrelativewindow.c" afterPath="$PROJECT_DIR$/navigate/sosrelativewindow.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/navigate.c" afterPath="$PROJECT_DIR$/navigate/navigate.c" />
     </list>
     <ignored path="navigate.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -39,81 +34,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="navigate.c" pinned="false" current-in-tab="false">
+      <file leaf-file-name="navigate.c" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/navigate/navigate.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="406">
-              <caret line="1403" column="0" selection-start-line="1403" selection-start-column="0" selection-end-line="1403" selection-end-column="0" />
+            <state relative-caret-position="332">
+              <caret line="325" column="36" selection-start-line="325" selection-start-column="36" selection-end-line="325" selection-end-column="36" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="navigate.brx" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/navigate/navigate.brx">
+      <file leaf-file-name="AEEVCodes.h" pinned="false" current-in-tab="false">
+        <entry file="file://D:/BREW/Sdk/sdk/inc/AEEVCodes.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="250">
-              <caret line="248" column="13" selection-start-line="248" selection-start-column="13" selection-end-line="248" selection-end-column="13" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="sosrelativewindow.c" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/navigate/sosrelativewindow.c">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="350">
-              <caret line="283" column="94" selection-start-line="283" selection-start-column="68" selection-end-line="283" selection-end-column="94" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AEEFile.h" pinned="false" current-in-tab="false">
-        <entry file="file://D:/BREW/Sdk/sdk/inc/AEEFile.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="189">
-              <caret line="28" column="14" selection-start-line="28" selection-start-column="3" selection-end-line="28" selection-end-column="14" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="navigate.h" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/navigate/navigate.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="329">
-              <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="sosinfowindow.h" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/navigate/sosinfowindow.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="250">
-              <caret line="10" column="6" selection-start-line="10" selection-start-column="6" selection-end-line="10" selection-end-column="6" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="logicmacro.h" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/navigate/logicmacro.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="395">
-              <caret line="64" column="31" selection-start-line="64" selection-start-column="11" selection-end-line="64" selection-end-column="31" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="sosinfowindow.c" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/navigate/sosinfowindow.c">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="320">
-              <caret line="194" column="42" selection-start-line="194" selection-start-column="42" selection-end-line="194" selection-end-column="42" />
+            <state relative-caret-position="856">
+              <caret line="134" column="3" selection-start-line="134" selection-start-column="3" selection-end-line="134" selection-end-column="3" />
               <folding />
             </state>
           </provider>
@@ -139,12 +74,12 @@
         <option value="$PROJECT_DIR$/navigate/wherewindow.c" />
         <option value="$PROJECT_DIR$/navigate/soswindow.c" />
         <option value="$PROJECT_DIR$/navigate/textctlwindow.c" />
-        <option value="$PROJECT_DIR$/navigate/navigate.c" />
         <option value="$PROJECT_DIR$/navigate/navigate.brx" />
         <option value="$PROJECT_DIR$/navigate/sosinfowindow.c" />
         <option value="$PROJECT_DIR$/navigate/navigate.h" />
         <option value="$PROJECT_DIR$/navigate/logicmacro.h" />
         <option value="$PROJECT_DIR$/navigate/sosrelativewindow.c" />
+        <option value="$PROJECT_DIR$/navigate/navigate.c" />
       </list>
     </option>
   </component>
@@ -439,7 +374,7 @@
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16860466" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32963374" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.35666665" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.35666665" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32852387" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4488889" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -701,13 +636,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://D:/BREW/Sdk/sdk/inc/AEEVCodes.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2799">
-          <caret line="223" column="13" selection-start-line="223" selection-start-column="8" selection-end-line="223" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/navigate/destlistfuctionwindow.c">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="636">
@@ -809,14 +737,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/navigate/navigate.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="406">
-          <caret line="1403" column="0" selection-start-line="1403" selection-start-column="0" selection-end-line="1403" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/navigate/sosinfowindow.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="250">
@@ -851,8 +771,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/navigate/navigate.brx">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="250">
+        <state relative-caret-position="325">
           <caret line="248" column="13" selection-start-line="248" selection-start-column="13" selection-end-line="248" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/BREW/Sdk/sdk/inc/AEEVCodes.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="856">
+          <caret line="134" column="3" selection-start-line="134" selection-start-column="3" selection-end-line="134" selection-end-column="3" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/navigate/navigate.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="332">
+          <caret line="325" column="36" selection-start-line="325" selection-start-column="36" selection-end-line="325" selection-end-column="36" />
           <folding />
         </state>
       </provider>
