@@ -119,28 +119,11 @@ IWindow * CSOSRelativeWin_New(CTopSoupApp * pOwner)
        MEMSET(pme->m_pOwner->m_szTextC, 0, sizeof(pme->m_pOwner->m_szTextC));
 
        LoadConfig(pme);
-
-       if (WSTRLEN(pme->m_szTextA) == 0)
-       {
-           ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextA,sizeof(pme->m_szTextA));
-       }
-
-       if (WSTRLEN(pme->m_szTextB) == 0)
-       {
-           ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextB,sizeof(pme->m_szTextB));
-       }
-
-       if (WSTRLEN(pme->m_szTextC) == 0)
-       {
-           ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextC,sizeof(pme->m_szTextC));
-       }
-
+       DBGPRINTF("LoadConfig Over");
 		pme->m_eViewType = VIEW_MAIN;
 
 		ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SET_RELATIVE,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
 		TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_STRING_EDIT);
-
-
 		//下级子菜单重置为0
 		pme->m_pOwner->m_wMenuLastSel[TSW_DEST_NEW_FUCTION] = 0;
    }
@@ -206,6 +189,21 @@ static void CSOSRelativeWin_Redraw(IWindow * po)
 		CtlAddItem  ai;
 		AECHAR szText[MP_MAX_STRLEN];
 		AECHAR szBuf[MP_MAX_STRLEN];
+
+        if (WSTRLEN(pme->m_szTextA) == 0)
+        {
+            ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextA,sizeof(pme->m_szTextA));
+        }
+
+        if (WSTRLEN(pme->m_szTextB) == 0)
+        {
+            ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextB,sizeof(pme->m_szTextB));
+        }
+
+        if (WSTRLEN(pme->m_szTextC) == 0)
+        {
+            ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_NOT_SET,pme->m_szTextC,sizeof(pme->m_szTextC));
+        }
 
 		//ISHELL_LoadResString(pme->m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SET_RELATIVE,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
         TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,IDS_STRING_EDIT);
@@ -518,7 +516,7 @@ static boolean CSOSRelativeWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 
 			WSTRTOSTR(pText, szBuf, sizeof(szBuf));
 
             //校验联系方式长度
-            if ((WSTRLEN(pText) <= TS_MIN_RELATIVE_NUM))
+            if ((WSTRLEN(pText) > TS_MAX_RELATIVE_NUM))
             {
                 AECHAR prompt[TS_MAX_STRLEN];
                 DBGPRINTF("Address Length ERROR!");
@@ -645,6 +643,7 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
     nResult = IFILE_Read(pIFile, pszBufOrg, fiInfo.dwSize);
     if ((uint32)nResult < fiInfo.dwSize) {
         FREE(pszBuf);
+        FREE(pszBufOrg);
         return EFAILED;
     }
 
@@ -655,14 +654,16 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
     MEMSET(szA,0,sizeof(szA));
     pszTok = STRCHR(pszBuf, '#');
     if (pszTok == NULL) {
-        FREE(pszBuf);
+        FREE(pBuf);
         IFILE_Release(pIFile);
         IFILEMGR_Release(pIFileMgr);
         return EFAILED;
     }
     len = pszTok-pszBuf;
-    MEMCPY(szA, pszBuf, len*sizeof(char));
-    szA[len] = 0;
+    if (len > 1) {
+        MEMCPY(szA, pszBuf, len * sizeof(char));
+        szA[len] = 0;
+    }
     pszBuf = pszTok + 1;
     DBGPRINTF("szA:%s", szA);
 
@@ -670,14 +671,16 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
     MEMSET(szB,0,sizeof(szB));
     pszTok = STRCHR(pszBuf, '#');
     if (pszTok == NULL) {
-        FREE(pszBuf);
+        FREE(pBuf);
         IFILE_Release(pIFile);
         IFILEMGR_Release(pIFileMgr);
         return EFAILED;
     }
     len = pszTok-pszBuf;
-    MEMCPY(szB, pszBuf, len*sizeof(char));
-    szB[len] = 0;
+    if (len > 1) {
+        MEMCPY(szB, pszBuf, len * sizeof(char));
+        szB[len] = 0;
+    }
     pszBuf = pszTok + 1;
     DBGPRINTF("szB:%s", szB);
 
@@ -691,28 +694,27 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
     }
     DBGPRINTF("szC:%s", szC);
 
-    if (STRLEN(szA) > TS_MIN_RELATIVE_NUM)
+    if (STRLEN(szA) > 0)
     {
         STRTOWSTR(szA, pme->m_szTextA, sizeof(pme->m_szTextA));
         WSTRCPY(pme->m_pOwner->m_szTextA, pme->m_szTextA);
     }
 
-    if (STRLEN(szB) > TS_MIN_RELATIVE_NUM)
+    if (STRLEN(szB) > 0)
     {
         STRTOWSTR(szB, pme->m_szTextB, sizeof(pme->m_szTextB));
         WSTRCPY(pme->m_pOwner->m_szTextB, pme->m_szTextB);
     }
 
-    if (STRLEN(szC) > TS_MIN_RELATIVE_NUM)
+    if (STRLEN(szC) > 0)
     {
         STRTOWSTR(szC, pme->m_szTextC, sizeof(pme->m_szTextC));
         WSTRCPY(pme->m_pOwner->m_szTextC, pme->m_szTextC);
     }
 
-    FREE(pszBuf);
+    FREE(pBuf);
     IFILE_Release(pIFile);
     IFILEMGR_Release(pIFileMgr);
-
     return SUCCESS;
 }
 
@@ -741,34 +743,36 @@ static uint32 SaveConfig(CSOSRelativeWin *pme)
         return nResult;
     }
 
-    pIFile = IFILEMGR_OpenFile(pIFileMgr, RELATIVE_ADDRESS_CFG, _OFM_READWRITE);
+    nResult = IFILEMGR_Test(pIFileMgr, RELATIVE_ADDRESS_CFG);
+    if (nResult == SUCCESS)
+    {
+        DBGPRINTF("REMOVE CONFIG!");
+        IFILEMGR_Remove(pIFileMgr, RELATIVE_ADDRESS_CFG);
+    }
+
+    pIFile = IFILEMGR_OpenFile(pIFileMgr, RELATIVE_ADDRESS_CFG, _OFM_CREATE);
     if (!pIFile) {
-        DBGPRINTF("Configure File %s Not Exists. Create It ...!", RELATIVE_ADDRESS_CFG);
-        pIFile = IFILEMGR_OpenFile(pIFileMgr, RELATIVE_ADDRESS_CFG, _OFM_CREATE);
-        if (!pIFile)
-        {
-            DBGPRINTF("Open Configure File Failed! %s", RELATIVE_ADDRESS_CFG);
-            IFILEMGR_Release(pIFileMgr);
-            return EFAILED;
-        }
+        DBGPRINTF("Create Configure File Failed! %s", RELATIVE_ADDRESS_CFG);
+        IFILEMGR_Release(pIFileMgr);
+        return EFAILED;
     }
 
     MEMSET(szA,0,sizeof(szA));
     MEMSET(szB,0,sizeof(szB));
     MEMSET(szC,0,sizeof(szC));
-    if (WSTRLEN(pme->m_szTextA) > TS_MIN_RELATIVE_NUM)
+    if (WSTRLEN(pme->m_pOwner->m_szTextA) > 0)
     {
-        WSTRTOSTR(pme->m_szTextA, szA, sizeof(szA));
+        WSTRTOSTR(pme->m_pOwner->m_szTextA, szA, sizeof(szA));
     }
 
-    if (WSTRLEN(pme->m_szTextB) > TS_MIN_RELATIVE_NUM)
+    if (WSTRLEN(pme->m_pOwner->m_szTextB) > 0)
     {
-        WSTRTOSTR(pme->m_szTextB, szB, sizeof(szB));
+        WSTRTOSTR(pme->m_pOwner->m_szTextB, szB, sizeof(szB));
     }
 
-    if (WSTRLEN(pme->m_szTextC) > TS_MIN_RELATIVE_NUM)
+    if (WSTRLEN(pme->m_pOwner->m_szTextC) > 0)
     {
-        WSTRTOSTR(pme->m_szTextC, szC, sizeof(szC));
+        WSTRTOSTR(pme->m_pOwner->m_szTextC, szC, sizeof(szC));
     }
 
     //构建配置内容: A#B#C

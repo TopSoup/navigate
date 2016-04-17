@@ -129,7 +129,6 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
 	   //CTopSoupApp_SaveSMSMessage(pme, str);
    }
 
-
    //init some data
    pme->m_bBackground = FALSE;
    pme->m_bEnableSOS = FALSE;
@@ -564,7 +563,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				{
 					DBGPRINTF("SOS CALL TEST ...");
 					//CTopSoupApp_MakeSOSCall(pme, "15511823090");
-                    CTopSoupApp_StartSOS(pme);
+                    //CTopSoupApp_StartSOS(pme);    //与系统冲突，有时会死机？
 				}
 
 				if (wParam == AVK_2)
@@ -1243,7 +1242,7 @@ void CTopSoupApp_SendSOSSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *sz
         WebOpts here, or shrink it and call AddOpt() multiple times */
         int    i = 0;
         uint32 nReturn=0;
-        AECHAR pszBuf[100];
+        //AECHAR pszBuf[100];
 
         nErr =ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_SMSMSG, (void **)&pme->m_pISMSMsg);
         DBGPRINTF("CreateInstance of AEECLSID_SMSMSG ret %d", nErr);
@@ -1258,9 +1257,10 @@ void CTopSoupApp_SendSOSSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *sz
 
         /* unicode text to be send */
         awo[i].nId  = MSGOPT_PAYLOAD_WSZ ;
-        WSTRCPY(pszBuf, szDesc);
-        awo[i].pVal = (void *)pszBuf;
+        //WSTRCPY(pszBuf, szDesc);
+        awo[i].pVal = (void *)szDesc;
         i++;
+        DBGPRINTF("ISMSMSG_AddOpt MSGOPT_PAYLOAD_WSZ");
 
         /* encoding */
         awo[i].nId  = MSGOPT_PAYLOAD_ENCODING;
@@ -1383,132 +1383,134 @@ static void CTopSoupApp_EndSOSCall(CTopSoupApp * pme)
 /************************************************************************/
 static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
 {
-	IFileMgr	*pIFileMgr = NULL;
-	IFile		*pIFile = NULL;
-	IShell		*pIShell = NULL;
+    IFileMgr	*pIFileMgr = NULL;
+    IFile		*pIFile = NULL;
+    IShell		*pIShell = NULL;
 
-	char    *pszBufOrg = NULL;
-	char    *pszBuf = NULL, *pBuf = NULL;
-	char    *pszTok = NULL;
-	char    *pszDelimiter = ";";
-	int32	nResult = 0;
-	FileInfo	fiInfo;
-	char    szA[32], szB[32], szC[32];
-	int len = 0;
-    int i = 0;
+    char    *pszBufOrg = NULL;
+    char    *pszBuf = NULL, *pBuf = NULL;
+    char    *pszTok = NULL;
+    char    *pszDelimiter = ";";
+    int32	nResult = 0;
+    FileInfo	fiInfo;
+    char    szA[32], szB[32], szC[32];
+    int len = 0;
+    int i =0;
 
-    if (iShell == NULL)
+    pIShell = iShell;
+
+    // Create the instance of IFileMgr
+    nResult = ISHELL_CreateInstance(pIShell, AEECLSID_FILEMGR, (void**)&pIFileMgr);
+    if (SUCCESS != nResult) {
+        DBGPRINTF("Create AEECLSID_FILEMGR Failed!");
+        return nResult;
+    }
+
+    nResult = IFILEMGR_Test(pIFileMgr, RELATIVE_ADDRESS_CFG);
+    if (nResult != SUCCESS)
     {
-        DBGPRINTF("LoadSOSConfig Error : iShell is NULL!");
+        DBGPRINTF("CONFIG NOT EXIST!");
+        IFILEMGR_Release(pIFileMgr);
+        return SUCCESS;
+    }
+
+    pIFile = IFILEMGR_OpenFile(pIFileMgr, RELATIVE_ADDRESS_CFG, _OFM_READ);
+    if (!pIFile) {
+        DBGPRINTF("Open Configure File Failed! %s", RELATIVE_ADDRESS_CFG);
+        IFILEMGR_Release(pIFileMgr);
         return EFAILED;
     }
 
-	pIShell = iShell;
+    if (SUCCESS != IFILE_GetInfo(pIFile, &fiInfo)) {
+        IFILE_Release(pIFile);
+        IFILEMGR_Release(pIFileMgr);
+        return EFAILED;
+    }
 
-	// Create the instance of IFileMgr
-	nResult = ISHELL_CreateInstance(pIShell, AEECLSID_FILEMGR, (void**)&pIFileMgr);
-	if (SUCCESS != nResult) {
-		return nResult;
-	}
+    if (fiInfo.dwSize == 0) {
+        IFILE_Release(pIFile);
+        IFILEMGR_Release(pIFileMgr);
+        return EFAILED;
+    }
 
-	nResult = IFILEMGR_Test(pIFileMgr, RELATIVE_ADDRESS_CFG);
-	if (nResult != SUCCESS)
-	{
-		DBGPRINTF("CONFIG NOT EXIST!");
-		IFILEMGR_Release(pIFileMgr);
-		return SUCCESS;
-	}
+    // Allocate enough memory to read the full text into memory
+    pszBufOrg = MALLOC(fiInfo.dwSize);
+    pszBuf = MALLOC(fiInfo.dwSize);
+    pBuf = pszBuf;
+    DBGPRINTF("@buf %u", pszBuf);
 
-	pIFile = IFILEMGR_OpenFile(pIFileMgr, RELATIVE_ADDRESS_CFG, _OFM_READWRITE);
-	if (!pIFile) {
-		DBGPRINTF("Open Configure File Failed! %s", RELATIVE_ADDRESS_CFG);
-		IFILEMGR_Release(pIFileMgr);
-		return EFAILED;
-	}
+    nResult = IFILE_Read(pIFile, pszBufOrg, fiInfo.dwSize);
+    if ((uint32)nResult < fiInfo.dwSize) {
+        FREE(pszBuf);
+        FREE(pszBufOrg);
+        return EFAILED;
+    }
 
-	if (SUCCESS != IFILE_GetInfo(pIFile, &fiInfo)) {
-		IFILE_Release(pIFile);
-		IFILEMGR_Release(pIFileMgr);
-		return EFAILED;
-	}
+    TrimSpace(pszBufOrg, pszBuf);
+    FREE(pszBufOrg);
 
-	if (fiInfo.dwSize == 0) {
-		IFILE_Release(pIFile);
-		IFILEMGR_Release(pIFileMgr);
-		return EFAILED;
-	}
+    //查找第一个联系人号码
+    MEMSET(szA,0,sizeof(szA));
+    pszTok = STRCHR(pszBuf, '#');
+    if (pszTok == NULL) {
+        FREE(pBuf);
+        IFILE_Release(pIFile);
+        IFILEMGR_Release(pIFileMgr);
+        return EFAILED;
+    }
+    len = pszTok-pszBuf;
+    if (len > 1) {
+        MEMCPY(szA, pszBuf, len * sizeof(char));
+        szA[len] = 0;
+    }
+    pszBuf = pszTok + 1;
+    DBGPRINTF("szA:%s", szA);
 
-	// Allocate enough memory to read the full text into memory
-	pszBufOrg = MALLOC(fiInfo.dwSize);
-	pszBuf = MALLOC(fiInfo.dwSize);
-	pBuf = pszBuf;
+    //查找第二个联系人号码
+    MEMSET(szB,0,sizeof(szB));
+    pszTok = STRCHR(pszBuf, '#');
+    if (pszTok == NULL) {
+        FREE(pBuf);
+        IFILE_Release(pIFile);
+        IFILEMGR_Release(pIFileMgr);
+        return EFAILED;
+    }
+    len = pszTok-pszBuf;
+    if (len > 1) {
+        MEMCPY(szB, pszBuf, len * sizeof(char));
+        szB[len] = 0;
+    }
+    pszBuf = pszTok + 1;
+    DBGPRINTF("szB:%s", szB);
 
-	nResult = IFILE_Read(pIFile, pszBufOrg, fiInfo.dwSize);
-	if ((uint32)nResult < fiInfo.dwSize) {
-		FREE(pszBuf);
-		return EFAILED;
-	}
-
-	TrimSpace(pszBufOrg, pszBuf);
-	FREE(pszBufOrg);
-
-	//查找第一个联系人号码
-	MEMSET(szA,0,sizeof(szA));
-	pszTok = STRCHR(pszBuf, '#');
-	if (pszTok == NULL) {
-		FREE(pszBuf);
-		IFILE_Release(pIFile);
-		IFILEMGR_Release(pIFileMgr);
-		return EFAILED;
-	}
-	len = pszTok-pszBuf;
-	MEMCPY(szA, pszBuf, len*sizeof(char));
-	szA[len] = 0;
-	pszBuf = pszTok + 1;
-	DBGPRINTF("szA:%s", szA);
-
-	//查找第二个联系人号码
-	MEMSET(szB,0,sizeof(szB));
-	pszTok = STRCHR(pszBuf, '#');
-	if (pszTok == NULL) {
-		FREE(pszBuf);
-		IFILE_Release(pIFile);
-		IFILEMGR_Release(pIFileMgr);
-		return EFAILED;
-	}
-	len = pszTok-pszBuf;
-	MEMCPY(szB, pszBuf, len*sizeof(char));
-	szB[len] = 0;
-	pszBuf = pszTok + 1;
-	DBGPRINTF("szB:%s", szB);
-
-	//查找第三个联系人号码
-	MEMSET(szC,0,sizeof(szC));
-	len = fiInfo.dwSize-(pszBuf-pBuf);
-	if (len > TS_MIN_RELATIVE_NUM && len < TS_MAX_RELATIVE_NUM)
-	{
-		MEMCPY(szC, pszBuf, len);
-		szC[len] = 0;
-	}
-	DBGPRINTF("szC:%s", szC);
+    //查找第三个联系人号码
+    MEMSET(szC,0,sizeof(szC));
+    len = fiInfo.dwSize-(pszBuf-pBuf);
+    if (len > TS_MIN_RELATIVE_NUM && len < TS_MAX_RELATIVE_NUM)
+    {
+        MEMCPY(szC, pszBuf, len);
+        szC[len] = 0;
+    }
+    DBGPRINTF("szC:%s", szC);
 
     i = 0;
-	if (STRLEN(szA) > TS_MIN_RELATIVE_NUM)
+	if (STRLEN(szA) > 0)
 	{
 		STRCPY(szNum[i++], szA);
 	}
 
-	if (STRLEN(szB) > TS_MIN_RELATIVE_NUM)
+	if (STRLEN(szB) > 0)
 	{
         STRCPY(szNum[i++], szB);
 	}
 
-	if (STRLEN(szC) > TS_MIN_RELATIVE_NUM)
+	if (STRLEN(szC) > 0)
 	{
         STRCPY(szNum[i++], szC);
 	}
 
-	FREE(pszBuf);
+	FREE(pBuf);
+    DBGPRINTF("@buf pBuf:%u pszBuf:%u",pBuf,pszBuf);
 	IFILE_Release(pIFile);
 	IFILEMGR_Release(pIFileMgr);
 
@@ -1527,7 +1529,7 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
                 AECHAR szSOS[32];
                 DBGPRINTF("@SOS Send SMS To Num: %s", pme->m_szNum[i]);
                 ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS,szSOS,sizeof(szSOS));
-                CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szSOS, pme->m_szNum[pme->m_id]);
+                CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szSOS, pme->m_szNum[i]);
                 break;
             }
             else {
@@ -1546,8 +1548,7 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
     if (ret ==  EFAILED)
     {
         DBGPRINTF("@No SOS Num ");
-        //alert message!
-
+        //TODO alert message!
         pme->m_id = -1;
         pme->m_bEnableSOS = FALSE;
     }

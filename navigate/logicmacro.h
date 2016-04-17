@@ -6,7 +6,7 @@
 #define TS_HEADER_Y           17
 #define TS_TITLE_Y	TS_HEADER_Y + 38	//38为标题图片高度
 
-#define TS_MIN_RELATIVE_NUM     5
+#define TS_MIN_RELATIVE_NUM     2
 #define TS_MAX_RELATIVE_NUM     20
 
 typedef struct _IWindow  IWindow;

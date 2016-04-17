@@ -151,9 +151,9 @@ struct CTopSoupApp
     CallListener callListener;
 
     //SOS
-	AECHAR				m_szTextA[32];
-	AECHAR				m_szTextB[32];
-	AECHAR				m_szTextC[32];
+	AECHAR				m_szTextA[64];
+	AECHAR				m_szTextB[64];
+	AECHAR				m_szTextC[64];
 
 	boolean			  m_bEnableSOS;
     SOSOP             m_OP;
