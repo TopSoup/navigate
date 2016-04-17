@@ -20,6 +20,8 @@ typedef struct _IWindow  IWindow;
 #define AMOUNT_BUFFER_SIZE           10                   // Max string buffer size for amount strings
 #define MAX_DESC_SIZE                32
 
+#define MAX_SOS_NUM                  3                     // Max Num for SOS NUM
+
 //TODO how to add annotate
 typedef enum TSWindow
 {
@@ -85,6 +87,13 @@ typedef enum TSWindow
 	TSW_LAST
 } TSWindow;
 
+//SOS 操作
+typedef enum _SOSOP{
+    SOS_IDLE,
+    SOS_SMS_SENDING,
+    SOS_CALL_CALLING,
+}SOSOP;
+
 // navigate app global structure.
 struct CTopSoupApp
 {
@@ -141,6 +150,12 @@ struct CTopSoupApp
 	ICall *m_pOutgoingCall;
     CallListener callListener;
 
+    //SOS
+	boolean			  m_bEnableSOS;
+    SOSOP             m_OP;
+    int               m_id;                       //当前通知的号码索引
+    char			  m_szNum[MAX_SOS_NUM][32];   //通知的号码列表
+
 	//Destination DataBse
 	IDatabase*		m_pDatabase;		// Database
 
@@ -177,5 +192,9 @@ void CTopSoupApp_onSplashDrawOver(void * po);
 //发送位置短信
 //格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
 void CTopSoupApp_SendSMSMessage(CTopSoupApp * pMe, uint16 wParam, AECHAR *szDesc,AECHAR* szLat,AECHAR* szLon,char* phoneNumber);
+
+//格式：紧急求助！
+void CTopSoupApp_SendSOSSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDesc, char* phoneNumber);
+
 
 #endif

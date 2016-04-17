@@ -256,6 +256,9 @@
 	<String Id="1055" Name="IDS_STRING_SOS_INFO_1">
         <Text>重要提示: 本功能非常重要，请及时确认手机的服务平台，并设置至少一位亲友的手机号码。</Text>
     </String>
+	<String Id="1056" Name="IDS_STRING_SOS_SMS">
+        <Text>紧急求助!</Text>
+    </String>
 </Strings>
 <Objects MimeType="image/png">
 	<Object Id="10000" Name="IDP_NAVIGATOR">

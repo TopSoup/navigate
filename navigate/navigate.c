@@ -10,6 +10,10 @@ static boolean    CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 w
 
 static void       CTopSoupApp_RedrawNotify(CTopSoupApp * pme);
 static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
+/************************************************************************/
+/* 从配置文件加载亲友联系方式                                           */
+/************************************************************************/
+static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32]);
 
 /*===============================================================================
                         SMS & TELEPHONE TEST
@@ -25,12 +29,20 @@ static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
 =============================================================================== */
 #define TS_EVT_SOS_CALL 0xe04d
 
+//Event
+#define EVT_SMS_END				EVT_USER + 100		// 发送SMS结束
+#define EVT_CALL_END			EVT_USER + 101		// 发送SMS结束
+
 //解析短信内容
 //格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
 static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg);
 static boolean    CTopSoupApp_ReceiveSMSMessage(CTopSoupApp *pme, uint32 uMsgId);
 static void		  CTopSoupApp_MakeSOSCall(CTopSoupApp * pme, char* szNumber);
 static void		  CTopSoupApp_EndSOSCall(CTopSoupApp * pme);
+
+//SOS功能：如果有亲友号码，则开启SOS，并给每个号码发送短信，和拨打电话，开启定位，定位成功后将位置信息通过短信发送
+//加载配置文件
+static void CTopSoupApp_StartSOS(CTopSoupApp *pme);
 
 //
 // navigate app can either be statically built into BREW or dynamically linked during run-time.
@@ -120,6 +132,9 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
 
    //init some data
    pme->m_bBackground = FALSE;
+   pme->m_bEnableSOS = FALSE;
+   pme->m_OP = SOS_IDLE;
+   pme->m_id = -1;
 
    // Get screen pixel count
    pdi = MALLOC(sizeof(AEEDeviceInfo));
@@ -479,20 +494,49 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 					 }
 				 }else if(wp->cls == AEECLSID_SOS)
                  {
-                     char			szA[32];
-                     char			szB[32];
-                     char			szC[32];
-
-                     //加载配置文件
-                     if (SUCCESS == LoadConfig((IShell*)pme->a.m_pIShell, szA, szB, szC))
-                     {
-                         CTopSoupApp_MakeSOSCall(pme, szA);
-                         //FIXME test
-						 CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_UNICODE, L"TIANANMEN",NULL,NULL,"18114498705");
-                     }
+                     CTopSoupApp_StartSOS(pme);
                  }
 			 }
 			 return (TRUE);
+
+        case EVT_SMS_END:
+            //收到短信发送结束消息
+            if (pme->m_id > 0 && pme->m_id < MAX_SOS_NUM)
+            {
+                CTopSoupApp_MakeSOSCall(pme, pme->m_szNum[pme->m_id]);
+                pme->m_OP = SOS_CALL_CALLING;
+            }
+            else
+            {
+                DBGPRINTF("@MakeSOSCall Failed with index:%d", pme->m_id);
+                //索引异常，结束单呼流程
+                pme->m_bEnableSOS = FALSE;
+                pme->m_OP = SOS_IDLE;
+                pme->m_id = -1;
+            }
+            return (TRUE);
+
+        case EVT_CALL_END:
+            //收到拨打电话结束消息
+            pme->m_id ++;   //使用下一个
+            if (pme->m_id > 0 && pme->m_id < MAX_SOS_NUM && STRLEN(pme->m_szNum[pme->m_id]) > 0)
+            {
+                AECHAR szSOS[32];
+                DBGPRINTF("@SOS Send SMS To Num: %s", pme->m_szNum[pme->m_id]);
+                ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS,szSOS,sizeof(szSOS));
+                CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szSOS, pme->m_szNum[pme->m_id]);
+                pme->m_OP = SOS_SMS_SENDING;
+            }
+            else
+            {
+                DBGPRINTF("@SOS End", pme->m_id);
+                //结束单呼流程
+                pme->m_bEnableSOS = FALSE;
+                pme->m_OP = SOS_IDLE;
+                pme->m_id = -1;
+            }
+
+            return (TRUE);
 
          case EVT_KEY:	            // Process key event
 			 {
@@ -961,7 +1005,7 @@ static boolean CTopSoupApp_ReceiveSMSMessage(CTopSoupApp* pme, uint32 uMsgId)
 static void SMSCallBack_Send(void *p)   
 {   
    CTopSoupApp *pme = (CTopSoupApp *)p;   
-  
+   int ret = 0;
    uint16 errType = AEESMS_GETERRORTYPE(pme->m_retVal);
    uint16 err = AEESMS_GETERROR(pme->m_retVal);
 
@@ -990,7 +1034,15 @@ static void SMSCallBack_Send(void *p)
    {   
        ISMSMSG_Release(pme->m_pISMSMsg);   
        pme->m_pISMSMsg = NULL;   
-   }   
+   }
+
+   //如果开启了SOS模式，则需要通知上层短信已发送成功
+   if (pme->m_bEnableSOS && pme->m_OP == SOS_SMS_SENDING)
+   {
+       if (!ISHELL_SendEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
+           DBGPRINTF("PlayTTS ISHELL_SendEvent EVT_SMS_END failure");
+       }
+   }
 }
 
 void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDesc,AECHAR* lat,AECHAR* lon,char* phoneNumber)
@@ -1165,10 +1217,80 @@ void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDes
 }
 
 
+void CTopSoupApp_SendSOSSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDesc, char* phoneNumber)
+{
+    AECHAR textDest[32], textLat[32], textLon[32];
+    AECHAR szLat[32], szLon[32];
+
+    // Make sure the pointers we'll be using are valid
+    if (pme == NULL || pme->a.m_pIShell == NULL || pme->a.m_pIDisplay == NULL)
+        return;
+
+    if (USAGE_SMS_TX_UNICODE == wParam)
+    {
+        int nErr;
+        WebOpt awo[6]; /* ***IMPORTANT**** grow this if you add more
+        WebOpts here, or shrink it and call AddOpt() multiple times */
+        int    i = 0;
+        uint32 nReturn=0;
+        AECHAR pszBuf[100];
+
+        nErr =ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_SMSMSG, (void **)&pme->m_pISMSMsg);
+        DBGPRINTF("CreateInstance of AEECLSID_SMSMSG ret %d", nErr);
+        if(nErr != AEE_SUCCESS)
+            return;
+
+        /* NULL terminated string providing destination device number.
+        '+' as first character signifies international number.  */
+        awo[i].nId  = MSGOPT_TO_DEVICE_SZ ;
+        awo[i].pVal = (void *)phoneNumber;
+        i++;
+
+        /* unicode text to be send */
+        awo[i].nId  = MSGOPT_PAYLOAD_WSZ ;
+        WSTRCPY(pszBuf, szDesc);
+        awo[i].pVal = (void *)pszBuf;
+        i++;
+
+        /* encoding */
+        awo[i].nId  = MSGOPT_PAYLOAD_ENCODING;
+        awo[i].pVal = (void *)AEE_ENC_UNICODE ;
+        i++;
+
+        awo[i].nId  = MSGOPT_MOSMS_ENCODING;
+        awo[i].pVal = (void *)AEESMS_ENC_UNICODE;
+        i++;
+
+#if 0
+        /* user ack */
+        awo[i].nId  = MSGOPT_READ_ACK;
+        awo[i].pVal = (void *)TRUE;
+        i++;
+#endif
+
+        /* this is absolutely necessary, do not remove, marks the end of the
+        array of WebOpts */
+        awo[i].nId  = MSGOPT_END;
+
+        /* add 'em */
+        nErr =ISMSMSG_AddOpt(pme->m_pISMSMsg, awo);
+        DBGPRINTF("ISMSMSG_AddOpt ret %d", nErr);
+
+        CALLBACK_Init(&pme->m_cb, SMSCallBack_Send, pme);
+        ISMS_SendMsg(pme->m_pISMS, pme->m_pISMSMsg, &pme->m_cb, &pme->m_retVal);
+
+        // Higher 16 bits specify error type specified as AEESMS_ERRORTYPE_XXX
+        // lower  16 bits specify error specified as AEESMS_ERROR_XXX
+        DBGPRINTF("ISMS_SendMsg ret 0x%x", nReturn);
+    }
+    return;
+}
+
 static void CTopSoupApp_OriginateListener(CTopSoupApp *pme, ModelEvent *pEvent)
 {
 	AEETCallEvent* pCallEvent = (AEETCallEvent*) pEvent;
-	
+	int ret = 0;
+
 	switch (pCallEvent->evCode)
 	{
 	case AEET_EVENT_CALL_CONNECT:
@@ -1181,7 +1303,7 @@ static void CTopSoupApp_OriginateListener(CTopSoupApp *pme, ModelEvent *pEvent)
 		{
 			DBGPRINTF("AEET_EVENT_CALL_ERROR");
 			LISTENER_Cancel(&pme->callListener);
-			
+			ret = 1;
 			break;
 		}
 		
@@ -1193,7 +1315,6 @@ static void CTopSoupApp_OriginateListener(CTopSoupApp *pme, ModelEvent *pEvent)
 		
 	case AEET_EVENT_CALL_END:
 		{
-			
 			DBGPRINTF("Rx:   AEET_EVENT_CALL_END");
 			LISTENER_Cancel(&pme->callListener);
 			if (pme->m_pOutgoingCall != NULL)
@@ -1201,7 +1322,8 @@ static void CTopSoupApp_OriginateListener(CTopSoupApp *pme, ModelEvent *pEvent)
 				ICALL_End(pme->m_pOutgoingCall);
 				TS_RELEASEIF(pme->m_pOutgoingCall);
 			}
-			
+            ret = 1;
+
 			break;
 		}
 		
@@ -1211,6 +1333,19 @@ static void CTopSoupApp_OriginateListener(CTopSoupApp *pme, ModelEvent *pEvent)
 			break;
 		}
 	}
+
+    //CALL结束，如果是SOS模式，则需要发送CALL_END消息
+    if (ret == 1)
+    {
+        DBGPRINTF("@Call End!");
+        //如果开启了SOS模式，则需要通知上层短信已发送成功
+        if (pme->m_bEnableSOS && pme->m_OP == SOS_CALL_CALLING)
+        {
+            if (!ISHELL_SendEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_CALL_END, 0, 0)) {
+                DBGPRINTF("PlayTTS ISHELL_SendEvent EVT_CALL_END failure");
+            }
+        }
+    }
 }
 
 //For SOS Test
@@ -1234,9 +1369,9 @@ static void CTopSoupApp_EndSOSCall(CTopSoupApp * pme)
 }
 
 /************************************************************************/
-/* 从配置文件加载亲友联系方式                                           */
+/* 从配置文件加载亲友联系方式,只记录有效的地址                          */
 /************************************************************************/
-static uint32 LoadConfig(IShell *iShell, char *pszA, char *pszB, char *pszC)
+static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
 {
 	IFileMgr	*pIFileMgr = NULL;
 	IFile		*pIFile = NULL;
@@ -1250,10 +1385,11 @@ static uint32 LoadConfig(IShell *iShell, char *pszA, char *pszB, char *pszC)
 	FileInfo	fiInfo;
 	char    szA[32], szB[32], szC[32];
 	int len = 0;
+    int i = 0;
 
     if (iShell == NULL)
     {
-        DBGPRINTF("LoadConfig Error : iShell is NULL!");
+        DBGPRINTF("LoadSOSConfig Error : iShell is NULL!");
         return EFAILED;
     }
 
@@ -1346,19 +1482,20 @@ static uint32 LoadConfig(IShell *iShell, char *pszA, char *pszB, char *pszC)
 	}
 	DBGPRINTF("szC:%s", szC);
 
+    i = 0;
 	if (STRLEN(szA) > TS_MIN_RELATIVE_NUM)
 	{
-		STRCPY(pszA, szA);
+		STRCPY(szNum[i++], szA);
 	}
 
 	if (STRLEN(szB) > TS_MIN_RELATIVE_NUM)
 	{
-        STRCPY(pszB, szB);
+        STRCPY(szNum[i++], szB);
 	}
 
 	if (STRLEN(szC) > TS_MIN_RELATIVE_NUM)
 	{
-        STRCPY(pszC, szC);
+        STRCPY(szNum[i++], szC);
 	}
 
 	FREE(pszBuf);
@@ -1368,8 +1505,50 @@ static uint32 LoadConfig(IShell *iShell, char *pszA, char *pszB, char *pszC)
 	return SUCCESS;
 }
 
+//SOS功能：如果有亲友号码，则开启SOS，并给每个号码发送短信，和拨打电话，开启定位，定位成功后将位置信息通过短信发送
+//加载配置文件
+static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
+	int ret = EFAILED;
+    int i = MAX_SOS_NUM;
 
+    if (SUCCESS == LoadSOSConfig((IShell *) pme->a.m_pIShell, pme->m_szNum)) {
+        for (i = 0; i < MAX_SOS_NUM; i++) {
+            if (STRLEN(pme->m_szNum[i]) > 0) {
+                AECHAR szSOS[32];
+                DBGPRINTF("@SOS Send SMS To Num: %s", pme->m_szNum[i]);
+                ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS,szSOS,sizeof(szSOS));
+                CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szSOS, pme->m_szNum[pme->m_id]);
+                break;
+            }
+            else {
+                DBGPRINTF("@SOS Num Is Empty:%d", i);
+            }
+        }
+    }
 
+    if (i < MAX_SOS_NUM) {
+        ret = SUCCESS;
+    }
+    else {
+        ret = EFAILED;
+    }
+
+    if (ret ==  EFAILED)
+    {
+        DBGPRINTF("@No SOS Num ");
+        //alert message!
+
+        pme->m_id = -1;
+        pme->m_bEnableSOS = FALSE;
+    }
+    else
+    {
+        //记录当前亲友索引和更改SOS状态
+        pme->m_id = i;
+        pme->m_bEnableSOS = TRUE;
+        pme->m_OP = SOS_SMS_SENDING;
+    }
+}
 
 
 

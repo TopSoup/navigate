@@ -269,6 +269,7 @@ static void CSOSRelativeWin_Redraw(IWindow * po)
 		IMENUCTL_SetSel(pme->m_pMainMenu, ((CTopSoupApp*)pme->m_pOwner)->m_wMenuLastSel[TSW_DEST_NEW]);
 		IMENUCTL_Redraw(pme->m_pMainMenu);
 
+        //绘制提示信息
         {
             AECHAR bufRes[MP_MAX_STRLEN];
             int a = 0, b = 0;
