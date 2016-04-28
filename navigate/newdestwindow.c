@@ -289,7 +289,7 @@ static void CNewDestWin_Redraw(IWindow * po)
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_LOCATION_RANGE_INFO_LON_0, bufRes, sizeof(bufRes));
 			h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 2;
 			xx = xMargin;
-			yy = pme->m_pOwner->m_rectWin.dy/2+36;
+			yy += h;
 			dxx = pme->m_pOwner->m_cxWidth - 2;
 			dyy += h;
 			SETAEERECT(&rect, xx, yy, dxx, dyy);

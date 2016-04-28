@@ -13,14 +13,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7e0fdb48-a700-4f68-8dd1-57c7cff4b812" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate.mif" afterPath="$PROJECT_DIR$/navigate.mif" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/encodings.xml" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/destlistwindow.c" afterPath="$PROJECT_DIR$/navigate/destlistwindow.c" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/navigate.brx" afterPath="$PROJECT_DIR$/navigate/navigate.brx" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/navigate.c" afterPath="$PROJECT_DIR$/navigate/navigate.c" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/newdestwindow.c" afterPath="$PROJECT_DIR$/navigate/newdestwindow.c" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/sosrelativewindow.c" afterPath="$PROJECT_DIR$/navigate/sosrelativewindow.c" />
     </list>
     <ignored path="navigate.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -41,21 +37,51 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="navigate.c" pinned="false" current-in-tab="false">
+      <file leaf-file-name="navigate.c" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/navigate/navigate.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="416">
-              <caret line="551" column="28" selection-start-line="551" selection-start-column="28" selection-end-line="551" selection-end-column="28" />
+            <state relative-caret-position="216">
+              <caret line="440" column="32" selection-start-line="440" selection-start-column="32" selection-end-line="440" selection-end-column="32" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="navigate.brx" pinned="false" current-in-tab="true">
+      <file leaf-file-name="sosrelativewindow.c" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/navigate/sosrelativewindow.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="212">
+              <caret line="86" column="0" selection-start-line="86" selection-start-column="0" selection-end-line="86" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="sosinfowindow.c" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/navigate/sosinfowindow.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="298">
+              <caret line="191" column="6" selection-start-line="191" selection-start-column="6" selection-end-line="191" selection-end-column="6" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="navigate.brx" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/navigate/navigate.brx">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="13" column="19" selection-start-line="13" selection-start-column="19" selection-end-line="13" selection-end-column="19" />
+            <state relative-caret-position="241">
+              <caret line="251" column="13" selection-start-line="251" selection-start-column="13" selection-end-line="251" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="newdestwindow.c" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/navigate/newdestwindow.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="266">
+              <caret line="291" column="19" selection-start-line="291" selection-start-column="19" selection-end-line="291" selection-end-column="19" />
               <folding />
             </state>
           </provider>
@@ -80,15 +106,15 @@
         <option value="$PROJECT_DIR$/navigate/wherewindow.c" />
         <option value="$PROJECT_DIR$/navigate/soswindow.c" />
         <option value="$PROJECT_DIR$/navigate/textctlwindow.c" />
-        <option value="$PROJECT_DIR$/navigate/sosinfowindow.c" />
         <option value="$PROJECT_DIR$/navigate/logicmacro.h" />
         <option value="$PROJECT_DIR$/navigate/navigate.bid" />
         <option value="$PROJECT_DIR$/navigate/navigate.h" />
-        <option value="$PROJECT_DIR$/navigate/sosrelativewindow.c" />
-        <option value="$PROJECT_DIR$/navigate/newdestwindow.c" />
         <option value="$PROJECT_DIR$/navigate/destlistwindow.c" />
-        <option value="$PROJECT_DIR$/navigate/navigate.c" />
+        <option value="$PROJECT_DIR$/navigate/newdestwindow.c" />
+        <option value="$PROJECT_DIR$/navigate/sosrelativewindow.c" />
+        <option value="$PROJECT_DIR$/navigate/sosinfowindow.c" />
         <option value="$PROJECT_DIR$/navigate/navigate.brx" />
+        <option value="$PROJECT_DIR$/navigate/navigate.c" />
       </list>
     </option>
   </component>
@@ -671,13 +697,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/navigate/navigate/navigate.mod" />
-    <entry file="file://$PROJECT_DIR$/navigate/sosinfowindow.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="320">
-          <caret line="194" column="42" selection-start-line="194" selection-start-column="42" selection-end-line="194" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/navigate/sosinfowindow.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="250">
@@ -743,22 +762,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/navigate/sosrelativewindow.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="350">
-          <caret line="26" column="8" selection-start-line="26" selection-start-column="8" selection-end-line="26" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/navigate/newdestwindow.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="31">
-          <caret line="74" column="0" selection-start-line="74" selection-start-column="0" selection-end-line="74" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/navigate/destlistwindow.c">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="431">
@@ -783,18 +786,42 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/navigate/navigate.c">
+    <entry file="file://$PROJECT_DIR$/navigate/newdestwindow.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="416">
-          <caret line="551" column="28" selection-start-line="551" selection-start-column="28" selection-end-line="551" selection-end-column="28" />
+        <state relative-caret-position="266">
+          <caret line="291" column="19" selection-start-line="291" selection-start-column="19" selection-end-line="291" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/navigate/sosrelativewindow.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="212">
+          <caret line="86" column="0" selection-start-line="86" selection-start-column="0" selection-end-line="86" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/navigate/sosinfowindow.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="298">
+          <caret line="191" column="6" selection-start-line="191" selection-start-column="6" selection-end-line="191" selection-end-column="6" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/navigate/navigate.brx">
       <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="241">
+          <caret line="251" column="13" selection-start-line="251" selection-start-column="13" selection-end-line="251" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/navigate/navigate.c">
+      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="216">
-          <caret line="13" column="19" selection-start-line="13" selection-start-column="19" selection-end-line="13" selection-end-column="19" />
+          <caret line="440" column="32" selection-start-line="440" selection-start-column="32" selection-end-line="440" selection-end-column="32" />
           <folding />
         </state>
       </provider>

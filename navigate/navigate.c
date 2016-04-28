@@ -1,5 +1,7 @@
 #include "logicmacro.h"
 
+#define TS_VERSION  "1.0.2-20160429"
+
 /*-------------------------------------------------------------------
             Function Prototypes
 -------------------------------------------------------------------*/
@@ -436,6 +438,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
     switch ( eCode ) 
     {   
          case EVT_APP_START:   // Process Start event
+            DBGPRINTF(TS_VERSION);
 			pme->m_eActiveWin = TSW_MAIN;
 		    CTopSoupApp_SetWindow(pme, TSW_MAIN, 0);
             return TRUE;
