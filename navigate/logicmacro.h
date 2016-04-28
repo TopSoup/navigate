@@ -21,6 +21,9 @@ void       TS_FreeWin(IWindow ** ppif);
 AECHAR*	   TS_FLT2SZ(AECHAR* szBuf, double val);
 AECHAR*    TS_FLT2SZ_3(AECHAR* szBuf, double val);
 
+//过滤空格
+int TrimSpace(char *inbuf, char *outbuf);
+
 //绘制文字
 void       TS_DrawText(IDisplay* pIDisplay, AEEFont nFont, AECHAR* pText, AEERect *rect);
 
@@ -28,6 +31,8 @@ void       TS_DrawText(IDisplay* pIDisplay, AEEFont nFont, AECHAR* pText, AEERec
 /**
  * @brief
  */
+#ifndef _TS_TIME_T_
+#define _TS_TIME_T_
 typedef struct _ts_time_t {
 	uint16			year;
 	uint8			month;
@@ -37,7 +42,7 @@ typedef struct _ts_time_t {
 	uint8			second;
 	uint16			millisecond;
 }ts_time_t;
-
+#endif// !_TS_TIME_T_
 	
 /**
  * @brief 获得当前时间

@@ -38,6 +38,8 @@
 #include "wheredetailswindow.h"
 #include "locationinfowindow.h"
 #include "locinfowindow.h"
+#include "sosrelativewindow.h"
+#include "sosinfowindow.h"
 
 #include "gmenuctl.h"
 #include "location.h"

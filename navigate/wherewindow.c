@@ -449,11 +449,6 @@ static boolean CWhereWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam
 	case EVT_KEY:
 		switch (wParam)
 		{
-		case AVK_SELECT:
-			pme->m_pOwner->m_bGetGpsInfo = TRUE;	//FOR TEST
-			bRet = TRUE;
-			CWhereWin_Redraw((IWindow*)pme);
-			break;
 		case AVK_SOFT1:
 			if (pme->m_pOwner->m_bGetGpsInfo)
 			{			  

@@ -10,6 +10,11 @@ static boolean    CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 w
 
 static void       CTopSoupApp_RedrawNotify(CTopSoupApp * pme);
 static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
+
+//构建SOS短信：
+//pos == NULL： 开启求助短信
+//pos != NULL:  发送带位置信息的求助短信
+static void          CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordinate *pos);
 /************************************************************************/
 /* 从配置文件加载亲友联系方式                                           */
 /************************************************************************/
@@ -31,7 +36,8 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32]);
 
 //Event
 #define EVT_SMS_END				EVT_USER + 100		// 发送SMS结束
-#define EVT_CALL_END			EVT_USER + 101		// 发送SMS结束
+#define EVT_CALL_END			EVT_USER + 101		// 拨打电话结束
+#define EVT_START_SOS           EVT_USER + 1000     // 启动SOS报警
 
 //解析短信内容
 //格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
@@ -425,6 +431,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 {
     CTopSoupApp * pme = (CTopSoupApp *)pi;
 
+    DBGPRINTF("@TS Recv eCode:%x", eCode);
     switch ( eCode ) 
     {   
          case EVT_APP_START:   // Process Start event
@@ -492,12 +499,14 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 							 return TRUE;
 						 }
 					 }
-				 }else if(wp->cls == AEECLSID_SOS)
-                 {
-                     CTopSoupApp_StartSOS(pme);
-                 }
+				 }
 			 }
 			 return (TRUE);
+        case EVT_START_SOS:
+            DBGPRINTF("@Recv Start SOS Msg!");
+            CTopSoupApp_StartSOS(pme);
+
+            return (TRUE);
 
         case EVT_SMS_END:
             //收到短信发送结束消息
@@ -521,10 +530,10 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
             pme->m_id ++;   //使用下一个
             if (pme->m_id >= 0 && pme->m_id < MAX_SOS_NUM && STRLEN(pme->m_szNum[pme->m_id]) > 0)
             {
-                AECHAR szSOS[32];
-                DBGPRINTF("@SOS Send SMS To Num: %s", pme->m_szNum[pme->m_id]);
-                ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS,szSOS,sizeof(szSOS));
-                CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szSOS, pme->m_szNum[pme->m_id]);
+                AECHAR szMsg[256];
+                CTopSoupApp_MakeSOSMsg(pme, szMsg, NULL);
+                DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szNum[pme->m_id], WSTRLEN(szMsg));
+                CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szNum[pme->m_id]);
                 pme->m_OP = SOS_SMS_SENDING;
             }
             else
@@ -780,7 +789,7 @@ static void CTopSoupApp_ReleaseRes(CTopSoupApp * pme)
 //格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
 static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 {
-	char *pszTok = NULL, *pszDot = NULL;
+	char *pszTok = NULL;
 	char szBuf[128];
 	char *pBuf = NULL;
 	char szTmp[32];
@@ -1013,13 +1022,11 @@ static boolean CTopSoupApp_ReceiveSMSMessage(CTopSoupApp* pme, uint32 uMsgId)
 
 static void SMSCallBack_Send(void *p)   
 {   
-   CTopSoupApp *pme = (CTopSoupApp *)p;   
-   int ret = 0;
+   CTopSoupApp *pme = (CTopSoupApp *)p;
    uint16 errType = AEESMS_GETERRORTYPE(pme->m_retVal);
    uint16 err = AEESMS_GETERROR(pme->m_retVal);
 
    SMSMsgOpt smo[2];
-   int dwSecs = 0;
 
    DBGPRINTF("SMSCallBack_Send called");   
 
@@ -1048,6 +1055,7 @@ static void SMSCallBack_Send(void *p)
    //如果开启了SOS模式，则需要通知上层短信已发送成功
    if (pme->m_bEnableSOS && pme->m_OP == SOS_SMS_SENDING)
    {
+       DBGPRINTF("@SMSCallBack_Send SMS");
        if (!ISHELL_SendEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
            DBGPRINTF("ISHELL_SendEvent EVT_SMS_END failure");
        }
@@ -1228,9 +1236,6 @@ void CTopSoupApp_SendSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDes
 
 void CTopSoupApp_SendSOSSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDesc, char* phoneNumber)
 {
-    AECHAR textDest[32], textLat[32], textLon[32];
-    AECHAR szLat[32], szLon[32];
-
     // Make sure the pointers we'll be using are valid
     if (pme == NULL || pme->a.m_pIShell == NULL || pme->a.m_pIDisplay == NULL)
         return;
@@ -1390,7 +1395,6 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
     char    *pszBufOrg = NULL;
     char    *pszBuf = NULL, *pBuf = NULL;
     char    *pszTok = NULL;
-    char    *pszDelimiter = ";";
     int32	nResult = 0;
     FileInfo	fiInfo;
     char    szA[32], szB[32], szC[32];
@@ -1514,7 +1518,74 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
 	IFILE_Release(pIFile);
 	IFILEMGR_Release(pIFileMgr);
 
-	return SUCCESS;
+	return (i == 0) ? EFAILED : SUCCESS;
+}
+
+//构建SOS短信：
+//pos == NULL： 开启求助短信
+//pos != NULL:  发送带位置信息的求助短信
+static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordinate *pos)
+{
+    ts_time_t now;
+    char szBuf[128];
+    AECHAR szTmp[128];
+    AECHAR szSOSInfo[32];
+    AECHAR szMon[6];
+    AECHAR szDay[6];
+    AECHAR szHour[6];
+    AECHAR szMinute[6];
+    AECHAR szTail[32];
+
+    TS_GetTimeNow(&now);
+
+    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MONTH,szMon,sizeof(szMon));  // 月
+    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DAY,szDay,sizeof(szDay));    // 日
+    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_HOUR,szHour,sizeof(szHour)); // 时
+    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MIN,szMinute,sizeof(szMinute)); // 分
+
+    if (pos == NULL)
+    {
+        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS,szSOSInfo,sizeof(szSOSInfo));
+        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MIN_OPEN,szTail,sizeof(szTail));   // 分开启求助
+
+        //1 构建开启求助短信：求助信息! 4月18日20时18分开启求助
+        WSPRINTF(szTmp, sizeof(szTmp), L"%s%d%s%d%s", szSOSInfo, now.month, szMon, now.day, szDay);
+        WSPRINTF(szMsg, sizeof(AECHAR)*256, L"%s%d%s%d%s", szTmp, now.hour, szHour, now.minute, szTail);
+    }
+    else
+    {
+        AECHAR szTmp2[128];
+        AECHAR textLat[32], textLon[32];
+        AECHAR szLat[32], szLon[32];
+        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS_LAST,szSOSInfo,sizeof(szSOSInfo));
+        ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LAT, textLat, sizeof(textLat));
+        ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LON, textLon, sizeof(textLon));
+        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_IS_NAVIGATE,szTail,sizeof(szTail));   // 分开启求助
+
+        TS_FLT2SZ(szLat, pos->lat);
+        //FLOATTOWSTR(pme->m_gpsInfo.theInfo.lat, szLat, 32);
+        WSTRTOSTR(szLat, szBuf, sizeof(szBuf));
+        DBGPRINTF("Lat: %s", szBuf);
+
+        TS_FLT2SZ(szLon, pos->lon);
+        //FLOATTOWSTR(pme->m_gpsInfo.theInfo.lon, szLat, 32);
+        WSTRTOSTR(szLon, szBuf, sizeof(szBuf));
+        DBGPRINTF("Lon: %s", szBuf);
+
+        //2 构建位置信息的求助短信：求助信息: 最后位置4月18日20时21分在东经114度27.947分，北纬38度5.280分，是否想该位置领航?
+        //2 构建位置信息的求助短信：求助信息! 最后位置:4月18日20时21分#纬度:E,20.012345#经度:N,120.012345, 是否想该位置领航?
+
+        //求助信息! 最后位置:4月18日
+        WSPRINTF(szTmp, sizeof(szTmp), L"%s%d%s%d%s", szSOSInfo, now.month, szMon, now.day, szDay);
+        //TMP+20时21分#
+        WSPRINTF(szTmp2, sizeof(szTmp2), L"%s%d%s%d%s#", szTmp, now.hour, szHour, now.minute, szMinute);
+        //TMP2+纬度:E,20.012345#经度:N,120.012345, 是否想该位置领航?
+        WSPRINTF(szMsg, sizeof(AECHAR)*256, L"%s%s:E,%s#%s:N,%s, %s", szTmp2, textLat, szLat, textLon, szLon, szTail);
+    }
+
+    WSTRTOSTR(szMsg, szBuf, sizeof(szBuf));
+
+    DBGPRINTF("@MakeSOSMsg:%s", szBuf);
 }
 
 //SOS功能：如果有亲友号码，则开启SOS，并给每个号码发送短信，和拨打电话，开启定位，定位成功后将位置信息通过短信发送
@@ -1523,13 +1594,19 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
 	int ret = EFAILED;
     int i = MAX_SOS_NUM;
 
+    if (pme->m_bEnableSOS)
+    {
+        DBGPRINTF("Already Enabled SOS");
+        return ;
+    }
+
     if (SUCCESS == LoadSOSConfig((IShell *) pme->a.m_pIShell, pme->m_szNum)) {
         for (i = 0; i < MAX_SOS_NUM; i++) {
             if (STRLEN(pme->m_szNum[i]) > 0) {
-                AECHAR szSOS[32];
-                DBGPRINTF("@SOS Send SMS To Num: %s", pme->m_szNum[i]);
-                ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS,szSOS,sizeof(szSOS));
-                CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szSOS, pme->m_szNum[i]);
+                AECHAR szMsg[256];
+                CTopSoupApp_MakeSOSMsg(pme, szMsg, NULL);
+				DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szNum[i], WSTRLEN(szMsg));
+                CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szNum[i]);
                 break;
             }
             else {

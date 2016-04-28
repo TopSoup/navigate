@@ -405,9 +405,6 @@ static boolean CNavigateWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wPa
 	case EVT_KEY:
 		switch (wParam)
 		{
-		case AVK_SELECT:
-			pme->m_bGetGpsInfo = TRUE;	//FOR TEST
-			break;
 		case AVK_SOFT1:
 			bRet = FALSE;
 			break;

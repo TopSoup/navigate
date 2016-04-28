@@ -251,13 +251,28 @@
 		<Text>重要提示: 亲友号码是启用紧急求救后,手机自动打电话,发短信的紧急联系人。最多可以设置3个,请尽量设置为手机,便于短信接收。</Text>
 	</String>
 	<String Id="1054" Name="IDS_STRING_SOS_INFO_0">
-		<Text>遇紧急情况长按PTT键2秒以上,手机自动循环向服务平台(如有)和亲友号码(需设置)发出求助短信并打电话,并启用定位,定位后将实时位置自动发出。</Text>
+		<Text>遇紧急情况长按数字9键2秒以上,手机自动循环向服务平台(如有)和亲友号码(需设置)发出求助短信并打电话,并启用定位,定位后将实时位置自动发出。</Text>
 	</String>
 	<String Id="1055" Name="IDS_STRING_SOS_INFO_1">
         <Text>重要提示: 本功能非常重要,请及时确认手机的服务平台,并设置至少一位亲友的手机号码。</Text>
     </String>
 	<String Id="1056" Name="IDS_STRING_SOS_SMS">
-        <Text>紧急求助!</Text>
+        <Text>求助信息! </Text>
+    </String>
+    <String Id="1057" Name="IDS_STRING_HOUR">
+        <Text>时</Text>
+    </String>
+    <String Id="1058" Name="IDS_STRING_MIN_OPEN">
+        <Text>分开启求助</Text>
+    </String>
+    <String Id="1059" Name="IDS_STRING_IS_NAVIGATE">
+        <Text>是否向该位置领航?</Text>
+    </String>
+    <String Id="1060" Name="IDS_STRING_SOS_SMS_LAST">
+        <Text>求助信息! 最后位置:</Text>
+    </String>
+    <String Id="1061" Name="IDS_STRING_MIN">
+        <Text>分</Text>
     </String>
 </Strings>
 <Objects MimeType="image/png">

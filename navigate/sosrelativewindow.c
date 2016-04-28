@@ -566,21 +566,6 @@ static boolean CSOSRelativeWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 
 }
 
 
-//过滤空格
-int TrimSpace(char *inbuf, char *outbuf)
-{
-    char *tmpBuf = inbuf;
-    while (*tmpBuf != '\0')
-    {
-        if ((*tmpBuf) != ' '){
-            *outbuf++ = *tmpBuf;
-        }
-        tmpBuf++;
-    }
-    *outbuf = '\0';
-    return 0;
-}
-
 /************************************************************************/
 /* 从配置文件加载亲友联系方式                                           */
 /************************************************************************/

@@ -157,6 +157,21 @@ AECHAR* TS_FLT2SZ_3(AECHAR* szBuf, double val)
 #endif
 }
 
+//过滤空格
+int TrimSpace(char *inbuf, char *outbuf)
+{
+	char *tmpBuf = inbuf;
+	while (*tmpBuf != '\0')
+	{
+		if ((*tmpBuf) != ' '){
+			*outbuf++ = *tmpBuf;
+		}
+		tmpBuf++;
+	}
+	*outbuf = '\0';
+	return 0;
+}
+
 //绘制文字
 void TS_DrawText(IDisplay* pIDisplay, AEEFont nFont, AECHAR* pText, AEERect *rect)
 {
