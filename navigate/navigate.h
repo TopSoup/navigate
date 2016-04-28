@@ -178,8 +178,6 @@ struct CTopSoupApp
 
 	//领航前一个窗口
 	TSWindow        m_pPreNaviWin; 
-
-	boolean			m_bBackground;		//是否设置为后台状态
 };
 
 typedef struct CTopSoupApp  CTopSoupApp;

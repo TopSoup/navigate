@@ -136,7 +136,6 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
    }
 
    //init some data
-   pme->m_bBackground = FALSE;
    pme->m_bEnableSOS = FALSE;
    pme->m_OP = SOS_IDLE;
    pme->m_id = -1;
@@ -435,23 +434,11 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
     switch ( eCode ) 
     {   
          case EVT_APP_START:   // Process Start event
-            //XXX
-			 if ( TRUE == pme->m_bBackground )
-			 {
-				 //resume opt
-				 CTopSoupApp_SetWindow(pme, pme->m_eSuspendWin, 0);
-				 pme->m_bBackground = FALSE;
-			 } else {
-				 pme->m_eActiveWin = TSW_MAIN;
-				 CTopSoupApp_SetWindow(pme, TSW_MAIN, 0);
-			 }
+			pme->m_eActiveWin = TSW_MAIN;
+		    CTopSoupApp_SetWindow(pme, TSW_MAIN, 0);
             return TRUE;
 
          case EVT_APP_STOP:        // process STOP event
-			 if ( TRUE == pme->m_bBackground )
-			 {
-				 *((boolean*)dwParam) = FALSE;
-			 }
             return (TRUE);
 
          case EVT_APP_SUSPEND:
@@ -477,27 +464,6 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 					 } else {
 						 DBGPRINTF("Rece unkown mask sms: %x",wp->dwMask);
 						 return FALSE;
-					 }
-				 }else if(wp->cls == AEECLSID_SHELL) 
-				 {
-					 //NMASK_SHELL_KEY
-					 if((wp->dwMask & NMASK_SHELL_KEY) == NMASK_SHELL_KEY)
-					 {
-						 NotifyKeyEvent *pKevEvent = (NotifyKeyEvent*)wp->pData;
-
-						 if(pKevEvent->wParam == AVK_END)
-						 {
-							 DBGPRINTF("recv notify key:AVK_END, Set Background!");
-
-							 pme->m_bBackground = TRUE;
-
-							 //suspend opt
-							 pme->m_eSuspendWin = pme->m_eActiveWin;
-							 CTopSoupApp_SetWindow(pme, TSW_NONE, 0);
-
-							 ISHELL_CloseApplet((IShell*)pme->a.m_pIShell, FALSE);
-							 return TRUE;
-						 }
 					 }
 				 }
 			 }
