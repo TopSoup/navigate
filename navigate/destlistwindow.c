@@ -40,11 +40,6 @@ IWindow * CDestListWin_New(CTopSoupApp * pOwner)
       return NULL;
 
    {
-	//AEEItemStyle rNormalStyle;
-	//AEEItemStyle rSelStyle;
-	int      cx = pme->m_pOwner->m_cxWidth;
-	int      cy = pme->m_pOwner->m_cyHeight;
-
 	//XXX __begin
 	//Initialize logo below the header
 	if (ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_MENUCTL, (void **)&pme->m_pMainMenu))

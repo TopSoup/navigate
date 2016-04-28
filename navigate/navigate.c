@@ -430,7 +430,9 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 {
     CTopSoupApp * pme = (CTopSoupApp *)pi;
 
-    DBGPRINTF("@TS Recv eCode:%x", eCode);
+    if (eCode != EVT_APP_NO_SLEEP)
+        DBGPRINTF("@TS Recv eCode:%x", eCode);
+
     switch ( eCode ) 
     {   
          case EVT_APP_START:   // Process Start event
@@ -522,28 +524,28 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 
          case EVT_KEY:	            // Process key event
 			 {
-				 DBGPRINTF("eCode:%x Key:%x", eCode, wParam);
+				 //DBGPRINTF("eCode:%x Key:%x", eCode, wParam);
 
 				//FOR SMS & TEL TEST
 				if (wParam == AVK_0)
 				{
-					DBGPRINTF("SEND SMS TEST ...");
+					//DBGPRINTF("SEND SMS TEST ...");
 					//CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_ASCII);
 					//CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_UNICODE, L"TIANANMEN");
-                    CTopSoupApp_StartSOS(pme);
+                    //CTopSoupApp_StartSOS(pme);
 				}
 
 				//FOR TEL TEST
 				if (wParam == AVK_PTT)
 				{
-					DBGPRINTF("SOS CALL TEST ...");
+					//DBGPRINTF("SOS CALL TEST ...");
 					//CTopSoupApp_MakeSOSCall(pme, "15511823090");
                     //CTopSoupApp_StartSOS(pme);    //与系统冲突，有时会死机？
 				}
 
 				if (wParam == AVK_2)
 				{
-					DBGPRINTF("CALL TEST END ...");
+					//DBGPRINTF("CALL TEST END ...");
 					//CTopSoupApp_EndSOSCall(pme);
 				}
 			 }
@@ -854,7 +856,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 
 static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg)
 {
-	AECHAR *pszTok = NULL, *pszDot = NULL;
+	AECHAR *pszTok = NULL;
 	AECHAR szBuf[128];
 	AECHAR *pBuf = NULL;
 	AECHAR szTmp[32];

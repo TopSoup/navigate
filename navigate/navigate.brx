@@ -11,7 +11,7 @@
 		<Text>目标领航</Text>
 	</String>
 	<String Id="4" Name="IDS_STRING_SOS">
-		<Text>SOS位置求助</Text>
+		<Text>SOS报警求助</Text>
 	</String>
 	<String Id="5" Name="IDS_STRING_APPINFO">
 		<Text>版本信息</Text>
@@ -251,7 +251,7 @@
 		<Text>重要提示: 亲友号码是启用紧急求救后,手机自动打电话,发短信的紧急联系人。最多可以设置3个,请尽量设置为手机,便于短信接收。</Text>
 	</String>
 	<String Id="1054" Name="IDS_STRING_SOS_INFO_0">
-		<Text>遇紧急情况长按数字9键2秒以上,手机自动循环向服务平台(如有)和亲友号码(需设置)发出求助短信并打电话,并启用定位,定位后将实时位置自动发出。</Text>
+		<Text>遇紧急情况长按数字9键2秒以上,手机自动循环向服务平台(如有)和亲友号码(需设置)发出求助短信并打电话。</Text>
 	</String>
 	<String Id="1055" Name="IDS_STRING_SOS_INFO_1">
         <Text>重要提示: 本功能非常重要,请及时确认手机的服务平台,并设置至少一位亲友的手机号码。</Text>

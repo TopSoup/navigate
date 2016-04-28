@@ -72,11 +72,7 @@ IWindow * CNewDestWin_New(CTopSoupApp * pOwner)
 
    {
 	   AEERect   rRect;
-	   
-		int      cx = pme->m_pOwner->m_cxWidth;
-		int      cy = pme->m_pOwner->m_cyHeight;
-		int		 dy = MP_NEW_DEST_CY;
-			   
+
 		if ((ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_MENUCTL, (void **)&pme->m_pMainMenu)) ||
 			(ISHELL_CreateInstance( pme->m_pIShell, AEECLSID_TEXTCTL, (void **)&pme->m_pTextCtl)) )
 			TS_WINERR_RETURN(pme);
