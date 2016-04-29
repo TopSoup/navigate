@@ -274,6 +274,12 @@
     <String Id="1061" Name="IDS_STRING_MIN">
         <Text>分</Text>
     </String>
+    <String Id="1062" Name="IDS_STRING_SOS_PROMPT">
+        <Text>SOS求助开启!</Text>
+    </String>
+    <String Id="1063" Name="IDS_STRING_SOS_CFG_ADDRESS">
+        <Text>请在领航应用中配置联系人!</Text>
+    </String>
 </Strings>
 <Objects MimeType="image/png">
 	<Object Id="10000" Name="IDP_NAVIGATOR">

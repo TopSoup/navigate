@@ -8,7 +8,7 @@
 /*===========================================================================
    This function draws the image and centers it within the specified 
    rectangle if bCenter is TRUE.
-   - note£ºreturn if image bot fit in the rect
+   - noteï¿½ï¿½return if image bot fit in the rect
 ===========================================================================*/
 void TS_DrawImage(IImage * pImage, AEERect * pRect, boolean bCenter)
 {
@@ -262,6 +262,10 @@ void CTopSoupApp_onSplashDrawOver(void * po)
 
 }
 
+void  TS_DrawSplash_Stop(CTopSoupApp * pme)
+{
+    ISHELL_CancelTimer(pme->a.m_pIShell, (PFNNOTIFY)CTopSoupApp_onSplashDrawOver, pme);
+}
 /*===========================================================================
    This function draws the splash screen and brings up the main window
    after the splash timer runs out.
@@ -304,7 +308,7 @@ void  TS_DrawSplash(CTopSoupApp * pme,AECHAR* prompt,int msTimeout,PFNNOTIFY on_
 	  if ( on_splashOver )
 		  ISHELL_SetTimer(pme->a.m_pIShell, msTimeout, (PFNNOTIFY)on_splashOver, pUser);  
 	  else
-		  ISHELL_SetTimer(pme->a.m_pIShell, msTimeout, (PFNNOTIFY)CTopSoupApp_onSplashDrawOver, pme);  
+		  ISHELL_SetTimer(pme->a.m_pIShell, msTimeout, (PFNNOTIFY)CTopSoupApp_onSplashDrawOver, pme);
    }
 }
 

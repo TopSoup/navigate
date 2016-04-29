@@ -13,7 +13,7 @@ void       TS_DrawImage(IImage * pImage, AEERect * pRect, boolean bCenter);
 boolean    TS_AddMenuItem(IMenuCtl * pMenu, uint16 wTextID, AECHAR * pText, uint16 wImageID, uint16 wItemID, uint32 dwData);
 void       TS_SetMenuAttr(IMenuCtl * pMenu, AEECLSID clsMenu, uint16 nColorDepth, AEERect * pRect, uint32 dwProps);
 
-void		TS_SetSoftButtonText(CTopSoupApp * pme,uint16 wTextLeftID, uint16 wTextRightID,uint16 wTextMidID); //IDÎª0£¬Ôò²»¼ÓÔØÎÄ×Ö
+void		TS_SetSoftButtonText(CTopSoupApp * pme,uint16 wTextLeftID, uint16 wTextRightID,uint16 wTextMidID); //IDÎª0ï¿½ï¿½ï¿½ò²»¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 //static
 void       TS_FitStaticText(IDisplay * pd, IStatic * ps, AEEFont font, AECHAR * pszText);
@@ -23,6 +23,8 @@ void       TS_FrameRect(IDisplay * pd, AEERect * pRect);
 
 //dlg
 void       TS_ErrorDlg(CTopSoupApp * pme, uint16 wResErrID);
+void       TS_DrawSplash_Stop(CTopSoupApp * pme);
+
 //PFNNOTIFY is null,use default func and pUser is CTopSoupApp*;pUser is the callback fun  param
 void       TS_DrawSplash(CTopSoupApp * pme,AECHAR* info,int msTimeout,PFNNOTIFY on_splashOver,void* pUser);
 

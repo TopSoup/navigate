@@ -1,6 +1,6 @@
 #include "logicmacro.h"
 
-#define TS_VERSION  "1.0.2-20160429"
+#define TS_VERSION  "1.0.3-20160429"
 
 /*-------------------------------------------------------------------
             Function Prototypes
@@ -432,18 +432,31 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 {
     CTopSoupApp * pme = (CTopSoupApp *)pi;
 
-    if (eCode != EVT_APP_NO_SLEEP)
-        DBGPRINTF("@TS Recv eCode:%x", eCode);
+    //if (eCode != EVT_APP_NO_SLEEP)
+    //  DBGPRINTF("@TS Recv eCode:%x", eCode);
 
     switch ( eCode ) 
     {   
          case EVT_APP_START:   // Process Start event
             DBGPRINTF(TS_VERSION);
-			pme->m_eActiveWin = TSW_MAIN;
-		    CTopSoupApp_SetWindow(pme, TSW_MAIN, 0);
+
+            //SOS模式开始发送短信和呼叫联系人
+            if (pme->m_bEnableSOS)
+            {
+                CTopSoupApp_StartSOS(pme);
+            }
+            else
+            {
+                pme->m_eActiveWin = TSW_MAIN;
+                CTopSoupApp_SetWindow(pme, TSW_MAIN, 0);
+            }
+
             return TRUE;
 
          case EVT_APP_STOP:        // process STOP event
+            pme->m_id = -1;
+            pme->m_OP = SOS_IDLE;
+            pme->m_bEnableSOS = FALSE;
             return (TRUE);
 
          case EVT_APP_SUSPEND:
@@ -467,16 +480,23 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 						 CTopSoupApp_ReceiveSMSMessage(pme, uMsgId);
 						 DBGPRINTF("msgid :%d", uMsgId);
 					 } else {
-						 DBGPRINTF("Rece unkown mask sms: %x",wp->dwMask);
+						 DBGPRINTF("Recv unkown mask sms: %x",wp->dwMask);
 						 return FALSE;
 					 }
 				 }
-			 }
+             }
 			 return (TRUE);
-        case EVT_START_SOS:
-            DBGPRINTF("@Recv Start SOS Msg!");
-            CTopSoupApp_StartSOS(pme);
 
+        case EVT_START_SOS:
+            if (pme->m_bEnableSOS)
+            {
+                DBGPRINTF("Already Enabled SOS");
+                return (TRUE);
+            }
+            DBGPRINTF("@Recv Start Navigate Use SOS Mode!");
+
+            pme->m_bEnableSOS = TRUE;
+            ISHELL_StartApplet(pme->a.m_pIShell, AEECLSID_NAVIGATE);
             return (TRUE);
 
         case EVT_SMS_END:
@@ -493,6 +513,8 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
                 pme->m_bEnableSOS = FALSE;
                 pme->m_OP = SOS_IDLE;
                 pme->m_id = -1;
+
+                ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
             }
             return (TRUE);
 
@@ -515,12 +537,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
                 pme->m_OP = SOS_IDLE;
                 pme->m_id = -1;
 
-                //FOR TEST??
-//                if (!ISHELL_SendEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_APP_RESUME, 0, 0)) {
-//                    DBGPRINTF("ISHELL_SendEvent EVT_APP_RESUME failure");
-//                }
-//
-//                DBGPRINTF("ISHELL_SendEvent send EVT_APP_RESUME");
+                ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
             }
 
             return (TRUE);
@@ -1363,13 +1380,13 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
     IFile		*pIFile = NULL;
     IShell		*pIShell = NULL;
 
-    char    *pszBufOrg = NULL;
-    char    *pszBuf = NULL, *pBuf = NULL;
+    char 	szBuf[128];
+    char    *pszBuf = NULL;
     char    *pszTok = NULL;
     int32	nResult = 0;
     FileInfo	fiInfo;
     char    szA[32], szB[32], szC[32];
-    int len = 0;
+    uint32 len = 0;
     int i =0;
 
     pIShell = iShell;
@@ -1408,27 +1425,25 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
         return EFAILED;
     }
 
-    // Allocate enough memory to read the full text into memory
-    pszBufOrg = MALLOC(fiInfo.dwSize);
-    pszBuf = MALLOC(fiInfo.dwSize);
-    pBuf = pszBuf;
-    DBGPRINTF("@buf %u", pszBuf);
+    //only use 128
+    len = fiInfo.dwSize;
+    if (len >= 128)
+        len = 127;
 
-    nResult = IFILE_Read(pIFile, pszBufOrg, fiInfo.dwSize);
-    if ((uint32)nResult < fiInfo.dwSize) {
-        FREE(pszBuf);
-        FREE(pszBufOrg);
+    MEMSET(szBuf, 0, 128);
+    nResult = IFILE_Read(pIFile, szBuf, len);
+    if ((uint32)nResult < len) {
+        IFILE_Release(pIFile);
+        IFILEMGR_Release(pIFileMgr);
         return EFAILED;
     }
 
-    TrimSpace(pszBufOrg, pszBuf);
-    FREE(pszBufOrg);
+    pszBuf = szBuf;
 
     //查找第一个联系人号码
     MEMSET(szA,0,sizeof(szA));
     pszTok = STRCHR(pszBuf, '#');
     if (pszTok == NULL) {
-        FREE(pBuf);
         IFILE_Release(pIFile);
         IFILEMGR_Release(pIFileMgr);
         return EFAILED;
@@ -1445,7 +1460,6 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
     MEMSET(szB,0,sizeof(szB));
     pszTok = STRCHR(pszBuf, '#');
     if (pszTok == NULL) {
-        FREE(pBuf);
         IFILE_Release(pIFile);
         IFILEMGR_Release(pIFileMgr);
         return EFAILED;
@@ -1460,7 +1474,7 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
 
     //查找第三个联系人号码
     MEMSET(szC,0,sizeof(szC));
-    len = fiInfo.dwSize-(pszBuf-pBuf);
+    len = fiInfo.dwSize-(pszBuf-szBuf);
     if (len > TS_MIN_RELATIVE_NUM && len < TS_MAX_RELATIVE_NUM)
     {
         MEMCPY(szC, pszBuf, len);
@@ -1484,8 +1498,6 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
         STRCPY(szNum[i++], szC);
 	}
 
-	FREE(pBuf);
-    DBGPRINTF("@buf pBuf:%u pszBuf:%u",pBuf,pszBuf);
 	IFILE_Release(pIFile);
 	IFILEMGR_Release(pIFileMgr);
 
@@ -1559,16 +1571,24 @@ static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
     DBGPRINTF("@MakeSOSMsg:%s", szBuf);
 }
 
+static void CTopSoupApp_onSplashCall(void * po)
+{
+    CTopSoupApp* pme = (CTopSoupApp*)po;
+
+    ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
+}
+
 //SOS功能：如果有亲友号码，则开启SOS，并给每个号码发送短信，和拨打电话，开启定位，定位成功后将位置信息通过短信发送
 //加载配置文件
 static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
 	int ret = EFAILED;
     int i = MAX_SOS_NUM;
 
-    if (pme->m_bEnableSOS)
+    //显示提示启用SOS
     {
-        DBGPRINTF("Already Enabled SOS");
-        return ;
+        AECHAR prompt[TS_MAX_STRLEN];
+        ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_SOS_PROMPT, prompt, sizeof(prompt));
+        TS_DrawSplash(pme, prompt, 10000, 0, 0);
     }
 
     if (SUCCESS == LoadSOSConfig((IShell *) pme->a.m_pIShell, pme->m_szNum)) {
@@ -1598,13 +1618,27 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
         DBGPRINTF("@No SOS Num ");
         //TODO alert message!
         pme->m_id = -1;
+        pme->m_OP = SOS_IDLE;
         pme->m_bEnableSOS = FALSE;
+
+        ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
+
+        //显示配置SOS联系人号码提示
+        //{
+        //    AECHAR prompt[TS_MAX_STRLEN];
+        //  TS_DrawSplash_Stop(pme);
+        //    ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_SOS_CFG_ADDRESS, prompt, sizeof(prompt));
+        //    TS_DrawSplash(pme, prompt, 5000, CTopSoupApp_onSplashCall, 0);
+        //}
+
+        //配置联系人
+        //pme->m_eActiveWin = TSW_SOS;
+        //CTopSoupApp_SetWindow(pme, TSW_SOS, 0);
     }
     else
     {
         //记录当前亲友索引和更改SOS状态
         pme->m_id = i;
-        pme->m_bEnableSOS = TRUE;
         pme->m_OP = SOS_SMS_SENDING;
     }
 }
