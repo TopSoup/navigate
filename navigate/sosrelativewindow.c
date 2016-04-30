@@ -570,13 +570,13 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
     IFile		*pIFile = NULL;
     IShell		*pIShell = NULL;
 
-    char    *pszBufOrg = NULL;
-    char    *pszBuf = NULL, *pBuf = NULL;
+    char 	szBuf[128];
+    char    *pszBuf = NULL;
     char    *pszTok = NULL;
     int32	nResult = 0;
     FileInfo	fiInfo;
     char    szA[32], szB[32], szC[32];
-    int len = 0;
+    uint32 len = 0;
 
     pIShell = pme->m_pIShell;
 
@@ -614,26 +614,25 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
         return EFAILED;
     }
 
-    // Allocate enough memory to read the full text into memory
-    pszBufOrg = MALLOC(fiInfo.dwSize);
-    pszBuf = MALLOC(fiInfo.dwSize);
-    pBuf = pszBuf;
+    //only use 128
+    len = fiInfo.dwSize;
+    if (len >= 128)
+        len = 127;
 
-    nResult = IFILE_Read(pIFile, pszBufOrg, fiInfo.dwSize);
-    if ((uint32)nResult < fiInfo.dwSize) {
-        FREE(pszBuf);
-        FREE(pszBufOrg);
+    MEMSET(szBuf, 0, 128);
+    nResult = IFILE_Read(pIFile, szBuf, len);
+    if ((uint32)nResult < len) {
+        IFILE_Release(pIFile);
+        IFILEMGR_Release(pIFileMgr);
         return EFAILED;
     }
 
-    TrimSpace(pszBufOrg, pszBuf);
-    FREE(pszBufOrg);
+    pszBuf = szBuf;
 
     //查找第一个联系人号码
     MEMSET(szA,0,sizeof(szA));
     pszTok = STRCHR(pszBuf, '#');
     if (pszTok == NULL) {
-        FREE(pBuf);
         IFILE_Release(pIFile);
         IFILEMGR_Release(pIFileMgr);
         return EFAILED;
@@ -650,7 +649,6 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
     MEMSET(szB,0,sizeof(szB));
     pszTok = STRCHR(pszBuf, '#');
     if (pszTok == NULL) {
-        FREE(pBuf);
         IFILE_Release(pIFile);
         IFILEMGR_Release(pIFileMgr);
         return EFAILED;
@@ -665,7 +663,7 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
 
     //查找第三个联系人号码
     MEMSET(szC,0,sizeof(szC));
-    len = fiInfo.dwSize-(pszBuf-pBuf);
+    len = fiInfo.dwSize-(pszBuf-szBuf);
     if (len > TS_MIN_RELATIVE_NUM && len < TS_MAX_RELATIVE_NUM)
     {
         MEMCPY(szC, pszBuf, len);
@@ -691,10 +689,9 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
         WSTRCPY(pme->m_pOwner->m_szTextC, pme->m_szTextC);
     }
 
-    FREE(pBuf);
-    IFILE_Release(pIFile);
-    IFILEMGR_Release(pIFileMgr);
-    return SUCCESS;
+	IFILE_Release(pIFile);
+	IFILEMGR_Release(pIFileMgr);
+	return SUCCESS;
 }
 
 /************************************************************************/
