@@ -304,6 +304,9 @@ static void CTopSoupApp_FreeAppData(IApplet* po)
 {
 	CTopSoupApp * pme = (CTopSoupApp *)po;
 	
+	//un-register sms notify
+	ISHELL_RegisterNotify(pme->a.m_pIShell, AEECLSID_NAVIGATE, AEECLSID_SMSNOTIFIER,0);
+
 	//SMS
 	TS_RELEASEIF(pme->m_pISMS);
 	TS_RELEASEIF(pme->m_pISMSMsg);
@@ -544,7 +547,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 
          case EVT_KEY:	            // Process key event
 			 {
-				 //DBGPRINTF("eCode:%x Key:%x", eCode, wParam);
+				//DBGPRINTF("eCode:%x Key:%x", eCode, wParam);
 
 				//FOR SMS & TEL TEST
 				if (wParam == AVK_0)
