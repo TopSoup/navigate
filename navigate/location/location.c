@@ -102,6 +102,14 @@ static void Loc_Cancel( AEECallback *pcb )
 
 static void Loc_cbInterval( LocState *pts )
 {
+    //v3 v4
+    AEEGPSReq req = AEEGPS_GETINFO_LOCATION|AEEGPS_GETINFO_VELOCITY|AEEGPS_GETINFO_ALTITUDE;
+
+    //v5
+    //AEEGPSReq req = AEEGPS_GETINFO_LOCATION|AEEGPS_GETINFO_ALTITUDE;
+
+
+    AEEGPSAccuracy accuracy = AEEGPS_ACCURACY_LEVEL6;
    /* Cancel if it was deferred. */
    if( TRUE == pts->bSetForCancellation ) {
 
@@ -109,12 +117,10 @@ static void Loc_cbInterval( LocState *pts )
       return;
    }
 
-   DBGPRINTF( "@Loc_cbInterval ");
+   DBGPRINTF( "@Loc_cbInterval IPOSDET_GetGPSInfo req :%d accuracy:%d", req, accuracy);
 
    // Request GPSInfo
-   if( TRUE == pts->bInProgress && SUCCESS != IPOSDET_GetGPSInfo( pts->pPos, 
-	   AEEGPS_GETINFO_LOCATION | AEEGPS_GETINFO_VELOCITY | AEEGPS_GETINFO_ALTITUDE | AEEGPS_GETINFO_VERSION_1, 
-	   AEEGPS_ACCURACY_LEVEL1, &pts->theInfo, &pts->cbInfo ) ) {
+   if( TRUE == pts->bInProgress && SUCCESS != IPOSDET_GetGPSInfo( pts->pPos, req,accuracy, &pts->theInfo, &pts->cbInfo ) ) {
 
 	  DBGPRINTF( "IPOSDET_GetGPSInfo Failed!");
 	  
@@ -179,8 +185,14 @@ static void Loc_cbInfo( LocState *pts ) {
 		
 		pts->pResp->height = pts->theInfo.wAltitude - 500;
 		pts->pResp->velocityHor = FMUL( pts->theInfo.wVelocityHor,0.25);
-		
-		//µ±Ç°¼Ð½Ç
+
+        if (FCMP_G(pts->theInfo.wVelocityHor, 0)) {
+            DBGPRINTF("@Loc_cbInfo got valid speed");
+        } else {
+            DBGPRINTF("@Loc_cbInfo got invalid speed:0");
+        }
+
+		//ï¿½ï¿½Ç°ï¿½Ð½ï¿½
 		if (FCMP_G(FABS(pts->lastCoordinate.lat), 0))
 		{
 			pts->pResp->heading = Loc_Calc_Azimuth(pts->lastCoordinate.lat, pts->lastCoordinate.lon, pts->pResp->lat, pts->pResp->lon);
@@ -197,12 +209,12 @@ static void Loc_cbInfo( LocState *pts ) {
 #endif
 		if (pts->pResp->bSetDestPos)
 		{
-			//¼ÆËã¾àÀëºÍ·½Î»½Ç
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½Î»ï¿½ï¿½
 			pts->pResp->distance = Loc_Calc_Distance(pts->pResp->lat, pts->pResp->lon, pts->pResp->destPos.lat, pts->pResp->destPos.lon);
 			pts->pResp->destHeading = Loc_Calc_Azimuth(pts->pResp->lat, pts->pResp->lon, pts->pResp->destPos.lat, pts->pResp->destPos.lon);
 		}
 		
-		//¼ÇÂ¼ÀúÊ·¶¨Î»ÐÅÏ¢
+		//ï¿½ï¿½Â¼ï¿½ï¿½Ê·ï¿½ï¿½Î»ï¿½ï¿½Ï¢
 		pts->lastCoordinate.lat = pts->pResp->lat;
 		pts->lastCoordinate.lon = pts->pResp->lon;
 		
@@ -329,6 +341,8 @@ int Loc_Start( LocState *pts, PositionData *pData )
       config.server = pData->gpsConfig.server;
       config.optim = pData->gpsConfig.optim;
       config.qos = pData->gpsConfig.qos;
+
+       DBGPRINTF("@Loc_Start IPOSDET_SetGPSConfig mode:%d qos:%d optim:%d nFixes:%d", config.mode, config.qos, config.optim, config.nFixes);
 
       nErr = IPOSDET_SetGPSConfig( pts->pPos, &config );
 

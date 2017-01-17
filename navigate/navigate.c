@@ -1,6 +1,6 @@
 #include "logicmacro.h"
 
-#define TS_VERSION  "1.0.4-20161012"
+#define TS_VERSION  "1.0.4.3-2017011804"
 
 /*-------------------------------------------------------------------
             Function Prototypes
