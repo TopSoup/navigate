@@ -34,12 +34,7 @@ struct CWhereWin
 
 	AEECallback		m_cbWatcherTimer;
 	AEEGPSMode		m_gpsMode;			//GPS模式
-	AEEGPSQos		m_qos;
-	uint16			m_nFixes;
-	uint16			m_nInterval;
-	boolean 		m_bServer;
 	ts_time_t		m_getGpsTime;
-
 };
 
 typedef struct CWhereWin CWhereWin;
@@ -128,10 +123,6 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 		ZEROAT(pGetGPSInfo);
 
 		pme->m_gpsMode = AEEGPS_MODE_TRACK_STANDALONE;//AEEGPS_MODE_TRACK_NETWORK;
-		pme->m_qos = 16;
-		pme->m_nFixes = 1;
-		pme->m_nInterval = 5;
-		pme->m_bServer = TRUE;
 
 		//启动定位
 		CWhereWin_LocStart((IWindow*)pme);
@@ -540,32 +531,13 @@ static void CWhereWin_LocStart( IWindow *po )
 	struct _GetGPSInfo *pGetGPSInfo = &pme->m_pOwner->m_gpsInfo;
 	ZEROAT( pGetGPSInfo );
 
-    //v3
 	pGetGPSInfo->theInfo.gpsConfig.server.svrType = AEEGPS_SERVER_DEFAULT;
-	pGetGPSInfo->theInfo.gpsConfig.qos = 58;
-	pGetGPSInfo->theInfo.gpsConfig.optim = AEEGPS_OPT_SPEED;
-	pGetGPSInfo->theInfo.gpsConfig.mode = pme->m_gpsMode;//AEEGPS_MODE_TRACK_STANDALONE[default] AEEGPS_MODE_TRACK_NETWORK
-	pGetGPSInfo->theInfo.gpsConfig.nFixes = 1;
+	pGetGPSInfo->theInfo.gpsConfig.qos = 16;
+	pGetGPSInfo->theInfo.gpsConfig.optim = 1;
+	pGetGPSInfo->theInfo.gpsConfig.mode = pme->m_gpsMode;
+	pGetGPSInfo->theInfo.gpsConfig.nFixes = 0;
 	pGetGPSInfo->theInfo.gpsConfig.nInterval = 5;
-
-
-    //v4
-    //pGetGPSInfo->theInfo.gpsConfig.server.svrType = AEEGPS_SERVER_DEFAULT;
-//	pGetGPSInfo->theInfo.gpsConfig.qos = 31;
-//	//pGetGPSInfo->theInfo.gpsConfig.optim = AEEGPS_OPT_SPEED;
-//	pGetGPSInfo->theInfo.gpsConfig.mode = pme->m_gpsMode;//AEEGPS_MODE_TRACK_STANDALONE[default] AEEGPS_MODE_TRACK_NETWORK
-//	pGetGPSInfo->theInfo.gpsConfig.nFixes = 65535;
-//	pGetGPSInfo->theInfo.gpsConfig.nInterval = 1;
-
-
-    //v5
-//    pGetGPSInfo->theInfo.gpsConfig.server.svrType = AEEGPS_SERVER_DEFAULT;
-//    pGetGPSInfo->theInfo.gpsConfig.qos = 89;
-//    pGetGPSInfo->theInfo.gpsConfig.optim = AEEGPS_OPT_SPEED;
-//    pGetGPSInfo->theInfo.gpsConfig.mode = pme->m_gpsMode;//AEEGPS_MODE_TRACK_STANDALONE[default] AEEGPS_MODE_TRACK_NETWORK
-//    pGetGPSInfo->theInfo.gpsConfig.nFixes = 1;
-//    pGetGPSInfo->theInfo.gpsConfig.nInterval = 0;
-
+	
 	if( ISHELL_CreateInstance( pme->m_pIShell, AEECLSID_POSDET,(void **)&pGetGPSInfo->pPosDet ) == SUCCESS ) {
 		
 		CALLBACK_Init( &pGetGPSInfo->cbPosDet, CWhereWin_GetGPSInfo_Callback, pme );

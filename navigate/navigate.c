@@ -14,7 +14,7 @@ static void       CTopSoupApp_RedrawNotify(CTopSoupApp * pme);
 static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
 
 //构建SOS短信：
-//pos == NULL： 开启求助短信`
+//pos == NULL： 开启求助短信
 //pos != NULL:  发送带位置信息的求助短信
 static void          CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordinate *pos);
 /************************************************************************/

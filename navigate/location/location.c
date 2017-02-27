@@ -102,14 +102,6 @@ static void Loc_Cancel( AEECallback *pcb )
 
 static void Loc_cbInterval( LocState *pts )
 {
-    //v3 v4
-    AEEGPSReq req = AEEGPS_GETINFO_LOCATION|AEEGPS_GETINFO_VELOCITY|AEEGPS_GETINFO_ALTITUDE;
-
-    //v5
-    //AEEGPSReq req = AEEGPS_GETINFO_LOCATION|AEEGPS_GETINFO_ALTITUDE;
-
-
-    AEEGPSAccuracy accuracy = AEEGPS_ACCURACY_LEVEL6;
    /* Cancel if it was deferred. */
    if( TRUE == pts->bSetForCancellation ) {
 
@@ -117,10 +109,12 @@ static void Loc_cbInterval( LocState *pts )
       return;
    }
 
-   DBGPRINTF( "@Loc_cbInterval IPOSDET_GetGPSInfo req :%d accuracy:%d", req, accuracy);
+   DBGPRINTF( "@Loc_cbInterval ");
 
    // Request GPSInfo
-   if( TRUE == pts->bInProgress && SUCCESS != IPOSDET_GetGPSInfo( pts->pPos, req,accuracy, &pts->theInfo, &pts->cbInfo ) ) {
+   if( TRUE == pts->bInProgress && SUCCESS != IPOSDET_GetGPSInfo( pts->pPos, 
+	   AEEGPS_GETINFO_LOCATION | AEEGPS_GETINFO_VELOCITY | AEEGPS_GETINFO_ALTITUDE | AEEGPS_GETINFO_VERSION_1, 
+	   AEEGPS_ACCURACY_LEVEL1, &pts->theInfo, &pts->cbInfo ) ) {
 
 	  DBGPRINTF( "IPOSDET_GetGPSInfo Failed!");
 	  
@@ -335,8 +329,6 @@ int Loc_Start( LocState *pts, PositionData *pData )
       config.server = pData->gpsConfig.server;
       config.optim = pData->gpsConfig.optim;
       config.qos = pData->gpsConfig.qos;
-
-       DBGPRINTF("@Loc_Start IPOSDET_SetGPSConfig mode:%d qos:%d optim:%d nFixes:%d", config.mode, config.qos, config.optim, config.nFixes);
 
       nErr = IPOSDET_SetGPSConfig( pts->pPos, &config );
 
