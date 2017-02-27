@@ -1,6 +1,6 @@
 #include "logicmacro.h"
 
-#define TS_VERSION  "1.0.4-20161012"
+#define TS_VERSION  "1.0.5-20170120"
 
 /*-------------------------------------------------------------------
             Function Prototypes
@@ -13,12 +13,12 @@ static boolean    CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 w
 static void       CTopSoupApp_RedrawNotify(CTopSoupApp * pme);
 static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
 
-//¹¹½¨SOS¶ÌÐÅ£º
-//pos == NULL£º ¿ªÆôÇóÖú¶ÌÐÅ
-//pos != NULL:  ·¢ËÍ´øÎ»ÖÃÐÅÏ¢µÄÇóÖú¶ÌÐÅ
+//æž„å»ºSOSçŸ­ä¿¡ï¼š
+//pos == NULLï¼š å¼€å¯æ±‚åŠ©çŸ­ä¿¡`
+//pos != NULL:  å‘é€å¸¦ä½ç½®ä¿¡æ¯çš„æ±‚åŠ©çŸ­ä¿¡
 static void          CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordinate *pos);
 /************************************************************************/
-/* ´ÓÅäÖÃÎÄ¼þ¼ÓÔØÇ×ÓÑÁªÏµ·½Ê½                                           */
+/* ä»Žé…ç½®æ–‡ä»¶åŠ è½½äº²å‹è”ç³»æ–¹å¼                                           */
 /************************************************************************/
 static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32]);
 
@@ -28,7 +28,7 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32]);
 #define USAGE_SMS_TX_UNICODE    0
 #define USAGE_SMS_TX_ASCII      1
  
-// ascii ¶ÌÐÅÄÚÈÝ£¬¶ÔÓÚunicode¶ÌÐÅÄÚÈÝ£¬±ØÐëÓÉ×ÊÔ´ÎÄ¼þbarÖÐ»ñÈ¡£¬·ñÔò±àÂë²»¶Ô 
+// ascii çŸ­ä¿¡å†…å®¹ï¼Œå¯¹äºŽunicodeçŸ­ä¿¡å†…å®¹ï¼Œå¿…é¡»ç”±èµ„æºæ–‡ä»¶barä¸­èŽ·å–ï¼Œå¦åˆ™ç¼–ç ä¸å¯¹ 
 #define MO_TEXT_ASCII "Destination:Beijing#lat:37.123456#lon:114.121345" 
 
 /*===============================================================================
@@ -37,19 +37,19 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32]);
 #define TS_EVT_SOS_CALL 0xe04d
 
 //Event
-#define EVT_SMS_END				EVT_USER + 100		// ·¢ËÍSMS½áÊø
-#define EVT_CALL_END			EVT_USER + 101		// ²¦´òµç»°½áÊø
-#define EVT_START_SOS           EVT_USER + 1000     // Æô¶¯SOS±¨¾¯
+#define EVT_SMS_END				EVT_USER + 100		// å‘é€SMSç»“æŸ
+#define EVT_CALL_END			EVT_USER + 101		// æ‹¨æ‰“ç”µè¯ç»“æŸ
+#define EVT_START_SOS           EVT_USER + 1000     // å¯åŠ¨SOSæŠ¥è­¦
 
-//½âÎö¶ÌÐÅÄÚÈÝ
-//¸ñÊ½: Ä¿±êÎ»ÖÃ:1111#Î³¶È:E,20.012345#¾­¶È:N,120.012345
+//è§£æžçŸ­ä¿¡å†…å®¹
+//æ ¼å¼: ç›®æ ‡ä½ç½®:1111#çº¬åº¦:E,20.012345#ç»åº¦:N,120.012345
 static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg);
 static boolean    CTopSoupApp_ReceiveSMSMessage(CTopSoupApp *pme, uint32 uMsgId);
 static void		  CTopSoupApp_MakeSOSCall(CTopSoupApp * pme, char* szNumber);
 static void		  CTopSoupApp_EndSOSCall(CTopSoupApp * pme);
 
-//SOS¹¦ÄÜ£ºÈç¹ûÓÐÇ×ÓÑºÅÂë£¬Ôò¿ªÆôSOS£¬²¢¸øÃ¿¸öºÅÂë·¢ËÍ¶ÌÐÅ£¬ºÍ²¦´òµç»°£¬¿ªÆô¶¨Î»£¬¶¨Î»³É¹¦ºó½«Î»ÖÃÐÅÏ¢Í¨¹ý¶ÌÐÅ·¢ËÍ
-//¼ÓÔØÅäÖÃÎÄ¼þ
+//SOSåŠŸèƒ½ï¼šå¦‚æžœæœ‰äº²å‹å·ç ï¼Œåˆ™å¼€å¯SOSï¼Œå¹¶ç»™æ¯ä¸ªå·ç å‘é€çŸ­ä¿¡ï¼Œå’Œæ‹¨æ‰“ç”µè¯ï¼Œå¼€å¯å®šä½ï¼Œå®šä½æˆåŠŸåŽå°†ä½ç½®ä¿¡æ¯é€šè¿‡çŸ­ä¿¡å‘é€
+//åŠ è½½é…ç½®æ–‡ä»¶
 static void CTopSoupApp_StartSOS(CTopSoupApp *pme);
 
 //
@@ -132,8 +132,8 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
    int				 nErr;
    
    {
-	   //¸ñÊ½: Ä¿±êÎ»ÖÃ:1111#Î³¶È:E,20.012345#¾­¶È:N,120.012345
-	   //char *str = "Ä¿±êÎ»ÖÃ:1111#Î³¶È:E,20.012345#¾­¶È:N,120.012345";
+	   //æ ¼å¼: ç›®æ ‡ä½ç½®:1111#çº¬åº¦:E,20.012345#ç»åº¦:N,120.012345
+	   //char *str = "ç›®æ ‡ä½ç½®:1111#çº¬åº¦:E,20.012345#ç»åº¦:N,120.012345";
 	   //CTopSoupApp_SaveSMSMessage(pme, str);
    }
 
@@ -443,7 +443,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
          case EVT_APP_START:   // Process Start event
             DBGPRINTF(TS_VERSION);
 
-            //SOSÄ£Ê½¿ªÊ¼·¢ËÍ¶ÌÐÅºÍºô½ÐÁªÏµÈË
+            //SOSæ¨¡å¼å¼€å§‹å‘é€çŸ­ä¿¡å’Œå‘¼å«è”ç³»äºº
             if (pme->m_bEnableSOS)
             {
                 CTopSoupApp_StartSOS(pme);
@@ -503,7 +503,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
             return (TRUE);
 
         case EVT_SMS_END:
-            //ÊÕµ½¶ÌÐÅ·¢ËÍ½áÊøÏûÏ¢
+            //æ”¶åˆ°çŸ­ä¿¡å‘é€ç»“æŸæ¶ˆæ¯
             if (pme->m_id >= 0 && pme->m_id < MAX_SOS_NUM)
             {
                 CTopSoupApp_MakeSOSCall(pme, pme->m_szNum[pme->m_id]);
@@ -512,7 +512,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
             else
             {
                 DBGPRINTF("@MakeSOSCall Failed with index:%d", pme->m_id);
-                //Ë÷ÒýÒì³££¬½áÊøµ¥ºôÁ÷³Ì
+                //ç´¢å¼•å¼‚å¸¸ï¼Œç»“æŸå•å‘¼æµç¨‹
                 pme->m_bEnableSOS = FALSE;
                 pme->m_OP = SOS_IDLE;
                 pme->m_id = -1;
@@ -522,8 +522,8 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
             return (TRUE);
 
         case EVT_CALL_END:
-            //ÊÕµ½²¦´òµç»°½áÊøÏûÏ¢
-            pme->m_id ++;   //Ê¹ÓÃÏÂÒ»¸ö
+            //æ”¶åˆ°æ‹¨æ‰“ç”µè¯ç»“æŸæ¶ˆæ¯
+            pme->m_id ++;   //ä½¿ç”¨ä¸‹ä¸€ä¸ª
             if (pme->m_id >= 0 && pme->m_id < MAX_SOS_NUM && STRLEN(pme->m_szNum[pme->m_id]) > 0)
             {
                 AECHAR szMsg[256];
@@ -535,7 +535,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
             else
             {
                 DBGPRINTF("@SOS End", pme->m_id);
-                //½áÊøµ¥ºôÁ÷³Ì
+                //ç»“æŸå•å‘¼æµç¨‹
                 pme->m_bEnableSOS = FALSE;
                 pme->m_OP = SOS_IDLE;
                 pme->m_id = -1;
@@ -563,7 +563,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				{
 					//DBGPRINTF("SOS CALL TEST ...");
 					//CTopSoupApp_MakeSOSCall(pme, "15511823090");
-                    //CTopSoupApp_StartSOS(pme);    //ÓëÏµÍ³³åÍ»£¬ÓÐÊ±»áËÀ»ú£¿
+                    //CTopSoupApp_StartSOS(pme);    //ä¸Žç³»ç»Ÿå†²çªï¼Œæœ‰æ—¶ä¼šæ­»æœºï¼Ÿ
 				}
 
 				if (wParam == AVK_2)
@@ -667,7 +667,7 @@ boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam)
 
 	  case TSW_NAVIGATE:
 		  {
-			  //Ê¹ÓÃµ±Ç°Ñ¡ÔñµÄÏî×÷ÎªÁìº½Ä¿±ê
+			  //ä½¿ç”¨å½“å‰é€‰æ‹©çš„é¡¹ä½œä¸ºé¢†èˆªç›®æ ‡
 				TS_GetExpenseItem(pme,(uint16)dwParam,pme->m_szTextDesc,pme->m_szTextLat,pme->m_szTextLon);
 
 				pme->m_pWin = (IWindow*)CNavigateWin_New(pme);
@@ -776,8 +776,8 @@ static void CTopSoupApp_ReleaseRes(CTopSoupApp * pme)
                         SMS & TELEPHONE TEST
 =============================================================================== */
 
-//½âÎö¶ÌÐÅÄÚÈÝ
-//¸ñÊ½: Ä¿±êÎ»ÖÃ:1111#Î³¶È:E,20.012345#¾­¶È:N,120.012345
+//è§£æžçŸ­ä¿¡å†…å®¹
+//æ ¼å¼: ç›®æ ‡ä½ç½®:1111#çº¬åº¦:E,20.012345#ç»åº¦:N,120.012345
 static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 {
 	char *pszTok = NULL;
@@ -799,7 +799,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	STRCPY(szBuf, szMsg);
 	pBuf = szBuf;
 	
-	//½âÎö¶ÌÐÅ
+	//è§£æžçŸ­ä¿¡
 	
 	//#1
 	pszTok = STRCHR(pBuf, '#');
@@ -808,7 +808,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	len = pszTok-pBuf;
 	MEMCPY(szTmp, pBuf, len);
 	szTmp[len] = 0;
-	pBuf = pszTok + 1;	//Æ«ÒÆ¹ý#
+	pBuf = pszTok + 1;	//åç§»è¿‡#
 	
 	pszTok = STRCHR(szTmp, ':');
 	if (pszTok == NULL)
@@ -826,7 +826,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	len = pszTok-pBuf;
 	MEMCPY(szTmp, pBuf, len);
 	szTmp[len] = 0;
-	pBuf = pszTok + 1;	//Æ«ÒÆ¹ý#
+	pBuf = pszTok + 1;	//åç§»è¿‡#
 
 	pszTok = STRCHR(szTmp, ',');
 	if (pszTok == NULL)
@@ -845,13 +845,13 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	STRTOWSTR(szLon,textLon,sizeof(textLon));
 	DBGPRINTF("@szLon:%s", szLon);
 
-	//±£´æµ½Êý¾Ý¿â
+	//ä¿å­˜åˆ°æ•°æ®åº“
 	if ( -1 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon))
 	{
-		DBGPRINTF("SAVE DATA ERROR!");//TODO ½çÃæÌáÊ¾
+		DBGPRINTF("SAVE DATA ERROR!");//TODO ç•Œé¢æç¤º
 		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_SAVE,prompt,sizeof(prompt));
 		
-		//ÌáÊ¾´°¿Ú
+		//æç¤ºçª—å£
 		MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
 		WSTRCPY(pme->m_pTextctlText, textDesc);	   
 		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
@@ -861,7 +861,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	{
 		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
 
-		//ÌáÊ¾´°¿Ú
+		//æç¤ºçª—å£
 		MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
 		WSTRCPY(pme->m_pTextctlText, textDesc);	   
 		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
@@ -870,7 +870,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
         DBGPRINTF("DATA EXIST!");
 	}
 	
-	//ÌáÊ¾ÐÅÏ¢
+	//æç¤ºä¿¡æ¯
 	//TS_SPLAH
 	
 	return TRUE;
@@ -899,7 +899,7 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	WSTRCPY(szBuf, szMsg);
 	pBuf = szBuf;
 
-	//½âÎö¶ÌÐÅ
+	//è§£æžçŸ­ä¿¡
 
 	//#1
 	pszTok = WSTRCHR(pBuf, L'#');
@@ -908,7 +908,7 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	len = pszTok-pBuf;
 	MEMCPY(szTmp, pBuf, len*sizeof(AECHAR));
 	szTmp[len] = 0;
-	pBuf = pszTok + 1;	//Æ«ÒÆ¹ý#
+	pBuf = pszTok + 1;	//åç§»è¿‡#
 
 	pszTok = WSTRCHR(szTmp, L':');
 	if (pszTok == NULL)
@@ -924,7 +924,7 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	len = pszTok-pBuf;
 	MEMCPY(szTmp, pBuf, len*sizeof(AECHAR));
 	szTmp[len] = 0;
-	pBuf = pszTok + 1;	//Æ«ÒÆ¹ý#
+	pBuf = pszTok + 1;	//åç§»è¿‡#
 
 	pszTok = WSTRCHR(szTmp, L',');
 	if (pszTok == NULL)
@@ -940,13 +940,13 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	WSTRCPY(textLon, pszTok+1);
 
 
-	//±£´æµ½Êý¾Ý¿â
+	//ä¿å­˜åˆ°æ•°æ®åº“
 	if ( -1 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon))
 	{
-		DBGPRINTF("SAVE DATA ERROR!");//TODO ½çÃæÌáÊ¾
+		DBGPRINTF("SAVE DATA ERROR!");//TODO ç•Œé¢æç¤º
 		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_SAVE,prompt,sizeof(prompt));
 
-		//ÌáÊ¾´°¿Ú
+		//æç¤ºçª—å£
 		MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
 		WSTRCPY(pme->m_pTextctlText, textDesc);	   
 		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
@@ -956,16 +956,16 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	{
 		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
 
-		//ÌáÊ¾´°¿Ú
+		//æç¤ºçª—å£
 		MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
 		WSTRCPY(pme->m_pTextctlText, textDesc);	   
 		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
 		TS_DrawSplash(pme,prompt,500,0, 0);
 	} else if( 1 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon) ) {
-		DBGPRINTF("DATA EXIST!");//TODO ½çÃæÌáÊ¾
+		DBGPRINTF("DATA EXIST!");//TODO ç•Œé¢æç¤º
 	}
 
-	//ÌáÊ¾ÐÅÏ¢
+	//æç¤ºä¿¡æ¯
 	//TS_SPLAH
 
 	return TRUE;
@@ -982,14 +982,14 @@ static boolean CTopSoupApp_ReceiveSMSMessage(CTopSoupApp* pme, uint32 uMsgId)
 
 		if(ISMSMSG_GetOpt(pSMS, MSGOPT_FROM_DEVICE_SZ,&TmpOpt)==AEE_SUCCESS) {
 			STRCPY(szPhone, (char*)TmpOpt.pVal);
-			//@yao ¶ÌÐÅÖÐÐÄºÍÇ×ÇéºÅÂë
+			//@yao çŸ­ä¿¡ä¸­å¿ƒå’Œäº²æƒ…å·ç 
 			//if( NULL == STRSTR("10659031107260,18931880692,18903110989",szPhone) ) {
 			//	DBGPRINTF("sms sender is not in center list");
 			//	return FALSE;
 			//}
 
-			//¶ÌÐÅÄÚÈÝ:Ä¿±êÎ»ÖÃ:±±¾©Ìì°²ÃÅ,¾­¶È:E,114.000Î³¶È:N,33.2222
-			///        Ä¿±êÎ»ÖÃ:±±¾©Ìì°²ÃÅ#¾­¶È:E,114.000#Î³¶È:N,33.2222
+			//çŸ­ä¿¡å†…å®¹:ç›®æ ‡ä½ç½®:åŒ—äº¬å¤©å®‰é—¨,ç»åº¦:E,114.000çº¬åº¦:N,33.2222
+			///        ç›®æ ‡ä½ç½®:åŒ—äº¬å¤©å®‰é—¨#ç»åº¦:E,114.000#çº¬åº¦:N,33.2222
 			if(ISMSMSG_GetOpt(pSMS, MSGOPT_PAYLOAD_WSZ,&TmpOpt)==AEE_SUCCESS) {
 				//WSTRTOUTF8((AECHAR*)TmpOpt.pVal,WSTRLEN((AECHAR*)TmpOpt.pVal), (byte*)szText, sizeof(szText));
 				//WSTRTOSTR((AECHAR*)TmpOpt.pVal, (char*)szText, WSTRLEN((AECHAR*)TmpOpt.pVal));//, sizeof(szText));
@@ -1036,14 +1036,14 @@ static void SMSCallBack_Send(void *p)
          break;
    }
 
-   // ¶ÌÐÅ·¢ËÍÍê±Ïºó£¬ÊÍ·ÅISMSMsg£¬·ñÔòËü½«±£ÁôÔÚÆäÖÐ£¬¶ÔÏÂÒ»Ìõ¶ÌÐÅ²úÉúÓ°Ïì   
+   // çŸ­ä¿¡å‘é€å®Œæ¯•åŽï¼Œé‡Šæ”¾ISMSMsgï¼Œå¦åˆ™å®ƒå°†ä¿ç•™åœ¨å…¶ä¸­ï¼Œå¯¹ä¸‹ä¸€æ¡çŸ­ä¿¡äº§ç”Ÿå½±å“   
    if(pme->m_pISMSMsg != NULL)   
    {   
        ISMSMSG_Release(pme->m_pISMSMsg);   
        pme->m_pISMSMsg = NULL;   
    }
 
-   //Èç¹û¿ªÆôÁËSOSÄ£Ê½£¬ÔòÐèÒªÍ¨ÖªÉÏ²ã¶ÌÐÅÒÑ·¢ËÍ³É¹¦
+   //å¦‚æžœå¼€å¯äº†SOSæ¨¡å¼ï¼Œåˆ™éœ€è¦é€šçŸ¥ä¸Šå±‚çŸ­ä¿¡å·²å‘é€æˆåŠŸ
    if (pme->m_bEnableSOS && pme->m_OP == SOS_SMS_SENDING)
    {
        DBGPRINTF("@SMSCallBack_Send SMS");
@@ -1340,11 +1340,11 @@ static void CTopSoupApp_OriginateListener(CTopSoupApp *pme, ModelEvent *pEvent)
 		}
 	}
 
-    //CALL½áÊø£¬Èç¹ûÊÇSOSÄ£Ê½£¬ÔòÐèÒª·¢ËÍCALL_ENDÏûÏ¢
+    //CALLç»“æŸï¼Œå¦‚æžœæ˜¯SOSæ¨¡å¼ï¼Œåˆ™éœ€è¦å‘é€CALL_ENDæ¶ˆæ¯
     if (ret == 1)
     {
         DBGPRINTF("@Call End!");
-        //Èç¹û¿ªÆôÁËSOSÄ£Ê½£¬ÔòÐèÒªÍ¨ÖªÉÏ²ã¶ÌÐÅÒÑ·¢ËÍ³É¹¦
+        //å¦‚æžœå¼€å¯äº†SOSæ¨¡å¼ï¼Œåˆ™éœ€è¦é€šçŸ¥ä¸Šå±‚çŸ­ä¿¡å·²å‘é€æˆåŠŸ
         if (pme->m_bEnableSOS && pme->m_OP == SOS_CALL_CALLING)
         {
             if (!ISHELL_SendEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_CALL_END, 0, 0)) {
@@ -1375,7 +1375,7 @@ static void CTopSoupApp_EndSOSCall(CTopSoupApp * pme)
 }
 
 /************************************************************************/
-/* ´ÓÅäÖÃÎÄ¼þ¼ÓÔØÇ×ÓÑÁªÏµ·½Ê½,Ö»¼ÇÂ¼ÓÐÐ§µÄµØÖ·                          */
+/* ä»Žé…ç½®æ–‡ä»¶åŠ è½½äº²å‹è”ç³»æ–¹å¼,åªè®°å½•æœ‰æ•ˆçš„åœ°å€                          */
 /************************************************************************/
 static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
 {
@@ -1443,7 +1443,7 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
 
     pszBuf = szBuf;
 
-    //²éÕÒµÚÒ»¸öÁªÏµÈËºÅÂë
+    //æŸ¥æ‰¾ç¬¬ä¸€ä¸ªè”ç³»äººå·ç 
     MEMSET(szA,0,sizeof(szA));
     pszTok = STRCHR(pszBuf, '#');
     if (pszTok == NULL) {
@@ -1459,7 +1459,7 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
     pszBuf = pszTok + 1;
     DBGPRINTF("szA:%s", szA);
 
-    //²éÕÒµÚ¶þ¸öÁªÏµÈËºÅÂë
+    //æŸ¥æ‰¾ç¬¬äºŒä¸ªè”ç³»äººå·ç 
     MEMSET(szB,0,sizeof(szB));
     pszTok = STRCHR(pszBuf, '#');
     if (pszTok == NULL) {
@@ -1475,7 +1475,7 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
     pszBuf = pszTok + 1;
     DBGPRINTF("szB:%s", szB);
 
-    //²éÕÒµÚÈý¸öÁªÏµÈËºÅÂë
+    //æŸ¥æ‰¾ç¬¬ä¸‰ä¸ªè”ç³»äººå·ç 
     MEMSET(szC,0,sizeof(szC));
     len = fiInfo.dwSize-(pszBuf-szBuf);
     if (len > TS_MIN_RELATIVE_NUM && len < TS_MAX_RELATIVE_NUM)
@@ -1507,9 +1507,9 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
 	return (i == 0) ? EFAILED : SUCCESS;
 }
 
-//¹¹½¨SOS¶ÌÐÅ£º
-//pos == NULL£º ¿ªÆôÇóÖú¶ÌÐÅ
-//pos != NULL:  ·¢ËÍ´øÎ»ÖÃÐÅÏ¢µÄÇóÖú¶ÌÐÅ
+//æž„å»ºSOSçŸ­ä¿¡ï¼š
+//pos == NULLï¼š å¼€å¯æ±‚åŠ©çŸ­ä¿¡
+//pos != NULL:  å‘é€å¸¦ä½ç½®ä¿¡æ¯çš„æ±‚åŠ©çŸ­ä¿¡
 static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordinate *pos)
 {
     ts_time_t now;
@@ -1524,17 +1524,17 @@ static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
 
     TS_GetTimeNow(&now);
 
-    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MONTH,szMon,sizeof(szMon));  // ÔÂ
-    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DAY,szDay,sizeof(szDay));    // ÈÕ
-    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_HOUR,szHour,sizeof(szHour)); // Ê±
-    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MIN,szMinute,sizeof(szMinute)); // ·Ö
+    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MONTH,szMon,sizeof(szMon));  // æœˆ
+    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DAY,szDay,sizeof(szDay));    // æ—¥
+    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_HOUR,szHour,sizeof(szHour)); // æ—¶
+    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MIN,szMinute,sizeof(szMinute)); // åˆ†
 
     if (pos == NULL)
     {
         ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS,szSOSInfo,sizeof(szSOSInfo));
-        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MIN_OPEN,szTail,sizeof(szTail));   // ·Ö¿ªÆôÇóÖú
+        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MIN_OPEN,szTail,sizeof(szTail));   // åˆ†å¼€å¯æ±‚åŠ©
 
-        //1 ¹¹½¨¿ªÆôÇóÖú¶ÌÐÅ£ºÇóÖúÐÅÏ¢! 4ÔÂ18ÈÕ20Ê±18·Ö¿ªÆôÇóÖú
+        //1 æž„å»ºå¼€å¯æ±‚åŠ©çŸ­ä¿¡ï¼šæ±‚åŠ©ä¿¡æ¯! 4æœˆ18æ—¥20æ—¶18åˆ†å¼€å¯æ±‚åŠ©
         WSPRINTF(szTmp, sizeof(szTmp), L"%s%d%s%d%s", szSOSInfo, now.month, szMon, now.day, szDay);
         WSPRINTF(szMsg, sizeof(AECHAR)*256, L"%s%d%s%d%s", szTmp, now.hour, szHour, now.minute, szTail);
     }
@@ -1546,7 +1546,7 @@ static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
         ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS_LAST,szSOSInfo,sizeof(szSOSInfo));
         ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LAT, textLat, sizeof(textLat));
         ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LON, textLon, sizeof(textLon));
-        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_IS_NAVIGATE,szTail,sizeof(szTail));   // ·Ö¿ªÆôÇóÖú
+        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_IS_NAVIGATE,szTail,sizeof(szTail));   // åˆ†å¼€å¯æ±‚åŠ©
 
         TS_FLT2SZ(szLat, pos->lat);
         //FLOATTOWSTR(pme->m_gpsInfo.theInfo.lat, szLat, 32);
@@ -1558,14 +1558,14 @@ static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
         WSTRTOSTR(szLon, szBuf, sizeof(szBuf));
         DBGPRINTF("Lon: %s", szBuf);
 
-        //2 ¹¹½¨Î»ÖÃÐÅÏ¢µÄÇóÖú¶ÌÐÅ£ºÇóÖúÐÅÏ¢: ×îºóÎ»ÖÃ4ÔÂ18ÈÕ20Ê±21·ÖÔÚ¶«¾­114¶È27.947·Ö£¬±±Î³38¶È5.280·Ö£¬ÊÇ·ñÏë¸ÃÎ»ÖÃÁìº½?
-        //2 ¹¹½¨Î»ÖÃÐÅÏ¢µÄÇóÖú¶ÌÐÅ£ºÇóÖúÐÅÏ¢! ×îºóÎ»ÖÃ:4ÔÂ18ÈÕ20Ê±21·Ö#Î³¶È:E,20.012345#¾­¶È:N,120.012345, ÊÇ·ñÏë¸ÃÎ»ÖÃÁìº½?
+        //2 æž„å»ºä½ç½®ä¿¡æ¯çš„æ±‚åŠ©çŸ­ä¿¡ï¼šæ±‚åŠ©ä¿¡æ¯: æœ€åŽä½ç½®4æœˆ18æ—¥20æ—¶21åˆ†åœ¨ä¸œç»114åº¦27.947åˆ†ï¼ŒåŒ—çº¬38åº¦5.280åˆ†ï¼Œæ˜¯å¦æƒ³è¯¥ä½ç½®é¢†èˆª?
+        //2 æž„å»ºä½ç½®ä¿¡æ¯çš„æ±‚åŠ©çŸ­ä¿¡ï¼šæ±‚åŠ©ä¿¡æ¯! æœ€åŽä½ç½®:4æœˆ18æ—¥20æ—¶21åˆ†#çº¬åº¦:E,20.012345#ç»åº¦:N,120.012345, æ˜¯å¦æƒ³è¯¥ä½ç½®é¢†èˆª?
 
-        //ÇóÖúÐÅÏ¢! ×îºóÎ»ÖÃ:4ÔÂ18ÈÕ
+        //æ±‚åŠ©ä¿¡æ¯! æœ€åŽä½ç½®:4æœˆ18æ—¥
         WSPRINTF(szTmp, sizeof(szTmp), L"%s%d%s%d%s", szSOSInfo, now.month, szMon, now.day, szDay);
-        //TMP+20Ê±21·Ö#
+        //TMP+20æ—¶21åˆ†#
         WSPRINTF(szTmp2, sizeof(szTmp2), L"%s%d%s%d%s#", szTmp, now.hour, szHour, now.minute, szMinute);
-        //TMP2+Î³¶È:E,20.012345#¾­¶È:N,120.012345, ÊÇ·ñÏë¸ÃÎ»ÖÃÁìº½?
+        //TMP2+çº¬åº¦:E,20.012345#ç»åº¦:N,120.012345, æ˜¯å¦æƒ³è¯¥ä½ç½®é¢†èˆª?
         WSPRINTF(szMsg, sizeof(AECHAR)*256, L"%s%s:E,%s#%s:N,%s, %s", szTmp2, textLat, szLat, textLon, szLon, szTail);
     }
 
@@ -1581,13 +1581,13 @@ static void CTopSoupApp_onSplashCall(void * po)
     ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
 }
 
-//SOS¹¦ÄÜ£ºÈç¹ûÓÐÇ×ÓÑºÅÂë£¬Ôò¿ªÆôSOS£¬²¢¸øÃ¿¸öºÅÂë·¢ËÍ¶ÌÐÅ£¬ºÍ²¦´òµç»°£¬¿ªÆô¶¨Î»£¬¶¨Î»³É¹¦ºó½«Î»ÖÃÐÅÏ¢Í¨¹ý¶ÌÐÅ·¢ËÍ
-//¼ÓÔØÅäÖÃÎÄ¼þ
+//SOSåŠŸèƒ½ï¼šå¦‚æžœæœ‰äº²å‹å·ç ï¼Œåˆ™å¼€å¯SOSï¼Œå¹¶ç»™æ¯ä¸ªå·ç å‘é€çŸ­ä¿¡ï¼Œå’Œæ‹¨æ‰“ç”µè¯ï¼Œå¼€å¯å®šä½ï¼Œå®šä½æˆåŠŸåŽå°†ä½ç½®ä¿¡æ¯é€šè¿‡çŸ­ä¿¡å‘é€
+//åŠ è½½é…ç½®æ–‡ä»¶
 static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
 	int ret = EFAILED;
     int i = MAX_SOS_NUM;
 
-    //ÏÔÊ¾ÌáÊ¾ÆôÓÃSOS
+    //æ˜¾ç¤ºæç¤ºå¯ç”¨SOS
     {
         AECHAR prompt[TS_MAX_STRLEN];
         ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_SOS_PROMPT, prompt, sizeof(prompt));
@@ -1626,7 +1626,7 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
 
         ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
 
-        //ÏÔÊ¾ÅäÖÃSOSÁªÏµÈËºÅÂëÌáÊ¾
+        //æ˜¾ç¤ºé…ç½®SOSè”ç³»äººå·ç æç¤º
         //{
         //    AECHAR prompt[TS_MAX_STRLEN];
         //  TS_DrawSplash_Stop(pme);
@@ -1634,13 +1634,13 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
         //    TS_DrawSplash(pme, prompt, 5000, CTopSoupApp_onSplashCall, 0);
         //}
 
-        //ÅäÖÃÁªÏµÈË
+        //é…ç½®è”ç³»äºº
         //pme->m_eActiveWin = TSW_SOS;
         //CTopSoupApp_SetWindow(pme, TSW_SOS, 0);
     }
     else
     {
-        //¼ÇÂ¼µ±Ç°Ç×ÓÑË÷ÒýºÍ¸ü¸ÄSOS×´Ì¬
+        //è®°å½•å½“å‰äº²å‹ç´¢å¼•å’Œæ›´æ”¹SOSçŠ¶æ€
         pme->m_id = i;
         pme->m_OP = SOS_SMS_SENDING;
     }

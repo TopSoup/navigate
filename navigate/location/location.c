@@ -178,9 +178,9 @@ static void Loc_cbInfo( LocState *pts ) {
 #endif /* MIN_BREW_VERSION 2.1 */
 		
 		pts->pResp->height = pts->theInfo.wAltitude - 500;
-		pts->pResp->velocityHor = FMUL( pts->theInfo.wVelocityHor,0.25);
+    pts->pResp->velocityHor = FMUL( FASSIGN_INT(pts->theInfo.wVelocityHor), 0.25); // add FASSIGN_INT to fix no speed bug
 		
-		//当前夹角
+		//褰撳墠澶硅
 		if (FCMP_G(FABS(pts->lastCoordinate.lat), 0))
 		{
 			pts->pResp->heading = Loc_Calc_Azimuth(pts->lastCoordinate.lat, pts->lastCoordinate.lon, pts->pResp->lat, pts->pResp->lon);
@@ -197,12 +197,12 @@ static void Loc_cbInfo( LocState *pts ) {
 #endif
 		if (pts->pResp->bSetDestPos)
 		{
-			//计算距离和方位角
+			//璁＄畻璺濈鍜屾柟浣嶈
 			pts->pResp->distance = Loc_Calc_Distance(pts->pResp->lat, pts->pResp->lon, pts->pResp->destPos.lat, pts->pResp->destPos.lon);
 			pts->pResp->destHeading = Loc_Calc_Azimuth(pts->pResp->lat, pts->pResp->lon, pts->pResp->destPos.lat, pts->pResp->destPos.lon);
 		}
 		
-		//记录历史定位信息
+		//璁板綍鍘嗗彶瀹氫綅淇℃伅
 		pts->lastCoordinate.lat = pts->pResp->lat;
 		pts->lastCoordinate.lon = pts->pResp->lon;
 		
