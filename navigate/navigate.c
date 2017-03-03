@@ -856,13 +856,26 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 	STRCPY(szBuf, szMsg);
 	pBuf = szBuf;
 	
-	//解析短信
+	
+	//解析短信	
+	//为配置SMS中心号码 #SMS:1065902018810
+	if (STRNCMP(pBuf, "#SMS", STRLEN("#SMS")) == 0) {
+		STRCPY(pme->m_szSmsNum, pBuf+STRLEN("#SMS")+1);
+		DBGPRINTF("pme->m_szSmsNum:%s", pme->m_szSmsNum);
+		return FALSE;
+	}
+
 	//#1
 	pszTok = STRCHR(pBuf, '#');
 	if (pszTok == NULL) {
 		return FALSE;
 	}
+
 	len = pszTok-pBuf;
+	if (len == 0) {
+		return FALSE;
+	}
+
 	MEMCPY(szTmp, pBuf, len);
 	szTmp[len] = 0;
 	pBuf = pszTok + 1;	//偏移过#
@@ -874,7 +887,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 
 	STRCPY(szDesc, pszTok+1);
 	STRTOWSTR(szDesc,textDesc,sizeof(textDesc));
-	DBGPRINTF("@textDesc:%s", szDesc);
+	//DBGPRINTF("@textDesc:%s", szDesc);
 
 	//#2
 	pszTok = STRCHR(pBuf, '#');
@@ -892,7 +905,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 
 	STRCPY(szLat, pszTok+1);
 	STRTOWSTR(szLat,textLat,sizeof(textLat));
-	DBGPRINTF("@szLat: %s", szLat);
+	//DBGPRINTF("@szLat: %s", szLat);
 
 	//#3
 	pszTok = STRCHR(pBuf, ',');
@@ -901,7 +914,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 
 	STRCPY(szLon, pszTok+1);
 	STRTOWSTR(szLon,textLon,sizeof(textLon));
-	DBGPRINTF("@szLon:%s", szLon);
+	//DBGPRINTF("@szLon:%s", szLon);
 
 	nRet = TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon);
 	if (bAlert) {
@@ -961,12 +974,24 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	WSTRCPY(szBuf, szMsg);
 	pBuf = szBuf;
 
-	//解析短信
+	//解析短信	
+	//为配置SMS中心号码 #SMS:1065902018810
+	if (WSTRNCMP(pBuf, L"#SMS", WSTRLEN(L"#SMS")) == 0) {
+		MEMSET(szTmp,0,sizeof(szTmp));
+		WSTRCPY(szTmp, pBuf+WSTRLEN(L"#SMS")+1);
+		WSTRTOSTR(szTmp, (char*)pme->m_szSmsNum, sizeof(szTmp));
+		DBGPRINTF("pme->m_szSmsNum:%s", pme->m_szSmsNum);
+		return FALSE;
+	}
+
 	//#1
 	pszTok = WSTRCHR(pBuf, L'#');
 	if (pszTok == NULL)
 		return FALSE;
 	len = pszTok-pBuf;
+	if (len == 0) {
+		return FALSE;
+	}
 	MEMCPY(szTmp, pBuf, len*sizeof(AECHAR));
 	szTmp[len] = 0;
 	pBuf = pszTok + 1;	//偏移过#
@@ -976,8 +1001,8 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 		return FALSE;
 
 	WSTRCPY(textDesc, pszTok+1);
-	WSTRTOSTR(textDesc, (char*)szText, sizeof(textDesc));
-	DBGPRINTF("textDesc:%s", szText);
+	//WSTRTOSTR(textDesc, (char*)szText, sizeof(textDesc));
+	//DBGPRINTF("textDesc:%s", szText);
 
 	//#2
 	pszTok = WSTRCHR(pBuf, L'#');
@@ -994,8 +1019,8 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 		return FALSE;
 
 	WSTRCPY(textLat, pszTok+1);
-	WSTRTOSTR(textLat, (char*)szText, sizeof(textLat));
-	DBGPRINTF("textLat:%s", szText);
+	//WSTRTOSTR(textLat, (char*)szText, sizeof(textLat));
+	//DBGPRINTF("textLat:%s", szText);
 
 	//#3
 	pszTok = WSTRCHR(pBuf, L',');
@@ -1003,8 +1028,8 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 		return FALSE;
 	
 	WSTRCPY(textLon, pszTok+1);
-	WSTRTOSTR(textLon, (char*)szText, sizeof(textLon));
-	DBGPRINTF("textLon:%s", szText);
+	//WSTRTOSTR(textLon, (char*)szText, sizeof(textLon));
+	//DBGPRINTF("textLon:%s", szText);
 
 
 	//保存到数据库
@@ -1610,7 +1635,7 @@ static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
         ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS_LAST,szSOSInfo,sizeof(szSOSInfo));
         ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LAT, textLat, sizeof(textLat));
         ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LON, textLon, sizeof(textLon));
-        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_IS_NAVIGATE,szTail,sizeof(szTail));   // 分开启求助
+        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_IS_NAVIGATE,szTail,sizeof(szTail));   // 分开启求助 //TODO
 
         TS_FLT2SZ(szLat, pos->lat);
         //FLOATTOWSTR(pme->m_gpsInfo.theInfo.lat, szLat, 32);
@@ -1622,15 +1647,15 @@ static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
         WSTRTOSTR(szLon, szBuf, sizeof(szBuf));
         DBGPRINTF("Lon: %s", szBuf);
 
-        //2 构建位置信息的求助短信：求助信息: 最后位置4月18日20时21分在东经114度27.947分，北纬38度5.280分，是否想该位置领航?
-        //2 构建位置信息的求助短信：求助信息! 最后位置:4月18日20时21分#纬度:E,20.012345#经度:N,120.012345, 是否想该位置领航?
+        //2 构建位置信息的求助短信：求助信息: 最后位置4月18日20时21分在东经114度27.947分，北纬38度5.280分
+        //2 构建位置信息的求助短信：求助信息! 最后位置:4月18日20时21分#纬度:E,20.012345#经度:N,120.012345
 
         //求助信息! 最后位置:4月18日
         WSPRINTF(szTmp, sizeof(szTmp), L"%s%d%s%d%s", szSOSInfo, now.month, szMon, now.day, szDay);
         //TMP+20时21分#
         WSPRINTF(szTmp2, sizeof(szTmp2), L"%s%d%s%d%s#", szTmp, now.hour, szHour, now.minute, szMinute);
-        //TMP2+纬度:E,20.012345#经度:N,120.012345, 是否想该位置领航?
-        WSPRINTF(szMsg, sizeof(AECHAR)*256, L"%s%s:E,%s#%s:N,%s, %s", szTmp2, textLat, szLat, textLon, szLon, szTail);
+        //TMP2+纬度:E,20.012345#经度:N,120.012345
+        WSPRINTF(szMsg, sizeof(AECHAR)*256, L"%s%s:E,%s#%s:N,%s", szTmp2, textLat, szLat, textLon, szLon);
     }
 
     WSTRTOSTR(szMsg, szBuf, sizeof(szBuf));
