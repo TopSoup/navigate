@@ -145,6 +145,14 @@ struct CTopSoupApp
 	AEECallback       m_cb;				// General callback
 	uint32            m_retVal;         // General place holder for error
 
+	ISMSStorage 	  *m_pISMSStorage;      // ISMSStorage Interface
+	uint32            m_dwStatus;          // Status
+	AEECallback 	  m_enumMsgInitCb;
+    AEECallback 	  m_enumMsgNextCb;
+    uint32         	  m_dwIndex;           // Message Index
+    AEESMSTag 		  m_tag;
+    AEESMSType 		  m_mt;
+
 	//Tel
 	ICallMgr *m_pCallMgr;
 	ICall *m_pOutgoingCall;

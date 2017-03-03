@@ -43,10 +43,16 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32]);
 
 //解析短信内容
 //格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
-static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg);
+static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean bAlert);
+static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg, boolean bAlert);
 static boolean    CTopSoupApp_ReceiveSMSMessage(CTopSoupApp *pme, uint32 uMsgId);
 static void		  CTopSoupApp_MakeSOSCall(CTopSoupApp * pme, char* szNumber);
 static void		  CTopSoupApp_EndSOSCall(CTopSoupApp * pme);
+
+//读取短信内容
+static void CTopSoupApp_EnumMsgInitCb(void * po);
+static void CTopSoupApp_EnumMsgNextCb(void * po);
+static void CTopSoupApp_ReadSMS(CTopSoupApp * pme,ISMSMsg *pSMS);
 
 //SOS功能：如果有亲友号码，则开启SOS，并给每个号码发送短信，和拨打电话，开启定位，定位成功后将位置信息通过短信发送
 //加载配置文件
@@ -245,6 +251,16 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
    // Register for Text and EMS 
    ISHELL_RegisterNotify(pme->a.m_pIShell, AEECLSID_NAVIGATE, AEECLSID_SMSNOTIFIER, (AEESMS_TYPE_TEXT << 16) | NMASK_SMS_TYPE);   
 
+   if ((nErr = ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_SMSSTORAGE, (void**)&pme->m_pISMSStorage)) != SUCCESS)
+   {
+   		DBGPRINTF("CreateInstance SMSSTORAGE ret %d", nErr);
+		return FALSE;
+   }
+   CALLBACK_Cancel(&pme->m_enumMsgInitCb);
+   CALLBACK_Init(&pme->m_enumMsgInitCb, CTopSoupApp_EnumMsgInitCb, (void*)pme);
+   pme->m_tag = STRTOUL("2", NULL, 10);	//SMS TAG:AEESMS_TAG_MT_NOT_READ
+   pme->m_mt = STRTOUL("2", NULL, 10);	//SMS TYPE:AEESMS_TYPE_PAGE
+
    //Tel
    nErr =ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_CALLMGR, (void**) &pme->m_pCallMgr);
    DBGPRINTF("CreateInst AEECLSID_CALLMGR ret %d", nErr);
@@ -310,7 +326,10 @@ static void CTopSoupApp_FreeAppData(IApplet* po)
 	//SMS
 	TS_RELEASEIF(pme->m_pISMS);
 	TS_RELEASEIF(pme->m_pISMSMsg);
-	
+	TS_RELEASEIF(pme->m_pISMSStorage);
+	CALLBACK_Cancel(&pme->m_enumMsgInitCb);
+	CALLBACK_Cancel(&pme->m_enumMsgNextCb);
+
 	//Tel
 	TS_RELEASEIF(pme->m_pCallMgr);
 	
@@ -452,6 +471,12 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
             {
                 pme->m_eActiveWin = TSW_MAIN;
                 CTopSoupApp_SetWindow(pme, TSW_MAIN, 0);
+
+				ISMSSTORAGE_EnumMsgInit(pme->m_pISMSStorage, 
+                    pme->m_mt, 
+                    pme->m_tag, 
+                    &pme->m_enumMsgInitCb, 
+                    &pme->m_dwStatus);
             }
 
             return TRUE;
@@ -552,6 +577,37 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				//FOR SMS & TEL TEST
 				if (wParam == AVK_0)
 				{
+					char szBuf[64];
+					int size = 0;
+					int err = 0;
+
+					MEMSET(szBuf, 0, 32);
+
+					size = 32;
+					err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_MEIDS, szBuf, &size);
+					DBGPRINTF("@@@ meid: %s size:%d err:%d", szBuf, size, err);
+					
+					MEMSET(szBuf, 0, 32);
+					size = 32;
+					err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_MOBILE_ID, szBuf, &size);
+					DBGPRINTF("@@@ imsi: %s size:%d err:%d", szBuf, size, err);
+
+					MEMSET(szBuf, 0, 32);
+					size = 32;
+					err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_ICCID, szBuf, &size);
+					DBGPRINTF("@@@ iccid: %s size:%d err:%d", szBuf, size, err);
+
+ 
+ 					MEMSET(szBuf, 0, 32);
+					size = 32;
+					err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_IMEI, szBuf, &size);
+					DBGPRINTF("@@@ imei: %s size:%d err:%d", szBuf, size, err);
+
+ 					MEMSET(szBuf, 0, 32);
+					size = 32;
+					err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_RUIMID, szBuf, &size);
+					DBGPRINTF("@@@ ruimid: %s size:%d err:%d", szBuf, size, err);
+
 					//DBGPRINTF("SEND SMS TEST ...");
 					//CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_ASCII);
 					//CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_UNICODE, L"TIANANMEN");
@@ -778,7 +834,7 @@ static void CTopSoupApp_ReleaseRes(CTopSoupApp * pme)
 
 //解析短信内容
 //格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
-static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
+static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean bAlert)
 {
 	char *pszTok = NULL;
 	char szBuf[128];
@@ -788,7 +844,8 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	AECHAR textDesc[32], textLon[32], textLat[32];
 	int len = 0;
 	AECHAR prompt[32];
-	
+    int nRet = 0;
+		
 	if (szMsg == NULL || STRLEN(szMsg) < 10)
 		return FALSE;
 
@@ -800,19 +857,20 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	pBuf = szBuf;
 	
 	//解析短信
-	
 	//#1
 	pszTok = STRCHR(pBuf, '#');
-	if (pszTok == NULL)
+	if (pszTok == NULL) {
 		return FALSE;
+	}
 	len = pszTok-pBuf;
 	MEMCPY(szTmp, pBuf, len);
 	szTmp[len] = 0;
 	pBuf = pszTok + 1;	//偏移过#
 	
 	pszTok = STRCHR(szTmp, ':');
-	if (pszTok == NULL)
+	if (pszTok == NULL){
 		return FALSE;
+	}
 
 	STRCPY(szDesc, pszTok+1);
 	STRTOWSTR(szDesc,textDesc,sizeof(textDesc));
@@ -845,45 +903,50 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg)
 	STRTOWSTR(szLon,textLon,sizeof(textLon));
 	DBGPRINTF("@szLon:%s", szLon);
 
-	//保存到数据库
-	if ( -1 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon))
-	{
-		DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
-		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_SAVE,prompt,sizeof(prompt));
-		
-		//提示窗口
-		MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
-		WSTRCPY(pme->m_pTextctlText, textDesc);	   
-		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
-		TS_DrawSplash(pme,prompt,1500,0, 0);
-		return TRUE;
-	} else if( 0 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon) )
-	{
-		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
+	nRet = TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon);
+	if (bAlert) {
+		//保存到数据库
+		if ( -1 == nRet)
+		{
+			DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
+			ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_SAVE,prompt,sizeof(prompt));
+			
+			//提示窗口
+			MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
+			WSTRCPY(pme->m_pTextctlText, textDesc);	   
+			//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+			TS_DrawSplash(pme,prompt,1500,0, 0);
+			return TRUE;
+		} else if( 0 == nRet )
+		{
+			ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
 
-		//提示窗口
-		MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
-		WSTRCPY(pme->m_pTextctlText, textDesc);	   
-		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
-		TS_DrawSplash(pme,prompt,500,0, 0);
-	}else if( 1 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon) ) {
-        DBGPRINTF("DATA EXIST!");
+			//提示窗口
+			MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
+			WSTRCPY(pme->m_pTextctlText, textDesc);	   
+			//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+			TS_DrawSplash(pme,prompt,500,0, 0);
+		}else if( 1 == nRet ) {
+			DBGPRINTF("DATA EXIST!");
+		}
 	}
-	
+
 	//提示信息
 	//TS_SPLAH
-	
 	return TRUE;
 }
 
-
-static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg)
+//解析短信内容
+//格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
+static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg, boolean bAlert)
 {
 	AECHAR *pszTok = NULL;
 	AECHAR szBuf[128];
 	AECHAR *pBuf = NULL;
 	AECHAR szTmp[32];
 	AECHAR textDesc[32], textLon[32], textLat[32];
+	char   szText[256];
+	int nRet = 0;
 	int len = 0;
 	AECHAR prompt[32];
 
@@ -893,14 +956,12 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	MEMSET(textDesc,0,sizeof(textDesc));
 	MEMSET(textLat,0,sizeof(textLat));
 	MEMSET(textLon,0,sizeof(textLon));
-	
 
 	MEMSET(szBuf,0,sizeof(szBuf));
 	WSTRCPY(szBuf, szMsg);
 	pBuf = szBuf;
 
 	//解析短信
-
 	//#1
 	pszTok = WSTRCHR(pBuf, L'#');
 	if (pszTok == NULL)
@@ -915,6 +976,8 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 		return FALSE;
 
 	WSTRCPY(textDesc, pszTok+1);
+	WSTRTOSTR(textDesc, (char*)szText, sizeof(textDesc));
+	DBGPRINTF("textDesc:%s", szText);
 
 	//#2
 	pszTok = WSTRCHR(pBuf, L'#');
@@ -931,43 +994,49 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 		return FALSE;
 
 	WSTRCPY(textLat, pszTok+1);
+	WSTRTOSTR(textLat, (char*)szText, sizeof(textLat));
+	DBGPRINTF("textLat:%s", szText);
 
 	//#3
 	pszTok = WSTRCHR(pBuf, L',');
 	if (pszTok == NULL)
 		return FALSE;
-
+	
 	WSTRCPY(textLon, pszTok+1);
+	WSTRTOSTR(textLon, (char*)szText, sizeof(textLon));
+	DBGPRINTF("textLon:%s", szText);
 
 
 	//保存到数据库
-	if ( -1 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon))
-	{
-		DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
-		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_SAVE,prompt,sizeof(prompt));
+	nRet = TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon);
+	if (bAlert) {
+		if ( -1 == nRet)
+		{
+			DBGPRINTF("SAVE DATA ERROR!");//TODO 界面提示
+			ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_INVALID_SAVE,prompt,sizeof(prompt));
 
-		//提示窗口
-		MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
-		WSTRCPY(pme->m_pTextctlText, textDesc);	   
-		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
-		TS_DrawSplash(pme,prompt,1500,0, 0);
-		return TRUE;
-	} else if ( 0 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon) )
-	{
-		ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
+			//提示窗口
+			MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
+			WSTRCPY(pme->m_pTextctlText, textDesc);	   
+			//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+			TS_DrawSplash(pme,prompt,1500,0, 0);
+			return TRUE;
+		} else if ( 0 == nRet )
+		{
+			ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_PROMPT_ALREADY_SAVE,prompt,sizeof(prompt));
 
-		//提示窗口
-		MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
-		WSTRCPY(pme->m_pTextctlText, textDesc);	   
-		//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
-		TS_DrawSplash(pme,prompt,500,0, 0);
-	} else if( 1 == TS_AddExpenseItemOnce(pme, textDesc, textLat, textLon) ) {
-		DBGPRINTF("DATA EXIST!");//TODO 界面提示
+			//提示窗口
+			MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
+			WSTRCPY(pme->m_pTextctlText, textDesc);	   
+			//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+			TS_DrawSplash(pme,prompt,500,0, 0);
+		} else if( 1 == nRet ) {
+			DBGPRINTF("DATA EXIST!");//TODO 界面提示
+		}
 	}
 
 	//提示信息
 	//TS_SPLAH
-
 	return TRUE;
 }
 
@@ -982,23 +1051,18 @@ static boolean CTopSoupApp_ReceiveSMSMessage(CTopSoupApp* pme, uint32 uMsgId)
 
 		if(ISMSMSG_GetOpt(pSMS, MSGOPT_FROM_DEVICE_SZ,&TmpOpt)==AEE_SUCCESS) {
 			STRCPY(szPhone, (char*)TmpOpt.pVal);
-			//@yao 短信中心和亲情号码
-			//if( NULL == STRSTR("10659031107260,18931880692,18903110989",szPhone) ) {
-			//	DBGPRINTF("sms sender is not in center list");
-			//	return FALSE;
-			//}
 
 			//短信内容:目标位置:北京天安门,经度:E,114.000纬度:N,33.2222
 			///        目标位置:北京天安门#经度:E,114.000#纬度:N,33.2222
 			if(ISMSMSG_GetOpt(pSMS, MSGOPT_PAYLOAD_WSZ,&TmpOpt)==AEE_SUCCESS) {
 				//WSTRTOUTF8((AECHAR*)TmpOpt.pVal,WSTRLEN((AECHAR*)TmpOpt.pVal), (byte*)szText, sizeof(szText));
-				//WSTRTOSTR((AECHAR*)TmpOpt.pVal, (char*)szText, WSTRLEN((AECHAR*)TmpOpt.pVal));//, sizeof(szText));
-				//DBGPRINTF("WSZ msg from %s: %s",szPhone,(AECHAR*)TmpOpt.pVal);
-				CTopSoupApp_SaveSMSMessageUnicode(pme, (AECHAR*)TmpOpt.pVal);
+				WSTRTOSTR((AECHAR*)TmpOpt.pVal, (char*)szText, WSTRLEN((AECHAR*)TmpOpt.pVal));//, sizeof(szText));
+				DBGPRINTF("WSZ msg from %s: %s",szPhone,szText);
+				CTopSoupApp_SaveSMSMessageUnicode(pme, (AECHAR*)TmpOpt.pVal, TRUE);
 			} else if( ISMSMSG_GetOpt(pSMS,MSGOPT_PAYLOAD_SZ,&TmpOpt) == AEE_SUCCESS ) {
 				STRCPY(szText,(const char*)(TmpOpt.pVal));
 				DBGPRINTF("SZ msg from %s: %s",szPhone,szText);
-				CTopSoupApp_SaveSMSMessage(pme, szText);
+				CTopSoupApp_SaveSMSMessage(pme, szText, TRUE);
 			} else {
 				DBGPRINTF("Can not get sms text");
 				return FALSE;
@@ -1646,6 +1710,144 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
     }
 }
 
+static void CTopSoupApp_EnumMsgInitCb(void * po)
+{
+   CTopSoupApp * pme = (CTopSoupApp *)po;
+
+   DBGPRINTF("CTopSoupApp_EnumMsgInitCb");
+
+   pme->m_pISMSMsg = NULL; // initial to save msg
+   if (SUCCESS == pme->m_dwStatus)
+   {
+      CALLBACK_Cancel(&pme->m_enumMsgNextCb);
+      CALLBACK_Init(&pme->m_enumMsgNextCb, CTopSoupApp_EnumMsgNextCb, (void*)pme);
+      ISMSSTORAGE_EnumNextMsg(pme->m_pISMSStorage, 
+          pme->m_mt, 
+          &pme->m_enumMsgNextCb,
+          &pme->m_dwIndex, 
+          &pme->m_pISMSMsg, 
+          &pme->m_dwStatus);
+   }
+   else
+   {      
+      DBGPRINTF("EnumMsgInit failed (nErr=%d)",  pme->m_dwStatus);
+   }
+}
+
+static void CTopSoupApp_EnumMsgNextCb(void * po)
+{
+   int nErr = SUCCESS;
+   CTopSoupApp * pme = (CTopSoupApp *)po;
+
+   DBGPRINTF("CTopSoupApp_EnumMsgNextCb index:%d", pme->m_dwIndex);
+
+   if (SUCCESS == (nErr = pme->m_dwStatus)) 
+   {
+      CTopSoupApp_ReadSMS(pme, pme->m_pISMSMsg);
+      pme->m_pISMSMsg = NULL; // initial for next time
+      // no item left == mean ending
+      if (0xFFFFFFFF != pme->m_dwIndex)
+      {
+         CALLBACK_Cancel(&pme->m_enumMsgNextCb);
+         CALLBACK_Init(&pme->m_enumMsgNextCb, CTopSoupApp_EnumMsgNextCb, (void*)pme);
+         ISMSSTORAGE_EnumNextMsg(pme->m_pISMSStorage, 
+             pme->m_mt, 
+             &pme->m_enumMsgNextCb, 
+             &pme->m_dwIndex, 
+             &pme->m_pISMSMsg, 
+             &pme->m_dwStatus);
+      }
+      else
+      {
+		  if (pme->m_tag != STRTOUL("1", NULL, 10)) {
+			DBGPRINTF("ISMSSTORAGE_EnumMsgInit Readed ");
+			pme->m_tag = STRTOUL("1", NULL, 10);	//SMS TAG:AEESMS_TAG_MT_READ
+			ISMSSTORAGE_EnumMsgInit(pme->m_pISMSStorage, 
+						pme->m_mt, 
+						pme->m_tag, 
+						&pme->m_enumMsgInitCb, 
+						&pme->m_dwStatus);
+		  }
+
+          DBGPRINTF("OATSMS_EnumMsgNextCb end");
+      }
+   }
+   else 
+   {
+      DBGPRINTF("EnumMsgNextfailed (nErr=%d)",  pme->m_dwStatus);
+   }
+}
 
 
+static void CTopSoupApp_ReadSMS(CTopSoupApp * pme,ISMSMsg *pSMS)
+{
+    SMSMsgOpt TmpOpt;
+	char szPhone[32], szText[256];
+
+    DBGPRINTF("CTopSoupApp_ReadSMS");
+    if(pme == NULL || pSMS == NULL)
+    {
+          DBGPRINTF("Null point");
+          return;
+    }
+
+	// MSGOPT_FROM_DEVICE_SZ - 发送方号码
+	if(ISMSMSG_GetOpt(pSMS, MSGOPT_FROM_DEVICE_SZ, &TmpOpt)==AEE_SUCCESS)
+	{
+		DBGPRINTF("get MSGOPT_FROM_DEVICE_SZ Phone:%s", (char *)TmpOpt.pVal);
+		//WriteLine(pme,  (char *)TmpOpt.pVal, NULL, FALSE);
+	}
+
+	// MSGOPT_PAYLOAD_SZ - ASCII的短信内容
+	if(ISMSMSG_GetOpt(pSMS, MSGOPT_PAYLOAD_SZ, &TmpOpt)==AEE_SUCCESS)
+	{
+		DBGPRINTF("get MSGOPT_PAYLOAD_SZ SMS:%s", (char *)TmpOpt.pVal);
+		//WriteLine(pme,  (char *)TmpOpt.pVal, NULL, FALSE);
+	}
+
+	// MSGOPT_PAYLOAD_WSZ - UNICODE的短信内容
+	if(ISMSMSG_GetOpt(pSMS, MSGOPT_PAYLOAD_WSZ, &TmpOpt)==AEE_SUCCESS)
+	{
+		WSTRTOSTR((AECHAR*)TmpOpt.pVal, (char*)szText, sizeof(szText));
+		DBGPRINTF("get MSGOPT_PAYLOAD_WSZ SMS:%s", szText);
+		//WriteLine(pme,  NULL, (AECHAR *)TmpOpt.pVal, TRUE);
+	}
+
+	// MSGOPT_TIMESTAMP - 短信时间标签
+	if(ISMSMSG_GetOpt(pSMS, MSGOPT_TIMESTAMP, &TmpOpt)==AEE_SUCCESS)
+	{
+		JulianType *pMyJulian;
+		char buf[80];
+
+		pMyJulian = (JulianType *)TmpOpt.pVal;
+		SPRINTF(buf, "%d/%d/%d %d:%d:%d, weekday:%d", pMyJulian->wMonth, pMyJulian->wDay, pMyJulian->wYear, 
+																	pMyJulian->wHour, pMyJulian->wMinute, pMyJulian->wSecond, pMyJulian->wWeekDay);
+		DBGPRINTF("get MSGOPT_TIMESTAMP %s", buf);
+		//WriteLine(pme,  buf, NULL, FALSE);
+	}
+
+	MEMSET(szPhone, 0, sizeof(szPhone));
+	MEMSET(szText, 0, sizeof(szText));
+
+	if(ISMSMSG_GetOpt(pSMS, MSGOPT_FROM_DEVICE_SZ,&TmpOpt)==AEE_SUCCESS) {
+		STRCPY(szPhone, (char*)TmpOpt.pVal);
+
+		//短信内容:目标位置:北京天安门,经度:E,114.000纬度:N,33.2222
+		///        目标位置:北京天安门#经度:E,114.000#纬度:N,33.2222
+		if(ISMSMSG_GetOpt(pSMS, MSGOPT_PAYLOAD_WSZ,&TmpOpt)==AEE_SUCCESS) {
+			//WSTRTOUTF8((AECHAR*)TmpOpt.pVal,WSTRLEN((AECHAR*)TmpOpt.pVal), (byte*)szText, sizeof(szText));
+			WSTRTOSTR((AECHAR*)TmpOpt.pVal, (char*)szText, sizeof(szText));
+			DBGPRINTF("WSZ msg from %s: %s",szPhone,szText);
+			CTopSoupApp_SaveSMSMessageUnicode(pme, (AECHAR*)TmpOpt.pVal, FALSE);
+		} else if( ISMSMSG_GetOpt(pSMS,MSGOPT_PAYLOAD_SZ,&TmpOpt) == AEE_SUCCESS ) {
+			STRCPY(szText,(const char*)(TmpOpt.pVal));
+			DBGPRINTF("SZ msg from %s: %s",szPhone,szText);
+			CTopSoupApp_SaveSMSMessage(pme, szText, FALSE);
+		} else {
+			DBGPRINTF("Can not get sms text");
+		}
+	} else {
+		DBGPRINTF("Can not get sms number: ");
+	}
+}
 

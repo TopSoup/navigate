@@ -116,7 +116,7 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 	//初始化定位信息
 
    //初始化定位信息
-    if(FALSE == pme->m_pOwner->m_bGetGpsInfo)
+    //if(FALSE == pme->m_pOwner->m_bGetGpsInfo)
 	{
 		int nErr = SUCCESS;
 		struct _GetGPSInfo *pGetGPSInfo = &pme->m_pOwner->m_gpsInfo;
@@ -134,9 +134,10 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 		pme->m_pOwner->m_bGetGpsInfo = FALSE;
 
 		TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,0);
-	} else {
-		TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,0);
-	}
+	} 
+	// else {
+	// 	TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,0);
+	// }
 	
 	ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MY_LOCATION,pme->m_pOwner->m_pHdrText,sizeof(pme->m_pOwner->m_pHdrText));
 	
