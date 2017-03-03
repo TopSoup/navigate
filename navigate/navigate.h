@@ -164,6 +164,7 @@ struct CTopSoupApp
 	AECHAR				m_szTextC[64];
 
 	boolean			  m_bEnableSOS;
+	boolean			  m_bEnableSMS;
     SOSOP             m_OP;
     int               m_id;                       //当前通知的号码索引
     char			  m_szNum[MAX_SOS_NUM][32];   //通知的号码列表

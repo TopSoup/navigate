@@ -16,7 +16,10 @@ static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
 //构建SOS短信：
 //pos == NULL： 开启求助短信
 //pos != NULL:  发送带位置信息的求助短信
-static void          CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordinate *pos);
+static void     CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordinate *pos);
+
+static void 	CTopSoupApp_MakeSMSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordinate *pos);
+
 /************************************************************************/
 /* 从配置文件加载亲友联系方式                                           */
 /************************************************************************/
@@ -260,6 +263,9 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
    CALLBACK_Init(&pme->m_enumMsgInitCb, CTopSoupApp_EnumMsgInitCb, (void*)pme);
    pme->m_tag = STRTOUL("2", NULL, 10);	//SMS TAG:AEESMS_TAG_MT_NOT_READ
    pme->m_mt = STRTOUL("2", NULL, 10);	//SMS TYPE:AEESMS_TYPE_PAGE
+   //STRCPY(pme->m_szSmsNum, "1065902018810"); //SMS Center
+   STRCPY(pme->m_szSmsNum, "15511823090"); //SMS Center
+   
 
    //Tel
    nErr =ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_CALLMGR, (void**) &pme->m_pCallMgr);
@@ -465,7 +471,12 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
             //SOS模式开始发送短信和呼叫联系人
             if (pme->m_bEnableSOS)
             {
+				if (STRLEN(pme->m_szSmsNum) > 0) 
+					pme->m_bEnableSMS = TRUE;
+
                 CTopSoupApp_StartSOS(pme);
+
+				//CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE, 0);
             }
             else
             {
@@ -860,6 +871,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 	//解析短信	
 	//为配置SMS中心号码 #SMS:1065902018810
 	if (STRNCMP(pBuf, "#SMS", STRLEN("#SMS")) == 0) {
+		MEMSET(pme->m_szSmsNum, 0, sizeof(pme->m_szSmsNum));
 		STRCPY(pme->m_szSmsNum, pBuf+STRLEN("#SMS")+1);
 		DBGPRINTF("pme->m_szSmsNum:%s", pme->m_szSmsNum);
 		return FALSE;
@@ -979,6 +991,7 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	if (WSTRNCMP(pBuf, L"#SMS", WSTRLEN(L"#SMS")) == 0) {
 		MEMSET(szTmp,0,sizeof(szTmp));
 		WSTRCPY(szTmp, pBuf+WSTRLEN(L"#SMS")+1);
+		MEMSET(pme->m_szSmsNum, 0, sizeof(pme->m_szSmsNum));
 		WSTRTOSTR(szTmp, (char*)pme->m_szSmsNum, sizeof(szTmp));
 		DBGPRINTF("pme->m_szSmsNum:%s", pme->m_szSmsNum);
 		return FALSE;
@@ -1663,6 +1676,73 @@ static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
     DBGPRINTF("@MakeSOSMsg:%s", szBuf);
 }
 
+//构建SMS短信：
+//pos == NULL： 开启求助短信
+//pos != NULL:  发送带位置信息的求助短信
+//&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,29.2467013,N,121.2467054,E,06.0,215,3$
+static void CTopSoupApp_MakeSMSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordinate *pos)
+{
+    ts_time_t now;
+    char szBuf[128];
+    AECHAR szTmp[128];
+    AECHAR szSOSInfo[32];
+    AECHAR szMon[6];
+    AECHAR szDay[6];
+    AECHAR szHour[6];
+    AECHAR szMinute[6];
+    AECHAR szTail[32];
+
+    TS_GetTimeNow(&now);
+
+    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MONTH,szMon,sizeof(szMon));  // 月
+    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DAY,szDay,sizeof(szDay));    // 日
+    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_HOUR,szHour,sizeof(szHour)); // 时
+    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MIN,szMinute,sizeof(szMinute)); // 分
+
+    if (pos == NULL)
+    {
+        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS,szSOSInfo,sizeof(szSOSInfo));
+        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MIN_OPEN,szTail,sizeof(szTail));   // 分开启求助
+
+        //1 构建开启求助短信：求助信息! 4月18日20时18分开启求助
+        WSPRINTF(szTmp, sizeof(szTmp), L"%s%d%s%d%s", szSOSInfo, now.month, szMon, now.day, szDay);
+        WSPRINTF(szMsg, sizeof(AECHAR)*256, L"%s%d%s%d%s", szTmp, now.hour, szHour, now.minute, szTail);
+    }
+    else
+    {
+        AECHAR szTmp2[128];
+        AECHAR textLat[32], textLon[32];
+        AECHAR szLat[32], szLon[32];
+        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS_LAST,szSOSInfo,sizeof(szSOSInfo));
+        ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LAT, textLat, sizeof(textLat));
+        ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LON, textLon, sizeof(textLon));
+        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_IS_NAVIGATE,szTail,sizeof(szTail));   // 分开启求助 //TODO
+
+        TS_FLT2SZ(szLat, pos->lat);
+        //FLOATTOWSTR(pme->m_gpsInfo.theInfo.lat, szLat, 32);
+        WSTRTOSTR(szLat, szBuf, sizeof(szBuf));
+        DBGPRINTF("Lat: %s", szBuf);
+
+        TS_FLT2SZ(szLon, pos->lon);
+        //FLOATTOWSTR(pme->m_gpsInfo.theInfo.lon, szLat, 32);
+        WSTRTOSTR(szLon, szBuf, sizeof(szBuf));
+        DBGPRINTF("Lon: %s", szBuf);
+
+        //2 构建位置信息的求助短信：求助信息: 最后位置4月18日20时21分在东经114度27.947分，北纬38度5.280分
+        //2 构建位置信息的求助短信：求助信息! 最后位置:4月18日20时21分#纬度:E,20.012345#经度:N,120.012345
+
+        //求助信息! 最后位置:4月18日
+        WSPRINTF(szTmp, sizeof(szTmp), L"%s%d%s%d%s", szSOSInfo, now.month, szMon, now.day, szDay);
+        //TMP+20时21分#
+        WSPRINTF(szTmp2, sizeof(szTmp2), L"%s%d%s%d%s#", szTmp, now.hour, szHour, now.minute, szMinute);
+        //TMP2+纬度:E,20.012345#经度:N,120.012345
+        WSPRINTF(szMsg, sizeof(AECHAR)*256, L"%s%s:E,%s#%s:N,%s", szTmp2, textLat, szLat, textLon, szLon);
+    }
+
+    WSTRTOSTR(szMsg, szBuf, sizeof(szBuf));
+
+    DBGPRINTF("@MakeSOSMsg:%s", szBuf);
+}
 static void CTopSoupApp_onSplashCall(void * po)
 {
     CTopSoupApp* pme = (CTopSoupApp*)po;
@@ -1684,18 +1764,19 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
     }
 
     if (SUCCESS == LoadSOSConfig((IShell *) pme->a.m_pIShell, pme->m_szNum)) {
-        for (i = 0; i < MAX_SOS_NUM; i++) {
-            if (STRLEN(pme->m_szNum[i]) > 0) {
-                AECHAR szMsg[256];
-                CTopSoupApp_MakeSOSMsg(pme, szMsg, NULL);
-				DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szNum[i], WSTRLEN(szMsg));
-                CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szNum[i]);
-                break;
-            }
-            else {
-                DBGPRINTF("@SOS Num Is Empty:%d", i);
-            }
-        }
+        // for (i = 0; i < MAX_SOS_NUM; i++) {
+        //     if (STRLEN(pme->m_szNum[i]) > 0) {
+        //         AECHAR szMsg[256];
+        //         CTopSoupApp_MakeSOSMsg(pme, szMsg, NULL);
+		// 		DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szNum[i], WSTRLEN(szMsg));
+        //         CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szNum[i]);
+        //         break;
+        //     }
+        //     else {
+        //         DBGPRINTF("@SOS Num Is Empty:%d", i);
+        //     }
+        // }
+		ret = SUCCESS;
     }
 
     if (i < MAX_SOS_NUM) {
@@ -1730,9 +1811,18 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
     else
     {
         //记录当前亲友索引和更改SOS状态
-        pme->m_id = i;
+        pme->m_id = 0; //i;
         pme->m_OP = SOS_SMS_SENDING;
     }
+
+	//SEND TO SMS
+	if (STRLEN(pme->m_szSmsNum) > 0) {
+		AECHAR szMsg[256];
+		CTopSoupApp_MakeSMSMsg(pme, szMsg, NULL);
+		DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szSmsNum, WSTRLEN(szMsg));
+		//CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szSmsNum);
+		CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, L"&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,29.2467013,N,121.2467054,E,06.0,215,3$", pme->m_szSmsNum);
+	}
 }
 
 static void CTopSoupApp_EnumMsgInitCb(void * po)
