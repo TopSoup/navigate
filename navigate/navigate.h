@@ -138,6 +138,15 @@ struct CTopSoupApp
 	GetGPSInfo		  m_gpsInfo;	//
 
     boolean			  m_bGetGpsInfo; //where win gpsstatus
+    
+	AEECallback		  m_cbWatcherTimer;
+	AEEGPSMode		  m_gpsMode;			//GPS模式
+
+	//Device
+	char				m_meid[32];				//设备MEID
+	char				m_imsi[32];				//卡IMSI
+	char				m_phone[32];			//手机号
+	char				m_rssi[32];				//信号值
 
 	//SMS
 	ISMS              *m_pISMS;      
@@ -158,6 +167,8 @@ struct CTopSoupApp
 	ICall *m_pOutgoingCall;
     CallListener callListener;
 
+	//INI
+	void			*iConf;
     //SOS
 	AECHAR				m_szTextA[64];
 	AECHAR				m_szTextB[64];

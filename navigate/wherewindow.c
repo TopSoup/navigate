@@ -23,17 +23,17 @@ struct CWhereWin
 
 	AECHAR          m_szMode[MP_MAX_STRLEN];
 
-	IStatic *		m_pTextMethod;	//¶¨Î»·½Ê½
-	IStatic *		m_pTextTime;	//¶¨Î»Ê±¼ä
-	IStatic *		m_pTextLon;		//Î³¶È
-	IStatic *		m_pTextLat;		//¾­¶È
-	IStatic *		m_pTextVel;		//ËÙ¶È
-	IStatic *		m_pTextHeading;	//·½Ïò½Ç¶È
-	IStatic *		m_pTextHeight;	//º£°Î
-	//IStatic *		m_pTextInfo;	//ÐÅÏ¢[debug]
+	IStatic *		m_pTextMethod;	//å®šä½æ–¹å¼
+	IStatic *		m_pTextTime;	//å®šä½æ—¶é—´
+	IStatic *		m_pTextLon;		//çº¬åº¦
+	IStatic *		m_pTextLat;		//ç»åº¦
+	IStatic *		m_pTextVel;		//é€Ÿåº¦
+	IStatic *		m_pTextHeading;	//æ–¹å‘è§’åº¦
+	IStatic *		m_pTextHeight;	//æµ·æ‹”
+	//IStatic *		m_pTextInfo;	//ä¿¡æ¯[debug]
 
 	AEECallback		m_cbWatcherTimer;
-	AEEGPSMode		m_gpsMode;			//GPSÄ£Ê½
+	AEEGPSMode		m_gpsMode;			//GPSæ¨¡å¼
 	ts_time_t		m_getGpsTime;
 };
 
@@ -74,7 +74,7 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 		int      dy = MP_WHERE_CY;
 		AEERect  rect;
 
-		//¶¨Î»½á¹ûÌáÊ¾ÐÅÏ¢
+		//å®šä½ç»“æžœæç¤ºä¿¡æ¯
 		if (ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pTextMethod) != SUCCESS ||
 			ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pTextTime) != SUCCESS ||
 			ISHELL_CreateInstance(pme->m_pIShell, AEECLSID_STATIC, (void **)&pme->m_pTextLon) != SUCCESS ||
@@ -109,13 +109,13 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 		//SETAEERECT(&rect, 0, y, cx, dy);
 		//ISTATIC_SetRect(pme->m_pTextInfo, &rect);
 
-		//Ä¬ÈÏÎªÍøÂç²âÊÔÄ£Ê½
+		//é»˜è®¤ä¸ºç½‘ç»œæµ‹è¯•æ¨¡å¼
 		STRTOWSTR("Mode: NETWORK", pme->m_szMode, sizeof(pme->m_szMode));
 	}
 
-	//³õÊ¼»¯¶¨Î»ÐÅÏ¢
+	//åˆå§‹åŒ–å®šä½ä¿¡æ¯
 
-   //³õÊ¼»¯¶¨Î»ÐÅÏ¢
+   //åˆå§‹åŒ–å®šä½ä¿¡æ¯
     //if(FALSE == pme->m_pOwner->m_bGetGpsInfo)
 	{
 		int nErr = SUCCESS;
@@ -124,7 +124,7 @@ IWindow * CWhereWin_New(CTopSoupApp * pOwner)
 
 		pme->m_gpsMode = AEEGPS_MODE_TRACK_STANDALONE;//AEEGPS_MODE_TRACK_NETWORK;
 
-		//Æô¶¯¶¨Î»
+		//å¯åŠ¨å®šä½
 		CWhereWin_LocStart((IWindow*)pme);
 
 		//Callback
@@ -153,12 +153,12 @@ static void CWhereWin_Delete(IWindow * po)
 {
 	CWhereWin *  pme = (CWhereWin *)po;	
 
-	//ÊÍ·Å¶¨Î»Ä£¿é
+	//é‡Šæ”¾å®šä½æ¨¡å—
 	CWhereWin_LocStop(po);
 	
 	CALLBACK_Cancel(&pme->m_cbWatcherTimer);
 
-	//¶¨Î»½á¹ûÏà¹Ø¿Ø¼þ
+	//å®šä½ç»“æžœç›¸å…³æŽ§ä»¶
 	TS_RELEASEIF(pme->m_pTextMethod);
 	TS_RELEASEIF(pme->m_pTextTime);
 	TS_RELEASEIF(pme->m_pTextLon);
@@ -180,7 +180,7 @@ static void CWhereWin_Enable(IWindow * po, boolean bEnable)
 		return;
 }
 
-//¸ñÊ½»¯¸¡µãÊý
+//æ ¼å¼åŒ–æµ®ç‚¹æ•°
 static AECHAR* FLT2RAD(AECHAR* szBuf, double val)
 {
 	AEEApplet* pApp = (AEEApplet*)GETAPPINSTANCE();
@@ -206,7 +206,7 @@ static AECHAR* FLT2RAD(AECHAR* szBuf, double val)
 	return szBuf;
 }
 
-//¸ñÊ½»¯¸¡µãÊý
+//æ ¼å¼åŒ–æµ®ç‚¹æ•°
 static int FORMATFLT(AECHAR* szLon, AECHAR* szLat, double lon, double lat)
 {
 	AECHAR eFlag[3], nFlag[3];
@@ -215,7 +215,7 @@ static int FORMATFLT(AECHAR* szLon, AECHAR* szLat, double lon, double lat)
 	if (szBuf == NULL)
 		return -1;
 
-	//¶«¾­/Î÷¾­
+	//ä¸œç»/è¥¿ç»
 	if (FCMP_GE(lon, 0))
 	{
 		WSTRCPY(eFlag, L"E");
@@ -225,7 +225,7 @@ static int FORMATFLT(AECHAR* szLon, AECHAR* szLat, double lon, double lat)
 		WSTRCPY(eFlag, L"W");
 	}
 
-	//ÄÏÎ³/±±Î³
+	//å—çº¬/åŒ—çº¬
 	if (FCMP_GE(lat, 0))
 	{
 		WSTRCPY(nFlag, L"N");
@@ -256,7 +256,7 @@ static void CWhereWin_Redraw(IWindow * po)
 
 	IDISPLAY_ClearScreen(pme->m_pIDisplay);
 
-	//¸üÐÂµ×²¿ÎÄ×Ö
+	//æ›´æ–°åº•éƒ¨æ–‡å­—
 	if (pme->m_pOwner->m_bGetGpsInfo)
 	{
 		TS_SetSoftButtonText(pme->m_pOwner,IDS_STRING_FUCTION,IDS_STRING_BACK,0);
@@ -266,11 +266,11 @@ static void CWhereWin_Redraw(IWindow * po)
 		TS_SetSoftButtonText(pme->m_pOwner,0,IDS_STRING_BACK,0);
 	}
 
-	//»æÖÆ±³¾°¼°¿ò¼Ü
+	//ç»˜åˆ¶èƒŒæ™¯åŠæ¡†æž¶
 	TS_DrawBackgroud(po);
 
 
-	//µ±È¡µÃ¶¨Î»½á¹ûÊ±¸üÐÂÏÔÊ¾
+	//å½“å–å¾—å®šä½ç»“æžœæ—¶æ›´æ–°æ˜¾ç¤º
 	if (pGetGpsInfo->pPosDet 
 		&& pme->m_pOwner->m_bGetGpsInfo)
 	{
@@ -284,7 +284,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			AEERect rect;
 			int xMargin = 4;
 			
-			//¶¨Î»ÀàÐÍ
+			//å®šä½ç±»åž‹
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_STATUS, bufRes, sizeof(bufRes));
 			h = IDISPLAY_GetFontMetrics(pme->m_pIDisplay, WIN_FONT, &a, &b) + 12;
 			xx = xMargin;
@@ -294,7 +294,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
 			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  bufRes, &rect);
 			
-			//Ê±¼ä
+			//æ—¶é—´
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_TIME, bufRes, sizeof(bufRes));
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MONTH, bufRes2, sizeof(bufRes));
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DAY, bufRes3, sizeof(bufRes));
@@ -309,7 +309,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
 			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  pme->m_szText, &rect);
 
-			//¸ñÊ½»¯¾­Î³¶È
+			//æ ¼å¼åŒ–ç»çº¬åº¦
 			//For Test Hack
 #ifdef AEE_SIMULATOR
 			pGetGpsInfo->theInfo.lat = 38.0422378880;
@@ -317,7 +317,7 @@ static void CWhereWin_Redraw(IWindow * po)
 #endif
 			FORMATFLT(bufLon, bufLat, pGetGpsInfo->theInfo.lon, pGetGpsInfo->theInfo.lat);
 
-			//¾­¶È
+			//ç»åº¦
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LON, bufRes, sizeof(bufRes));
 			//FLOATTOWSTR(pGetGpsInfo->theInfo.lon, bufLon, 32);
 			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, bufLon);
@@ -328,7 +328,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
 			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  pme->m_szText, &rect);
 
-			//Î³¶È		
+			//çº¬åº¦		
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_EDIT_LAT, bufRes, sizeof(bufRes));
 			//FLOATTOWSTR(pGetGpsInfo->theInfo.lat, bufLat, 32);
 			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, bufLat);
@@ -340,14 +340,14 @@ static void CWhereWin_Redraw(IWindow * po)
 			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  pme->m_szText, &rect);
 
 			
-			//ËÙ¶È[Ê¹ÓÃ½ÚºÍ¹«Àï/Ð¡Ê±±íÊ¾]
+			//é€Ÿåº¦[ä½¿ç”¨èŠ‚å’Œå…¬é‡Œ/å°æ—¶è¡¨ç¤º]
 			{
 			AECHAR szKn[32];
 			AECHAR knRes[10];
 			AECHAR kmRes[10];
 			double kn = 0, km = 0;
 
-			kn = FMUL(FDIV(pGetGpsInfo->theInfo.velocityHor, 1852.0), 3600.0);	//1½Ú=1.852¹«Àï/Ð¡Ê± velocityHorÎªm/s --> 1½Ú = V*3600/1852
+			kn = FMUL(FDIV(pGetGpsInfo->theInfo.velocityHor, 1852.0), 3600.0);	//1èŠ‚=1.852å…¬é‡Œ/å°æ—¶ velocityHorä¸ºm/s --> 1èŠ‚ = V*3600/1852
             km = FMUL(pGetGpsInfo->theInfo.velocityHor, 3.6);  //m/s --> km/h
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_VEL, bufRes, sizeof(bufRes));
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SPEED_KN, knRes, sizeof(knRes));
@@ -366,7 +366,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  pme->m_szText, &rect);
 			}
 
-			//·½Ïò
+			//æ–¹å‘
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_HEADING, bufRes, sizeof(bufRes));
 			//FLOATTOWSTR(pGetGpsInfo->theInfo.heading, bufHeading, 32);
 			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %s", bufRes, TS_FLT2SZ_3(bufHeading, pGetGpsInfo->theInfo.heading));
@@ -378,7 +378,7 @@ static void CWhereWin_Redraw(IWindow * po)
 			SETAEERECT(&rect, xx, yy, dxx, dyy);
 			TS_DrawText(pme->m_pIDisplay, WIN_FONT,  pme->m_szText, &rect);
 			
-			//º£°Î
+			//æµ·æ‹”
 			ISHELL_LoadResString(pme->m_pOwner->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_ALT, bufRes, sizeof(bufRes));
 			WSPRINTF(pme->m_szText, sizeof(pme->m_szText), L"%s: %d.0", bufRes, pGetGpsInfo->theInfo.height);
 			xx = xMargin;
@@ -454,13 +454,13 @@ static boolean CWhereWin_HandleEvent(IWindow * po, AEEEvent eCode, uint16 wParam
 			if (pme->m_pOwner->m_bGetGpsInfo)
 			{			  
 			 
-				//¼ÇÂ¼¾­Î³¶È
+				//è®°å½•ç»çº¬åº¦
 			    TS_FLT2SZ(pme->m_pOwner->m_szTextLat, pme->m_pOwner->m_gpsInfo.theInfo.lat);
 			    TS_FLT2SZ(pme->m_pOwner->m_szTextLon, pme->m_pOwner->m_gpsInfo.theInfo.lon);
 				//FLOATTOWSTR(pme->m_pOwner->m_gpsInfo.theInfo.lat, pme->m_pOwner->m_szTextLat, 32);
 				//FLOATTOWSTR(pme->m_pOwner->m_gpsInfo.theInfo.lon, pme->m_pOwner->m_szTextLon, 32);
 
-			  //Èç¹ûÎ»ÖÃÃû³ÆÎª¿Õ, ÔòÊ¹ÓÃÄ¬ÈÏÈÕÖ¾±àºÅ¸ñÊ½Ãû³Æ
+			  //å¦‚æžœä½ç½®åç§°ä¸ºç©º, åˆ™ä½¿ç”¨é»˜è®¤æ—¥å¿—ç¼–å·æ ¼å¼åç§°
 			  if (WSTRLEN(pme->m_pOwner->m_szTextDesc) == 0)
 			  {
 				  ts_time_t tw;
@@ -585,7 +585,7 @@ static void CWhereWin_GetGPSInfo_Callback( IWindow *po )
 		pGetGPSInfo->wProgress = 0;
 		DBGPRINTF("@GetGPSInfo fix:%d", pGetGPSInfo->dwFixNumber);
 
-		//¾­Î³¶ÈÓÐÐ§Ê±²ÅËã¶¨Î»³É¹¦
+		//ç»çº¬åº¦æœ‰æ•ˆæ—¶æ‰ç®—å®šä½æˆåŠŸ
 	    if (FCMP_G(pGetGPSInfo->theInfo.lat,0) && FCMP_G(pGetGPSInfo->theInfo.lon,0))
 		{
 			pme->m_pOwner->m_bGetGpsInfo = TRUE;
@@ -641,9 +641,9 @@ static void CWhereWin_GetGPSInfo_SecondTicker( IWindow *po )
 		DBGPRINTF("@Where GetGPS wIdleCount:%d", pGetGPSInfo->wIdleCount);
 	}
 
-	//ÖØÐÂÆô¶¯
-	//1 ¿ÕÏÐ30Ãë
-	//2 ³¢ÊÔ2·ÖÖÓÎ´¶¨Î»³É¹¦
+	//é‡æ–°å¯åŠ¨
+	//1 ç©ºé—²30ç§’
+	//2 å°è¯•2åˆ†é’Ÿæœªå®šä½æˆåŠŸ
 	if (pGetGPSInfo->wIdleCount > WATCHER_TIMER || pGetGPSInfo->wProgress > 60 * 2)
 	{
 		//play_tts(pme, L"restart location");

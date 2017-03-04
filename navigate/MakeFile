@@ -87,7 +87,9 @@ LOCAL_OBJS =$(OBJSDIR)\AEEAppGen.o\
 			$(OBJSDIR)\dbfunc.o \
 			$(OBJSDIR)\e_asin.o \
 			$(OBJSDIR)\location.o \
-			$(OBJSDIR)\transform.o
+			$(OBJSDIR)\transform.o \
+			$(OBJSDIR)\minIni.o \
+			$(OBJSDIR)\configmgr.o
 
 
 #-------------------------------------------------------------------------------

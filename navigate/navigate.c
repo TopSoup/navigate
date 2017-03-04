@@ -18,6 +18,9 @@ static void		  CTopSoupApp_ReleaseRes(CTopSoupApp * pme);
 //pos != NULL:  发送带位置信息的求助短信
 static void     CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordinate *pos);
 
+//构建SMS短信：
+//pos == NULL： 开启求助短信
+//pos != NULL:  发送带位置信息的求助短信
 static void 	CTopSoupApp_MakeSMSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordinate *pos);
 
 /************************************************************************/
@@ -61,6 +64,17 @@ static void CTopSoupApp_ReadSMS(CTopSoupApp * pme,ISMSMsg *pSMS);
 //加载配置文件
 static void CTopSoupApp_StartSOS(CTopSoupApp *pme);
 
+#ifdef AEE_SIMULATOR
+#define WATCHER_TIMER	15
+#else
+#define WATCHER_TIMER	60
+#endif
+
+static void		  CTopSoupApp_LocStart ( void *po );
+static void		  CTopSoupApp_LocStop ( void *po );
+static void		  CTopSoupApp_GetGPSInfo_SecondTicker( void *po );
+static void		  CTopSoupApp_GetGPSInfo_Callback( void *po );
+static int 		  CTopSoupApp_GetMeid(CTopSoupApp *pme);
 //
 // navigate app can either be statically built into BREW or dynamically linked during run-time.
 // If AEE_STATIC is defined, then navigate app will be a static app.
@@ -266,6 +280,7 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
    //STRCPY(pme->m_szSmsNum, "1065902018810"); //SMS Center
    STRCPY(pme->m_szSmsNum, "15511823090"); //SMS Center
    
+   pme->iConf = confmgr_createinstance(pme->a.m_pIShell,NULL);
 
    //Tel
    nErr =ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_CALLMGR, (void**) &pme->m_pCallMgr);
@@ -339,8 +354,20 @@ static void CTopSoupApp_FreeAppData(IApplet* po)
 	//Tel
 	TS_RELEASEIF(pme->m_pCallMgr);
 	
+	if( pme->iConf ) {
+		confmgr_release(pme->iConf);
+		pme->iConf = NULL;
+	}
+
 	//DataBase
 	TS_RELEASEIF( pme->m_pDatabase);
+
+	//释放定位模块
+	if (pme->m_bEnableSOS) {
+		CTopSoupApp_LocStop(po);
+		CALLBACK_Cancel(&pme->m_cbWatcherTimer);
+		pme->m_bEnableSOS = FALSE;
+	}
 
 	CTopSoupApp_ReleaseRes(pme);
 }
@@ -468,15 +495,36 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
          case EVT_APP_START:   // Process Start event
             DBGPRINTF(TS_VERSION);
 
+			CTopSoupApp_GetMeid(pme);
+			
             //SOS模式开始发送短信和呼叫联系人
             if (pme->m_bEnableSOS)
             {
-				if (STRLEN(pme->m_szSmsNum) > 0) 
+				//先向SMS短信中心发送报警信息
+				if (STRLEN(pme->m_szSmsNum) > 0) {
+					AECHAR szMsg[256];
+                	CTopSoupApp_MakeSMSMsg(pme, szMsg, NULL);
 					pme->m_bEnableSMS = TRUE;
+				}
+				
+				//启动定位
+                {
+					struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
+					ZEROAT(pGetGPSInfo);
+
+					pme->m_gpsMode = AEEGPS_MODE_TRACK_STANDALONE;//AEEGPS_MODE_TRACK_NETWORK;
+					
+					//启动定位
+					CTopSoupApp_LocStart((IWindow*)pme);
+
+					//Callback
+					CALLBACK_Init(&pme->m_cbWatcherTimer, CTopSoupApp_GetGPSInfo_SecondTicker, pme);
+					ISHELL_SetTimerEx(pme->a.m_pIShell, 1000, &pme->m_cbWatcherTimer);
+
+					pme->m_bGetGpsInfo = FALSE;
+				}
 
                 CTopSoupApp_StartSOS(pme);
-
-				//CTopSoupApp_SetWindow(pme->m_pOwner, TSW_WHERE, 0);
             }
             else
             {
@@ -628,11 +676,17 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				//FOR TEL TEST
 				if (wParam == AVK_PTT)
 				{
-					//DBGPRINTF("SOS CALL TEST ...");
+					DBGPRINTF("SOS CALL TEST ...");
 					//CTopSoupApp_MakeSOSCall(pme, "15511823090");
                     //CTopSoupApp_StartSOS(pme);    //与系统冲突，有时会死机？
 				}
 
+				if (wParam == AVK_1)
+				{
+					AECHAR szMsg[256];
+					DBGPRINTF("make sms test ...");
+                	CTopSoupApp_MakeSMSMsg(pme, szMsg, NULL);
+				}
 				if (wParam == AVK_2)
 				{
 					//DBGPRINTF("CALL TEST END ...");
@@ -939,7 +993,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 			//提示窗口
 			MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
 			WSTRCPY(pme->m_pTextctlText, textDesc);	   
-			//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+			//TS_DrawSplash(pme->,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
 			TS_DrawSplash(pme,prompt,1500,0, 0);
 			return TRUE;
 		} else if( 0 == nRet )
@@ -949,7 +1003,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 			//提示窗口
 			MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
 			WSTRCPY(pme->m_pTextctlText, textDesc);	   
-			//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+			//TS_DrawSplash(pme->,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
 			TS_DrawSplash(pme,prompt,500,0, 0);
 		}else if( 1 == nRet ) {
 			DBGPRINTF("DATA EXIST!");
@@ -1056,7 +1110,7 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 			//提示窗口
 			MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
 			WSTRCPY(pme->m_pTextctlText, textDesc);	   
-			//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+			//TS_DrawSplash(pme->,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
 			TS_DrawSplash(pme,prompt,1500,0, 0);
 			return TRUE;
 		} else if ( 0 == nRet )
@@ -1066,7 +1120,7 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 			//提示窗口
 			MEMSET(pme->m_pTextctlText,0,sizeof(pme->m_pTextctlText));	  
 			WSTRCPY(pme->m_pTextctlText, textDesc);	   
-			//TS_DrawSplash(pme->m_pOwner,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
+			//TS_DrawSplash(pme->,prompt,1000,(PFNNOTIFY)CNewdestFuctionWin_onSplashDrawOver);
 			TS_DrawSplash(pme,prompt,500,0, 0);
 		} else if( 1 == nRet ) {
 			DBGPRINTF("DATA EXIST!");//TODO 界面提示
@@ -1685,63 +1739,46 @@ static void CTopSoupApp_MakeSMSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
     ts_time_t now;
     char szBuf[128];
     AECHAR szTmp[128];
-    AECHAR szSOSInfo[32];
-    AECHAR szMon[6];
-    AECHAR szDay[6];
-    AECHAR szHour[6];
-    AECHAR szMinute[6];
-    AECHAR szTail[32];
+
+	AECHAR szBaseInfo[128];
+	AECHAR szIMSI[32];
+	AECHAR szMEID[32];
+	AECHAR szPhone[32];
+
+	AECHAR szRssi[16];
+
+	AECHAR szGpsInfo[128];
+	AECHAR szGpsTime[32];
+	AECHAR szGpsCoord[64];
 
     TS_GetTimeNow(&now);
 
-    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MONTH,szMon,sizeof(szMon));  // 月
-    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_DAY,szDay,sizeof(szDay));    // 日
-    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_HOUR,szHour,sizeof(szHour)); // 时
-    ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MIN,szMinute,sizeof(szMinute)); // 分
-
     if (pos == NULL)
     {
-        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS,szSOSInfo,sizeof(szSOSInfo));
-        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MIN_OPEN,szTail,sizeof(szTail));   // 分开启求助
+		//1 构建开启求助短信：&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,0.0,N,0.0,E,0.0,0,30$
 
-        //1 构建开启求助短信：求助信息! 4月18日20时18分开启求助
-        WSPRINTF(szTmp, sizeof(szTmp), L"%s%d%s%d%s", szSOSInfo, now.month, szMon, now.day, szDay);
-        WSPRINTF(szMsg, sizeof(AECHAR)*256, L"%s%d%s%d%s", szTmp, now.hour, szHour, now.minute, szTail);
+		STRTOWSTR(pme->m_imsi,szIMSI,sizeof(szIMSI));
+		STRTOWSTR(pme->m_meid,szMEID,sizeof(szMEID));
+		STRTOWSTR(pme->m_phone,szPhone,sizeof(szPhone));
+		STRTOWSTR(pme->m_rssi,szRssi,sizeof(szRssi));
+
+		WSPRINTF(szBaseInfo, sizeof(szBaseInfo), L"%s,%s,%s", szIMSI, szMEID, szPhone);
+		
+        WSPRINTF(szTmp, sizeof(szTmp), L"%d-%02d-%02d", now.year, now.month, now.day);
+		WSPRINTF(szGpsTime, sizeof(szGpsTime), L"%s,%02d:%02d:%02d", szTmp, now.hour, now.minute, now.second);
+		WSTRCPY(szGpsCoord, L"0.0,N,0.0,E,0.0,0");
+        WSPRINTF(szGpsInfo, sizeof(szGpsInfo), L"%s,%s", szGpsTime, szGpsCoord);
+
+        WSPRINTF(szMsg, sizeof(AECHAR)*256, L"&CMCZ,%s,%s,%s", szBaseInfo, szGpsInfo, szRssi);
     }
     else
     {
-        AECHAR szTmp2[128];
-        AECHAR textLat[32], textLon[32];
-        AECHAR szLat[32], szLon[32];
-        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS_LAST,szSOSInfo,sizeof(szSOSInfo));
-        ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LAT, textLat, sizeof(textLat));
-        ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LON, textLon, sizeof(textLon));
-        ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_IS_NAVIGATE,szTail,sizeof(szTail));   // 分开启求助 //TODO
-
-        TS_FLT2SZ(szLat, pos->lat);
-        //FLOATTOWSTR(pme->m_gpsInfo.theInfo.lat, szLat, 32);
-        WSTRTOSTR(szLat, szBuf, sizeof(szBuf));
-        DBGPRINTF("Lat: %s", szBuf);
-
-        TS_FLT2SZ(szLon, pos->lon);
-        //FLOATTOWSTR(pme->m_gpsInfo.theInfo.lon, szLat, 32);
-        WSTRTOSTR(szLon, szBuf, sizeof(szBuf));
-        DBGPRINTF("Lon: %s", szBuf);
-
-        //2 构建位置信息的求助短信：求助信息: 最后位置4月18日20时21分在东经114度27.947分，北纬38度5.280分
-        //2 构建位置信息的求助短信：求助信息! 最后位置:4月18日20时21分#纬度:E,20.012345#经度:N,120.012345
-
-        //求助信息! 最后位置:4月18日
-        WSPRINTF(szTmp, sizeof(szTmp), L"%s%d%s%d%s", szSOSInfo, now.month, szMon, now.day, szDay);
-        //TMP+20时21分#
-        WSPRINTF(szTmp2, sizeof(szTmp2), L"%s%d%s%d%s#", szTmp, now.hour, szHour, now.minute, szMinute);
-        //TMP2+纬度:E,20.012345#经度:N,120.012345
-        WSPRINTF(szMsg, sizeof(AECHAR)*256, L"%s%s:E,%s#%s:N,%s", szTmp2, textLat, szLat, textLon, szLon);
+       
     }
 
     WSTRTOSTR(szMsg, szBuf, sizeof(szBuf));
 
-    DBGPRINTF("@MakeSOSMsg:%s", szBuf);
+    DBGPRINTF("@MakeSMSMsg:%s", szBuf);
 }
 static void CTopSoupApp_onSplashCall(void * po)
 {
@@ -1966,3 +2003,165 @@ static void CTopSoupApp_ReadSMS(CTopSoupApp * pme,ISMSMsg *pSMS)
 	}
 }
 
+
+/*===========================================================================
+   This function called by location modoule.
+===========================================================================*/
+static void CTopSoupApp_LocStart( void *po )
+{
+	CTopSoupApp *pme = (CTopSoupApp*)po;
+	int nErr = SUCCESS;
+	struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
+	ZEROAT( pGetGPSInfo );
+
+	pGetGPSInfo->theInfo.gpsConfig.server.svrType = AEEGPS_SERVER_DEFAULT;
+	pGetGPSInfo->theInfo.gpsConfig.qos = 16;
+	pGetGPSInfo->theInfo.gpsConfig.optim = 1;
+	pGetGPSInfo->theInfo.gpsConfig.mode = pme->m_gpsMode;
+	pGetGPSInfo->theInfo.gpsConfig.nFixes = 0;
+	pGetGPSInfo->theInfo.gpsConfig.nInterval = 5;
+	
+	if( ISHELL_CreateInstance( pme->a.m_pIShell, AEECLSID_POSDET,(void **)&pGetGPSInfo->pPosDet ) == SUCCESS ) {
+		
+		CALLBACK_Init( &pGetGPSInfo->cbPosDet, CTopSoupApp_GetGPSInfo_Callback, pme );
+		
+		nErr = Loc_Init( pme->a.m_pIShell, pGetGPSInfo->pPosDet, &pGetGPSInfo->cbPosDet, &pGetGPSInfo->pts );
+		nErr = Loc_Start( pGetGPSInfo->pts, &pGetGPSInfo->theInfo );
+		if( nErr != SUCCESS ) {
+			pGetGPSInfo->theInfo.nErr = nErr;
+			DBGPRINTF("Loc_Start Failed! Err:%d", nErr);
+			//CTopSoupApp_Redraw((IWindow*)pme);
+			//TODO
+		}
+		else {
+			pGetGPSInfo->bAbort = FALSE;
+		}
+	}
+}
+
+static void CTopSoupApp_LocStop( void *po )
+{
+	CTopSoupApp *pme = (CTopSoupApp*)po;
+	struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
+
+	if (pGetGPSInfo->pPosDet)
+	{
+		Loc_Stop(pGetGPSInfo->pts);
+		
+		CALLBACK_Cancel( &pGetGPSInfo->cbProgressTimer );
+		CALLBACK_Cancel( &pGetGPSInfo->cbPosDet );
+		TS_RELEASEIF( pGetGPSInfo->pPosDet );
+	}
+}
+
+static void CTopSoupApp_GetGPSInfo_Callback( void *po )
+{
+	CTopSoupApp *pme = (CTopSoupApp*)po;
+	struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
+
+	DBGPRINTF("CTopSoupApp_GetGPSInfo_Callback in nErr:%d", pGetGPSInfo->theInfo.nErr);
+
+	if( pGetGPSInfo->theInfo.nErr == SUCCESS ) {
+		/* Process new data from IPosDet */
+		pGetGPSInfo->dwFixNumber++;
+		pGetGPSInfo->dwFixDuration += pGetGPSInfo->wProgress;
+		pGetGPSInfo->wProgress = 0;
+		DBGPRINTF("@GetGPSInfo fix:%d", pGetGPSInfo->dwFixNumber);
+
+		//经纬度有效时才算定位成功
+	    if (FCMP_G(pGetGPSInfo->theInfo.lat,0) && FCMP_G(pGetGPSInfo->theInfo.lon,0))
+		{
+			pme->m_bGetGpsInfo = TRUE;
+			pGetGPSInfo->wIdleCount = 0;
+		}
+		//else
+		//{
+		//	pme->m_bGetGpsInfo = FALSE;
+		//}
+
+		//TODO
+		//CTopSoupApp_Redraw(po);
+	}
+	else if( pGetGPSInfo->theInfo.nErr == EIDLE ) {
+		/* End of tracking */
+		DBGPRINTF("@End of tracking");
+		pGetGPSInfo->dwFixNumber = 0;
+	}
+	else if( pGetGPSInfo->theInfo.nErr == AEEGPS_ERR_TIMEOUT ) {
+		/* Record the timeout and perhaps re-try. */
+		pGetGPSInfo->dwTimeout++;
+	}
+	else {
+		
+		CTopSoupApp_LocStop((IWindow*)pme);
+		DBGPRINTF("@Something is not right here. Requires corrective action. Bailout");
+
+		/* Something is not right here. Requires corrective action. Bailout */
+		pGetGPSInfo->bAbort = TRUE;
+
+		pGetGPSInfo->dwFixNumber = 0;
+		
+		//CTopSoupApp_Redraw(po);
+	}
+}
+
+/*===========================================================================
+   This function called by location modoule.
+===========================================================================*/
+static void CTopSoupApp_GetGPSInfo_SecondTicker( void *po )
+{
+	CTopSoupApp *pme = (CTopSoupApp*)po;
+	struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
+
+	if (pGetGPSInfo->bPaused == FALSE) {
+		pGetGPSInfo->wProgress++;
+		DBGPRINTF("@Where GetGPS progress:%d", pGetGPSInfo->wProgress);
+		//CTopSoupApp_Redraw(po);
+	}
+
+	if (pGetGPSInfo->bAbort == FALSE) {
+		pGetGPSInfo->wIdleCount++;
+		DBGPRINTF("@Where GetGPS wIdleCount:%d", pGetGPSInfo->wIdleCount);
+	}
+
+	//重新启动
+	//1 空闲30秒
+	//2 尝试2分钟未定位成功
+	if (pGetGPSInfo->wIdleCount > WATCHER_TIMER || pGetGPSInfo->wProgress > 60 * 2)
+	{
+		//play_tts(pme, L"restart location");
+
+		DBGPRINTF("@Where GetGPS CTopSoupApp_LocStart");
+		CTopSoupApp_LocStop((IWindow*)pme);
+		CTopSoupApp_LocStart((IWindow*)pme);
+	}
+
+	ISHELL_SetTimerEx(pme->a.m_pIShell, 1000, &pme->m_cbWatcherTimer);
+}
+
+
+
+//Get MEID
+static int CTopSoupApp_GetMeid(CTopSoupApp *pme)
+{
+	char szBuf[64];
+	int size = 0;
+	int err = 0;
+
+	MEMSET(pme->m_meid, 0, 32);
+	MEMSET(pme->m_imsi, 0, 32);
+
+	size = 32;
+	err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_MEIDS, pme->m_meid, &size);
+	DBGPRINTF("@meid: %s size:%d err:%d", pme->m_meid, size, err);
+
+	size = 32;
+	err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_MOBILE_ID, pme->m_imsi, &size);
+	DBGPRINTF("@m_imsi: %s size:%d err:%d", pme->m_imsi, size, err);
+
+	confmgr_puts(pme->iConf, "device", "meid", pme->m_meid);
+	confmgr_puts(pme->iConf, "device", "imsi", pme->m_imsi);
+	confmgr_puts(pme->iConf, "device", "phone", pme->m_phone);
+	confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
+	return err;
+}
