@@ -2080,6 +2080,20 @@ static void CTopSoupApp_GetGPSInfo_Callback( void *po )
 
 		//TODO
 		//CTopSoupApp_Redraw(po);
+
+		//先向SMS短信中心发送报警信息
+		//SEND TO SMS
+		if (STRLEN(pme->m_szSmsNum) > 0) {
+			AECHAR szMsg[256];
+			pme->m_bEnableSMS = TRUE;
+			CTopSoupApp_MakeSMSMsg(pme, szMsg, NULL);
+			DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szSmsNum, WSTRLEN(szMsg));
+			CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szSmsNum);
+		} else {
+			DBGPRINTF("@SOS start");
+			CTopSoupApp_StartSOS(pme);
+		}
+
 	}
 	else if( pGetGPSInfo->theInfo.nErr == EIDLE ) {
 		/* End of tracking */
@@ -2134,6 +2148,8 @@ static void CTopSoupApp_GetGPSInfo_SecondTicker( void *po )
 		CTopSoupApp_LocStop((IWindow*)pme);
 		CTopSoupApp_LocStart((IWindow*)pme);
 	}
+
+	//添加重新发送判断
 
 	ISHELL_SetTimerEx(pme->a.m_pIShell, 1000, &pme->m_cbWatcherTimer);
 }
