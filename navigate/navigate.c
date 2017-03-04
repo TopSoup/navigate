@@ -1,4 +1,5 @@
 #include "logicmacro.h"
+#include "configmgr.h"
 
 #define TS_VERSION  "1.0.5-20170120"
 
@@ -74,7 +75,7 @@ static void		  CTopSoupApp_LocStart ( void *po );
 static void		  CTopSoupApp_LocStop ( void *po );
 static void		  CTopSoupApp_GetGPSInfo_SecondTicker( void *po );
 static void		  CTopSoupApp_GetGPSInfo_Callback( void *po );
-static int 		  CTopSoupApp_GetMeid(CTopSoupApp *pme);
+static void		  CTopSoupApp_GetDeviceInfo(CTopSoupApp *pme);
 //
 // navigate app can either be statically built into BREW or dynamically linked during run-time.
 // If AEE_STATIC is defined, then navigate app will be a static app.
@@ -363,11 +364,9 @@ static void CTopSoupApp_FreeAppData(IApplet* po)
 	TS_RELEASEIF( pme->m_pDatabase);
 
 	//释放定位模块
-	if (pme->m_bEnableSOS) {
-		CTopSoupApp_LocStop(po);
-		CALLBACK_Cancel(&pme->m_cbWatcherTimer);
-		pme->m_bEnableSOS = FALSE;
-	}
+	CTopSoupApp_LocStop(pme);
+	CALLBACK_Cancel(&pme->m_cbWatcherTimer);
+	pme->m_bEnableSOS = FALSE;
 
 	CTopSoupApp_ReleaseRes(pme);
 }
@@ -495,18 +494,11 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
          case EVT_APP_START:   // Process Start event
             DBGPRINTF(TS_VERSION);
 
-			CTopSoupApp_GetMeid(pme);
+			CTopSoupApp_GetDeviceInfo(pme);
 			
             //SOS模式开始发送短信和呼叫联系人
             if (pme->m_bEnableSOS)
             {
-				//先向SMS短信中心发送报警信息
-				if (STRLEN(pme->m_szSmsNum) > 0) {
-					AECHAR szMsg[256];
-                	CTopSoupApp_MakeSMSMsg(pme, szMsg, NULL);
-					pme->m_bEnableSMS = TRUE;
-				}
-				
 				//启动定位
                 {
 					struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
@@ -524,7 +516,17 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 					pme->m_bGetGpsInfo = FALSE;
 				}
 
-                CTopSoupApp_StartSOS(pme);
+				//先向SMS短信中心发送报警信息
+				//SEND TO SMS
+				if (STRLEN(pme->m_szSmsNum) > 0) {
+					AECHAR szMsg[256];
+					pme->m_bEnableSMS = TRUE;
+					CTopSoupApp_MakeSMSMsg(pme, szMsg, NULL);
+					DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szSmsNum, WSTRLEN(szMsg));
+					CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szSmsNum);
+				} else {
+					CTopSoupApp_StartSOS(pme);
+				}
             }
             else
             {
@@ -587,22 +589,28 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
             return (TRUE);
 
         case EVT_SMS_END:
-            //收到短信发送结束消息
-            if (pme->m_id >= 0 && pme->m_id < MAX_SOS_NUM)
-            {
-                CTopSoupApp_MakeSOSCall(pme, pme->m_szNum[pme->m_id]);
-                pme->m_OP = SOS_CALL_CALLING;
-            }
-            else
-            {
-                DBGPRINTF("@MakeSOSCall Failed with index:%d", pme->m_id);
-                //索引异常，结束单呼流程
-                pme->m_bEnableSOS = FALSE;
-                pme->m_OP = SOS_IDLE;
-                pme->m_id = -1;
+			if (pme->m_bEnableSMS) {
+				pme->m_bEnableSMS = FALSE;
+				CTopSoupApp_StartSOS(pme);
+			} else {
+				//收到短信发送结束消息
+				if (pme->m_id >= 0 && pme->m_id < MAX_SOS_NUM)
+				{
+					CTopSoupApp_MakeSOSCall(pme, pme->m_szNum[pme->m_id]);
+					pme->m_OP = SOS_CALL_CALLING;
+				}
+				else
+				{
+					DBGPRINTF("@MakeSOSCall Failed with index:%d", pme->m_id);
+					//索引异常，结束单呼流程
+					pme->m_bEnableSOS = FALSE;
+					pme->m_OP = SOS_IDLE;
+					pme->m_id = -1;
 
-                ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
-            }
+					ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
+				}
+			}
+            
             return (TRUE);
 
         case EVT_CALL_END:
@@ -1801,18 +1809,18 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
     }
 
     if (SUCCESS == LoadSOSConfig((IShell *) pme->a.m_pIShell, pme->m_szNum)) {
-        // for (i = 0; i < MAX_SOS_NUM; i++) {
-        //     if (STRLEN(pme->m_szNum[i]) > 0) {
-        //         AECHAR szMsg[256];
-        //         CTopSoupApp_MakeSOSMsg(pme, szMsg, NULL);
-		// 		DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szNum[i], WSTRLEN(szMsg));
-        //         CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szNum[i]);
-        //         break;
-        //     }
-        //     else {
-        //         DBGPRINTF("@SOS Num Is Empty:%d", i);
-        //     }
-        // }
+        for (i = 0; i < MAX_SOS_NUM; i++) {
+            if (STRLEN(pme->m_szNum[i]) > 0) {
+                AECHAR szMsg[256];
+                CTopSoupApp_MakeSOSMsg(pme, szMsg, NULL);
+				DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szNum[i], WSTRLEN(szMsg));
+                CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szNum[i]);
+                break;
+            }
+            else {
+                DBGPRINTF("@SOS Num Is Empty:%d", i);
+            }
+        }
 		ret = SUCCESS;
     }
 
@@ -1848,18 +1856,9 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
     else
     {
         //记录当前亲友索引和更改SOS状态
-        pme->m_id = 0; //i;
+        pme->m_id = i;
         pme->m_OP = SOS_SMS_SENDING;
     }
-
-	//SEND TO SMS
-	if (STRLEN(pme->m_szSmsNum) > 0) {
-		AECHAR szMsg[256];
-		CTopSoupApp_MakeSMSMsg(pme, szMsg, NULL);
-		DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szSmsNum, WSTRLEN(szMsg));
-		//CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szSmsNum);
-		CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, L"&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,29.2467013,N,121.2467054,E,06.0,215,3$", pme->m_szSmsNum);
-	}
 }
 
 static void CTopSoupApp_EnumMsgInitCb(void * po)
@@ -2142,9 +2141,8 @@ static void CTopSoupApp_GetGPSInfo_SecondTicker( void *po )
 
 
 //Get MEID
-static int CTopSoupApp_GetMeid(CTopSoupApp *pme)
+static void CTopSoupApp_GetDeviceInfo(CTopSoupApp *pme)
 {
-	char szBuf[64];
 	int size = 0;
 	int err = 0;
 
@@ -2163,5 +2161,4 @@ static int CTopSoupApp_GetMeid(CTopSoupApp *pme)
 	confmgr_puts(pme->iConf, "device", "imsi", pme->m_imsi);
 	confmgr_puts(pme->iConf, "device", "phone", pme->m_phone);
 	confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
-	return err;
 }
