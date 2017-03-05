@@ -697,17 +697,45 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				//FOR TEL TEST
 				if (wParam == AVK_PTT)
 				{
+					AECHAR szLoc[32];
 					DBGPRINTF("SOS CALL TEST ...");
 					//CTopSoupApp_MakeSOSCall(pme, "15511823090");
                     //CTopSoupApp_StartSOS(pme);    //与系统冲突，有时会死机？
+
+					DBGPRINTF(TS_FLT2SZ_7(szLoc, 123.12345678));
+					DBGPRINTF(TS_FLT2SZ_7(szLoc, 123.00000001));
+					DBGPRINTF(TS_FLT2SZ_7(szLoc, 123.00000006));
+					DBGPRINTF(TS_FLT2SZ_7(szLoc, 123.1234564));
 				}
 
 				if (wParam == AVK_1)
 				{
-					AECHAR szMsg[256];
-					DBGPRINTF("make sms test ...");
+					AECHAR szLoc[32];
+					char szBuf[32];
+
+					DBGPRINTF("SOS CALL TEST ...");
+					//CTopSoupApp_MakeSOSCall(pme, "15511823090");
+                    //CTopSoupApp_StartSOS(pme);    //与系统冲突，有时会死机？
+					TS_FLT2SZ_7(szLoc, 123.12345678);
+					WSTRTOSTR(szLoc, szBuf, sizeof(szBuf));
+					DBGPRINTF(szBuf);
+
+					TS_FLT2SZ_7(szLoc, 123.00000001);
+					WSTRTOSTR(szLoc, szBuf, sizeof(szBuf));
+					DBGPRINTF(szBuf);
+
+					TS_FLT2SZ_7(szLoc, 123.00000006);
+					WSTRTOSTR(szLoc, szBuf, sizeof(szBuf));
+					DBGPRINTF(szBuf);
+
+					TS_FLT2SZ_7(szLoc, 123.1234564);
+					WSTRTOSTR(szLoc, szBuf, sizeof(szBuf));
+					DBGPRINTF(szBuf);
+
+					//AECHAR szMsg[256];
+					//DBGPRINTF("make sms test ...");
                 	//CTopSoupApp_MakeSMSMsg(pme, szMsg, NULL);
-					CTopSoupApp_StartSOS(pme);    //与系统冲突，有时会死机？
+					//CTopSoupApp_StartSOS(pme);    //与系统冲突，有时会死机？
 				}
 				if (wParam == AVK_2)
 				{
@@ -1893,12 +1921,13 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
         SNPRINTF(szTmp, sizeof(szTmp), "%d-%02d-%02d", now.year, now.month, now.day);
 		SNPRINTF(szGpsTime, sizeof(szGpsTime), "%s,%02d:%02d:%02d", szTmp, now.hour, now.minute, now.second);
 
-		TS_FLT2SZ(szwLat, pme->m_gpsInfo.theInfo.lat);
-		TS_FLT2SZ(szwLon, pme->m_gpsInfo.theInfo.lon);
+		TS_FLT2SZ_7(szwLat, pme->m_gpsInfo.theInfo.lat);
+		TS_FLT2SZ_7(szwLon, pme->m_gpsInfo.theInfo.lon);
 		WSTRTOSTR(szwLat, szLat, sizeof(szLat));
 		WSTRTOSTR(szwLon, szLon, sizeof(szLon));
 
-		pme->m_gpsInfo.theInfo.velocityHor = 12.250;
+		//For Test
+		//pme->m_gpsInfo.theInfo.velocityHor = 12.250;
 
 		kn = FMUL(FDIV(pme->m_gpsInfo.theInfo.velocityHor, 1852.0), 3600.0);	//1节=1.852公里/小时 velocityHor为m/s --> 1节 = V*3600/1852
 		km = FMUL(pme->m_gpsInfo.theInfo.velocityHor, 3.6);  //m/s --> km/h
@@ -1917,49 +1946,6 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
 
         SNPRINTF(szMsg, sizeof(char)*256, "&CMCZ,%s,%s,%s", szBaseInfo, szGpsInfo, pme->m_rssi);
     }
-
-    // else
-    // {
-	// 	AECHAR szwBaseInfo[128];
-	// 	AECHAR szIMSI[32];
-	// 	AECHAR szMEID[32];
-	// 	AECHAR szPhone[32];
-
-	// 	AECHAR szRssi[16];
-		
-	// 	AECHAR szGpsInfo[128];
-	// 	AECHAR szGpsTime[32];
-	// 	AECHAR szGpsCoord[64];
-
-	// 	AECHAR bufLat[MP_MAX_STRLEN], bufLon[MP_MAX_STRLEN], bufVel[MP_MAX_STRLEN], bufHeading[MP_MAX_STRLEN];
-	// 	AECHAR szKn[32];
-	// 	double kn = 0, km = 0;
-
-	// 	STRTOWSTR(pme->m_imsi,szIMSI,sizeof(szIMSI));
-	// 	STRTOWSTR(pme->m_meid,szMEID,sizeof(szMEID));
-	// 	STRTOWSTR(pme->m_phone,szPhone,sizeof(szPhone));
-	// 	STRTOWSTR(pme->m_rssi,szRssi,sizeof(szRssi));
-	// 	WSPRINTF(szwBaseInfo, sizeof(szwBaseInfo), L"%s,%s,%s", szIMSI, szMEID, szPhone);
-		
-	// 	kn = FMUL(FDIV(pme->m_gpsInfo.theInfo.velocityHor, 1852.0), 3600.0);	//1节=1.852公里/小时 velocityHor为m/s --> 1节 = V*3600/1852
-	// 	km = FMUL(pme->m_gpsInfo.theInfo.velocityHor, 3.6);  //m/s --> km/h
-		
-    //    	//1 构建开启求助短信：&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,0.0,N,0.0,E,0.0,0,30$
-		
-	// 	FORMATFLT(bufLon, bufLat, pme->m_gpsInfo.theInfo.lon, pme->m_gpsInfo.theInfo.lat);
-
-    //     WSPRINTF(szTmp, sizeof(szTmp), L"%d-%02d-%02d", now.year, now.month, now.day);
-	// 	WSPRINTF(szGpsTime, sizeof(szGpsTime), L"%s,%02d:%02d:%02d", szTmp, now.hour, now.minute, now.second);
-	// 	WSTRCPY(szGpsCoord, L"0.0,N,0.0,E,0.0,0");
-	// 	//WSPRINTF(szGpsCoord, sizeof(szGpsCoord), L"%s,N,%s,E,%s,%s", bufLon, bufLat, TS_FLT2SZ_3(bufVel, km), TS_FLT2SZ_3(bufHeading, pGetGpsInfo->theInfo.heading));
-	// 	WSPRINTF(szGpsCoord, sizeof(szGpsCoord), L"%s,N,%s,E,%s,%s", bufLon, bufLat, TS_FLT2SZ_3(szKn, kn), TS_FLT2SZ_3(bufHeading, pme->m_gpsInfo.theInfo.heading));
-    //     WSPRINTF(szGpsInfo, sizeof(szGpsInfo), L"%s,%s", szGpsTime, szGpsCoord);
-
-    //     WSPRINTF(szTmp2, sizeof(AECHAR)*256, L"&CMCZ,%s,%s,%s", szwBaseInfo, szGpsInfo, szRssi);
-	// 	WSTRTOSTR(szTmp2, szMsg, sizeof(char)*256);
-    // }
-
-    //WSTRTOSTR(szMsg, szBuf, sizeof(szBuf));
 
     DBGPRINTF("@MakeSMSMsg:%s", szMsg);
 }
