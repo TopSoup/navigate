@@ -282,11 +282,25 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
    CALLBACK_Init(&pme->m_enumMsgInitCb, CTopSoupApp_EnumMsgInitCb, (void*)pme);
    pme->m_tag = STRTOUL("2", NULL, 10);	//SMS TAG:AEESMS_TAG_MT_NOT_READ
    pme->m_mt = STRTOUL("2", NULL, 10);	//SMS TYPE:AEESMS_TYPE_PAGE
-   //STRCPY(pme->m_szSmsNum, "1065902018810"); //SMS Center
-   STRCPY(pme->m_szSmsNum, "15511823090"); //SMS Center
    
    pme->iConf = confmgr_createinstance(pme->a.m_pIShell,NULL);
 
+
+   //SMS center
+   {
+	   const char* pSmsNum = NULL;
+	   pSmsNum = confmgr_gets(pme->iConf, "sms", "center", NULL, NULL, "1065902018810");
+	   if (pSmsNum != NULL) {
+		   STRCPY(pme->m_szSmsNum,pSmsNum);
+		   DBGPRINTF("@1%s", pme->m_szSmsNum);
+	   } else {
+			STRCPY(pme->m_szSmsNum,"1065902018810");
+			DBGPRINTF("@2%s", pme->m_szSmsNum);
+	   }
+
+	   confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
+   }
+   
    //Tel
    nErr =ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_CALLMGR, (void**) &pme->m_pCallMgr);
    DBGPRINTF("CreateInst AEECLSID_CALLMGR ret %d", nErr);
@@ -524,10 +538,11 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				//SEND TO SMS
 				if (STRLEN(pme->m_szSmsNum) > 0) {
 					char szMsg[256];
+					Coordinate co;
 					pme->m_bEnableSMS = TRUE;
-					CTopSoupApp_MakeSMSMsg(pme, szMsg, NULL);
-					DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szSmsNum, WSTRLEN(szMsg));
-					CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szSmsNum);
+					CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, NULL);
+					DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
+					CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
 				} else {
 					CTopSoupApp_StartSOS(pme);
 				}
@@ -994,6 +1009,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 		MEMSET(pme->m_szSmsNum, 0, sizeof(pme->m_szSmsNum));
 		STRCPY(pme->m_szSmsNum, pBuf+STRLEN("#SMS")+1);
 		DBGPRINTF("pme->m_szSmsNum:%s", pme->m_szSmsNum);
+		confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
 		return FALSE;
 	}
 
@@ -1114,6 +1130,7 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 		MEMSET(pme->m_szSmsNum, 0, sizeof(pme->m_szSmsNum));
 		WSTRTOSTR(szTmp, (char*)pme->m_szSmsNum, sizeof(szTmp));
 		DBGPRINTF("pme->m_szSmsNum:%s", pme->m_szSmsNum);
+		confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
 		return FALSE;
 	}
 
@@ -1879,10 +1896,6 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
 	char szGpsInfo[128];
 	char szGpsTime[32];
 	char szGpsCoord[64];
-	char szLat[16];
-	char szLon[16];
-	char szHeading[16];
-	char szVel[16];
 
 	//AECHAR szTmp2[256];
 
@@ -1895,9 +1908,6 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
 	if (STRLEN(pme->m_rssi) == 0) {
 		STRCPY(pme->m_rssi, "0");
 	}
-
-	STRCPY(szHeading, "0");
-	STRCPY(szVel, "0.0");
 
 	SNPRINTF(szBaseInfo, sizeof(szBaseInfo), "%s,%s,%s", pme->m_imsi, pme->m_meid, pme->m_phone);
     if (pos == NULL)
@@ -1913,10 +1923,17 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
     } else 
 	{
 		//1 构建开启求助短信：&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,0.0,N,0.0,E,0.0,0,30$
+		char szLat[16];
+		char szLon[16];
+		char szHeading[16];
+		char szVel[16];
 		AECHAR szwLat[16], szwLon[16];
 		AECHAR szwKn[16], szwKm[16];
 		double kn = 0, km = 0;
 		int heading = 0;
+
+		STRCPY(szHeading, "0");
+		STRCPY(szVel, "0.0");
 
         SNPRINTF(szTmp, sizeof(szTmp), "%d-%02d-%02d", now.year, now.month, now.day);
 		SNPRINTF(szGpsTime, sizeof(szGpsTime), "%s,%02d:%02d:%02d", szTmp, now.hour, now.minute, now.second);
@@ -2305,18 +2322,7 @@ static void CTopSoupApp_GetGPSInfo_Callback( void *po )
 
 		//TODO
 		//CTopSoupApp_Redraw(po);
-		
-		// if (STRLEN(pme->m_szSmsNum) > 0) {
-		// 	char szMsg[256];
-		// 	Coordinate co;
-		// 	pme->m_bEnableSMS = TRUE;
-		// 	//CTopSoupApp_MakeSMSMsg(pme, szMsg, &co);
-		// 	//CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, NULL);
-		// 	CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, &co);
-		// 	DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
-		// 	CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
-		// }
-		
+				
 		//先向SMS短信中心发送报警信息
 		//SEND TO SMS
 		if (pme->m_bGetGpsInfo) {
@@ -2326,6 +2332,52 @@ static void CTopSoupApp_GetGPSInfo_Callback( void *po )
 				TS_DrawSplash(pme, prompt, 10000, 0, 0);
 			}
 			
+			//记录当前定位信息, 备用
+			{
+				ts_time_t now;
+				char szTmp[128];
+				char szGpsTime[32];
+				char szLat[16];
+				char szLon[16];
+				char szHeading[16];
+				char szVel[16];
+				AECHAR szwLat[16], szwLon[16];
+				AECHAR szwKn[16], szwKm[16];
+				double kn = 0, km = 0;
+				int heading = 0;
+
+				TS_GetTimeNow(&now);
+				SNPRINTF(szTmp, sizeof(szTmp), "%d-%02d-%02d", now.year, now.month, now.day);
+				SNPRINTF(szGpsTime, sizeof(szGpsTime), "%s,%02d:%02d:%02d", szTmp, now.hour, now.minute, now.second);
+
+				TS_FLT2SZ_7(szwLat, pme->m_gpsInfo.theInfo.lat);
+				TS_FLT2SZ_7(szwLon, pme->m_gpsInfo.theInfo.lon);
+				WSTRTOSTR(szwLat, szLat, sizeof(szLat));
+				WSTRTOSTR(szwLon, szLon, sizeof(szLon));
+
+				//For Test
+				//pme->m_gpsInfo.theInfo.velocityHor = 12.250;
+
+				kn = FMUL(FDIV(pme->m_gpsInfo.theInfo.velocityHor, 1852.0), 3600.0);	//1节=1.852公里/小时 velocityHor为m/s --> 1节 = V*3600/1852
+				km = FMUL(pme->m_gpsInfo.theInfo.velocityHor, 3.6);  //m/s --> km/h
+				
+				TS_FLT2SZ_1(szwKm, km);
+				TS_FLT2SZ_1(szwKn, kn);
+				
+				//WSTRTOSTR(szwKm, szVel, sizeof(szVel));
+				WSTRTOSTR(szwKn, szVel, sizeof(szVel));
+
+				heading = FLTTOINT(pme->m_gpsInfo.theInfo.heading);
+				SPRINTF(szHeading, "%d", heading);
+				
+				confmgr_puts(pme->iConf, "gps", "lat", szLat);
+				confmgr_puts(pme->iConf, "gps", "lon", szLon);
+				confmgr_puts(pme->iConf, "gps", "vel", szVel);
+				confmgr_puts(pme->iConf, "gps", "heading", szHeading);
+				confmgr_puts(pme->iConf, "gps", "time", szGpsTime);
+			}
+			
+
 			if (STRLEN(pme->m_szSmsNum) > 0) {
 				char szMsg[256];
 				Coordinate co;
@@ -2333,7 +2385,6 @@ static void CTopSoupApp_GetGPSInfo_Callback( void *po )
 				CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, &co);
 				DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
 				CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
-
 			} else {
 				DBGPRINTF("@SOS start");
 				CTopSoupApp_StartSOS(pme);
@@ -2423,5 +2474,4 @@ static void CTopSoupApp_GetDeviceInfo(CTopSoupApp *pme)
 	confmgr_puts(pme->iConf, "device", "meid", pme->m_meid);
 	confmgr_puts(pme->iConf, "device", "imsi", pme->m_imsi);
 	confmgr_puts(pme->iConf, "device", "phone", pme->m_phone);
-	confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
 }
