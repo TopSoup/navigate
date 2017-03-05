@@ -24,6 +24,9 @@ static void     CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coor
 //pos != NULL:  发送带位置信息的求助短信
 static void 	CTopSoupApp_MakeSMSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordinate *pos);
 
+static void CTopSoupApp_SendSOSSMSMessage_ASC (CTopSoupApp * pme, uint16 wParam, char *szDesc, char* phoneNumber);
+static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordinate *pos);
+
 /************************************************************************/
 /* 从配置文件加载亲友联系方式                                           */
 /************************************************************************/
@@ -520,7 +523,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				//先向SMS短信中心发送报警信息
 				//SEND TO SMS
 				if (STRLEN(pme->m_szSmsNum) > 0) {
-					AECHAR szMsg[256];
+					char szMsg[256];
 					pme->m_bEnableSMS = TRUE;
 					CTopSoupApp_MakeSMSMsg(pme, szMsg, NULL);
 					DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szSmsNum, WSTRLEN(szMsg));
@@ -645,37 +648,46 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				//FOR SMS & TEL TEST
 				if (wParam == AVK_0)
 				{
-					char szBuf[64];
-					int size = 0;
-					int err = 0;
+					// char szBuf[64];
+					// int size = 0;
+					// int err = 0;
 
-					MEMSET(szBuf, 0, 32);
+					// MEMSET(szBuf, 0, 32);
 
-					size = 32;
-					err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_MEIDS, szBuf, &size);
-					DBGPRINTF("@@@ meid: %s size:%d err:%d", szBuf, size, err);
+					// size = 32;
+					// err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_MEIDS, szBuf, &size);
+					// DBGPRINTF("@@@ meid: %s size:%d err:%d", szBuf, size, err);
 					
-					MEMSET(szBuf, 0, 32);
-					size = 32;
-					err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_MOBILE_ID, szBuf, &size);
-					DBGPRINTF("@@@ imsi: %s size:%d err:%d", szBuf, size, err);
+					// MEMSET(szBuf, 0, 32);
+					// size = 32;
+					// err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_MOBILE_ID, szBuf, &size);
+					// DBGPRINTF("@@@ imsi: %s size:%d err:%d", szBuf, size, err);
 
-					MEMSET(szBuf, 0, 32);
-					size = 32;
-					err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_ICCID, szBuf, &size);
-					DBGPRINTF("@@@ iccid: %s size:%d err:%d", szBuf, size, err);
+					// MEMSET(szBuf, 0, 32);
+					// size = 32;
+					// err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_ICCID, szBuf, &size);
+					// DBGPRINTF("@@@ iccid: %s size:%d err:%d", szBuf, size, err);
 
  
- 					MEMSET(szBuf, 0, 32);
-					size = 32;
-					err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_IMEI, szBuf, &size);
-					DBGPRINTF("@@@ imei: %s size:%d err:%d", szBuf, size, err);
+ 					// MEMSET(szBuf, 0, 32);
+					// size = 32;
+					// err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_IMEI, szBuf, &size);
+					// DBGPRINTF("@@@ imei: %s size:%d err:%d", szBuf, size, err);
 
- 					MEMSET(szBuf, 0, 32);
-					size = 32;
-					err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_RUIMID, szBuf, &size);
-					DBGPRINTF("@@@ ruimid: %s size:%d err:%d", szBuf, size, err);
+ 					// MEMSET(szBuf, 0, 32);
+					// size = 32;
+					// err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_RUIMID, szBuf, &size);
+					// DBGPRINTF("@@@ ruimid: %s size:%d err:%d", szBuf, size, err);
 
+					if (STRLEN(pme->m_szSmsNum) > 0) {
+						char szMsg[256];
+						Coordinate co;
+						pme->m_bEnableSMS = TRUE;
+						//CTopSoupApp_MakeSMSMsg(pme, szMsg, &co);
+						CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, NULL);
+						DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
+						CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
+					}
 					//DBGPRINTF("SEND SMS TEST ...");
 					//CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_ASCII);
 					//CTopSoupApp_SendSMSMessage(pme, USAGE_SMS_TX_UNICODE, L"TIANANMEN");
@@ -694,7 +706,8 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				{
 					AECHAR szMsg[256];
 					DBGPRINTF("make sms test ...");
-                	CTopSoupApp_MakeSMSMsg(pme, szMsg, NULL);
+                	//CTopSoupApp_MakeSMSMsg(pme, szMsg, NULL);
+					CTopSoupApp_StartSOS(pme);    //与系统冲突，有时会死机？
 				}
 				if (wParam == AVK_2)
 				{
@@ -1469,6 +1482,73 @@ void CTopSoupApp_SendSOSSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *sz
         // Higher 16 bits specify error type specified as AEESMS_ERRORTYPE_XXX
         // lower  16 bits specify error specified as AEESMS_ERROR_XXX
         DBGPRINTF("ISMS_SendMsg ret 0x%x", nReturn);
+    } 
+    return;
+}
+
+
+void CTopSoupApp_SendSOSSMSMessage_ASC (CTopSoupApp * pme, uint16 wParam, char *szDesc, char* phoneNumber)
+{
+    // Make sure the pointers we'll be using are valid
+    if (pme == NULL || pme->a.m_pIShell == NULL || pme->a.m_pIDisplay == NULL)
+        return;
+
+    if (USAGE_SMS_TX_ASCII == wParam)
+    {
+        int nErr;
+        WebOpt awo[6]; /* ***IMPORTANT**** grow this if you add more
+        WebOpts here, or shrink it and call AddOpt() multiple times */
+        int    i = 0;
+        uint32 nReturn=0;
+        //AECHAR pszBuf[100];
+
+        nErr =ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_SMSMSG, (void **)&pme->m_pISMSMsg);
+        DBGPRINTF("CreateInstance of AEECLSID_SMSMSG ret %d", nErr);
+        if(nErr != AEE_SUCCESS)
+            return;
+
+        /* NULL terminated string providing destination device number.
+        '+' as first character signifies international number.  */
+        awo[i].nId  = MSGOPT_TO_DEVICE_SZ ;
+        awo[i].pVal = (void *)phoneNumber;
+        i++;
+
+        /* unicode text to be send */
+        awo[i].nId  = MSGOPT_PAYLOAD_SZ ;
+        awo[i].pVal = (void *)szDesc;
+        i++;
+        DBGPRINTF("ISMSMSG_AddOpt MSGOPT_PAYLOAD_SZ");
+
+        /* encoding */
+        awo[i].nId  = MSGOPT_PAYLOAD_ENCODING;
+        awo[i].pVal = (void *)AEE_ENC_ISOLATIN1 ;
+        i++;
+
+        awo[i].nId  = MSGOPT_MOSMS_ENCODING;
+        awo[i].pVal = (void *)AEESMS_ENC_ASCII;
+        i++;
+
+#if 0
+        /* user ack */
+        awo[i].nId  = MSGOPT_READ_ACK;
+        awo[i].pVal = (void *)TRUE;
+        i++;
+#endif
+
+        /* this is absolutely necessary, do not remove, marks the end of the
+        array of WebOpts */
+        awo[i].nId  = MSGOPT_END;
+
+        /* add 'em */
+        nErr =ISMSMSG_AddOpt(pme->m_pISMSMsg, awo);
+        DBGPRINTF("ISMSMSG_AddOpt ret %d", nErr);
+
+        CALLBACK_Init(&pme->m_cb, SMSCallBack_Send, pme);
+        ISMS_SendMsg(pme->m_pISMS, pme->m_pISMSMsg, &pme->m_cb, &pme->m_retVal);
+
+        // Higher 16 bits specify error type specified as AEESMS_ERRORTYPE_XXX
+        // lower  16 bits specify error specified as AEESMS_ERROR_XXX
+        DBGPRINTF("ISMS_SendMsg ret 0x%x", nReturn);
     }
     return;
 }
@@ -1761,7 +1841,129 @@ extern int FORMATFLT(AECHAR* szLon, AECHAR* szLat, double lon, double lat);
 //构建SMS短信：
 //pos == NULL： 开启求助短信
 //pos != NULL:  发送带位置信息的求助短信
-//&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,29.2467013,N,121.2467054,E,06.0,215,3$
+//&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,29.2467013,N,121.2467054,E,06.0,215,80$
+static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordinate *pos)
+{
+    ts_time_t now;
+    char szTmp[128];
+
+	char szBaseInfo[128];
+	char szGpsInfo[128];
+	char szGpsTime[32];
+	char szGpsCoord[64];
+	char szLat[16];
+	char szLon[16];
+	char szHeading[16];
+	char szVel[16];
+
+	//AECHAR szTmp2[256];
+
+    TS_GetTimeNow(&now);
+
+	if (STRLEN(pme->m_phone) == 0) {
+		STRCPY(pme->m_phone, "00000000000");
+	}
+
+	if (STRLEN(pme->m_rssi) == 0) {
+		STRCPY(pme->m_rssi, "0");
+	}
+
+	STRCPY(szHeading, "0");
+	STRCPY(szVel, "0.0");
+
+	SNPRINTF(szBaseInfo, sizeof(szBaseInfo), "%s,%s,%s", pme->m_imsi, pme->m_meid, pme->m_phone);
+    if (pos == NULL)
+    {
+		//1 构建开启求助短信：&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,0.0,N,0.0,E,0.0,0,80$
+		
+        SNPRINTF(szTmp, sizeof(szTmp), "%d-%02d-%02d", now.year, now.month, now.day);
+		SNPRINTF(szGpsTime, sizeof(szGpsTime), "%s,%02d:%02d:%02d", szTmp, now.hour, now.minute, now.second);
+		STRCPY(szGpsCoord, "0.0,N,0.0,E,0.0,0");
+        SNPRINTF(szGpsInfo, sizeof(szGpsInfo), "%s,%s", szGpsTime, szGpsCoord);
+
+        SNPRINTF(szMsg, sizeof(char)*256, "&CMCZ,%s,%s,%s", szBaseInfo, szGpsInfo, pme->m_rssi);
+    } else 
+	{
+		//1 构建开启求助短信：&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,0.0,N,0.0,E,0.0,0,30$
+		AECHAR szwLat[16], szwLon[16];
+		AECHAR szwKn[16], szwKm[16];
+		double kn = 0, km = 0;
+		int heading = 0;
+
+        SNPRINTF(szTmp, sizeof(szTmp), "%d-%02d-%02d", now.year, now.month, now.day);
+		SNPRINTF(szGpsTime, sizeof(szGpsTime), "%s,%02d:%02d:%02d", szTmp, now.hour, now.minute, now.second);
+
+		TS_FLT2SZ(szwLat, pme->m_gpsInfo.theInfo.lat);
+		TS_FLT2SZ(szwLon, pme->m_gpsInfo.theInfo.lon);
+		WSTRTOSTR(szwLat, szLat, sizeof(szLat));
+		WSTRTOSTR(szwLon, szLon, sizeof(szLon));
+
+		pme->m_gpsInfo.theInfo.velocityHor = 12.250;
+
+		kn = FMUL(FDIV(pme->m_gpsInfo.theInfo.velocityHor, 1852.0), 3600.0);	//1节=1.852公里/小时 velocityHor为m/s --> 1节 = V*3600/1852
+		km = FMUL(pme->m_gpsInfo.theInfo.velocityHor, 3.6);  //m/s --> km/h
+		
+		TS_FLT2SZ_1(szwKm, km);
+		TS_FLT2SZ_1(szwKn, kn);
+
+		//WSTRTOSTR(szwKm, szVel, sizeof(szVel));
+		WSTRTOSTR(szwKn, szVel, sizeof(szVel));
+
+		heading = FLTTOINT(pme->m_gpsInfo.theInfo.heading);
+		SPRINTF(szHeading, "%d", heading);
+
+		SNPRINTF(szGpsCoord, sizeof(szGpsCoord), "%s,N,%s,E,%s,%s", szLat, szLon, szVel, szHeading);
+        SNPRINTF(szGpsInfo, sizeof(szGpsInfo), "%s,%s", szGpsTime, szGpsCoord);
+
+        SNPRINTF(szMsg, sizeof(char)*256, "&CMCZ,%s,%s,%s", szBaseInfo, szGpsInfo, pme->m_rssi);
+    }
+
+    // else
+    // {
+	// 	AECHAR szwBaseInfo[128];
+	// 	AECHAR szIMSI[32];
+	// 	AECHAR szMEID[32];
+	// 	AECHAR szPhone[32];
+
+	// 	AECHAR szRssi[16];
+		
+	// 	AECHAR szGpsInfo[128];
+	// 	AECHAR szGpsTime[32];
+	// 	AECHAR szGpsCoord[64];
+
+	// 	AECHAR bufLat[MP_MAX_STRLEN], bufLon[MP_MAX_STRLEN], bufVel[MP_MAX_STRLEN], bufHeading[MP_MAX_STRLEN];
+	// 	AECHAR szKn[32];
+	// 	double kn = 0, km = 0;
+
+	// 	STRTOWSTR(pme->m_imsi,szIMSI,sizeof(szIMSI));
+	// 	STRTOWSTR(pme->m_meid,szMEID,sizeof(szMEID));
+	// 	STRTOWSTR(pme->m_phone,szPhone,sizeof(szPhone));
+	// 	STRTOWSTR(pme->m_rssi,szRssi,sizeof(szRssi));
+	// 	WSPRINTF(szwBaseInfo, sizeof(szwBaseInfo), L"%s,%s,%s", szIMSI, szMEID, szPhone);
+		
+	// 	kn = FMUL(FDIV(pme->m_gpsInfo.theInfo.velocityHor, 1852.0), 3600.0);	//1节=1.852公里/小时 velocityHor为m/s --> 1节 = V*3600/1852
+	// 	km = FMUL(pme->m_gpsInfo.theInfo.velocityHor, 3.6);  //m/s --> km/h
+		
+    //    	//1 构建开启求助短信：&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,0.0,N,0.0,E,0.0,0,30$
+		
+	// 	FORMATFLT(bufLon, bufLat, pme->m_gpsInfo.theInfo.lon, pme->m_gpsInfo.theInfo.lat);
+
+    //     WSPRINTF(szTmp, sizeof(szTmp), L"%d-%02d-%02d", now.year, now.month, now.day);
+	// 	WSPRINTF(szGpsTime, sizeof(szGpsTime), L"%s,%02d:%02d:%02d", szTmp, now.hour, now.minute, now.second);
+	// 	WSTRCPY(szGpsCoord, L"0.0,N,0.0,E,0.0,0");
+	// 	//WSPRINTF(szGpsCoord, sizeof(szGpsCoord), L"%s,N,%s,E,%s,%s", bufLon, bufLat, TS_FLT2SZ_3(bufVel, km), TS_FLT2SZ_3(bufHeading, pGetGpsInfo->theInfo.heading));
+	// 	WSPRINTF(szGpsCoord, sizeof(szGpsCoord), L"%s,N,%s,E,%s,%s", bufLon, bufLat, TS_FLT2SZ_3(szKn, kn), TS_FLT2SZ_3(bufHeading, pme->m_gpsInfo.theInfo.heading));
+    //     WSPRINTF(szGpsInfo, sizeof(szGpsInfo), L"%s,%s", szGpsTime, szGpsCoord);
+
+    //     WSPRINTF(szTmp2, sizeof(AECHAR)*256, L"&CMCZ,%s,%s,%s", szwBaseInfo, szGpsInfo, szRssi);
+	// 	WSTRTOSTR(szTmp2, szMsg, sizeof(char)*256);
+    // }
+
+    //WSTRTOSTR(szMsg, szBuf, sizeof(szBuf));
+
+    DBGPRINTF("@MakeSMSMsg:%s", szMsg);
+}
+
 static void CTopSoupApp_MakeSMSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordinate *pos)
 {
     ts_time_t now;
@@ -2117,22 +2319,42 @@ static void CTopSoupApp_GetGPSInfo_Callback( void *po )
 
 		//TODO
 		//CTopSoupApp_Redraw(po);
-
+		
+		// if (STRLEN(pme->m_szSmsNum) > 0) {
+		// 	char szMsg[256];
+		// 	Coordinate co;
+		// 	pme->m_bEnableSMS = TRUE;
+		// 	//CTopSoupApp_MakeSMSMsg(pme, szMsg, &co);
+		// 	//CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, NULL);
+		// 	CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, &co);
+		// 	DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
+		// 	CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
+		// }
+		
 		//先向SMS短信中心发送报警信息
 		//SEND TO SMS
-		if (STRLEN(pme->m_szSmsNum) > 0) {
-			AECHAR szMsg[256];
-			Coordinate co;
-			pme->m_bEnableSMS = TRUE;
-			CTopSoupApp_MakeSMSMsg(pme, szMsg, &co);
-			DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szSmsNum, WSTRLEN(szMsg));
-			CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szSmsNum);
-		} else {
-			DBGPRINTF("@SOS start");
-			CTopSoupApp_StartSOS(pme);
-		}
+		if (pme->m_bGetGpsInfo) {
+			{
+				AECHAR prompt[TS_MAX_STRLEN];
+				ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_SOS_PROMPT, prompt, sizeof(prompt));
+				TS_DrawSplash(pme, prompt, 10000, 0, 0);
+			}
+			
+			if (STRLEN(pme->m_szSmsNum) > 0) {
+				char szMsg[256];
+				Coordinate co;
+				pme->m_bEnableSMS = TRUE;
+				CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, &co);
+				DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
+				CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
 
-		CTopSoupApp_LocStop((IWindow*)pme);
+			} else {
+				DBGPRINTF("@SOS start");
+				CTopSoupApp_StartSOS(pme);
+			}
+
+			CTopSoupApp_LocStop((IWindow*)pme);	
+		}
 	}
 	else if( pGetGPSInfo->theInfo.nErr == EIDLE ) {
 		/* End of tracking */

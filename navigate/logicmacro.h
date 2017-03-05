@@ -20,6 +20,7 @@ void       TS_FreeWin(IWindow ** ppif);
 
 AECHAR*	   TS_FLT2SZ(AECHAR* szBuf, double val);
 AECHAR*    TS_FLT2SZ_3(AECHAR* szBuf, double val);
+AECHAR*    TS_FLT2SZ_1(AECHAR* szBuf, double val);
 
 //���˿ո�
 int TrimSpace(char *inbuf, char *outbuf);
