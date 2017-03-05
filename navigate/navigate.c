@@ -1013,6 +1013,11 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 		return FALSE;
 	}
 
+	if (STRNCMP(pBuf, "!alarm#", STRLEN("!alarm#")) == 0) {
+		pme->m_bSmsSuccess = TRUE;
+		return FALSE;
+	}
+
 	//#1
 	pszTok = STRCHR(pBuf, '#');
 	if (pszTok == NULL) {
@@ -1131,7 +1136,12 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 		WSTRTOSTR(szTmp, (char*)pme->m_szSmsNum, sizeof(szTmp));
 		DBGPRINTF("pme->m_szSmsNum:%s", pme->m_szSmsNum);
 		confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
-		return FALSE;
+		return TRUE;
+	}
+
+	if (WSTRNCMP(pBuf, L"!alarm#", WSTRLEN(L"!alarm#")) == 0) {
+		pme->m_bSmsSuccess = TRUE;
+		return TRUE;
 	}
 
 	//#1
@@ -1910,6 +1920,7 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
 	}
 
 	SNPRINTF(szBaseInfo, sizeof(szBaseInfo), "%s,%s,%s", pme->m_imsi, pme->m_meid, pme->m_phone);
+
     if (pos == NULL)
     {
 		//1 构建开启求助短信：&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,0.0,N,0.0,E,0.0,0,80$
@@ -2382,6 +2393,7 @@ static void CTopSoupApp_GetGPSInfo_Callback( void *po )
 				char szMsg[256];
 				Coordinate co;
 				pme->m_bEnableSMS = TRUE;
+				pme->m_startSmsTime = GETTIMESECONDS();
 				CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, &co);
 				DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
 				CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
@@ -2448,7 +2460,14 @@ static void CTopSoupApp_GetGPSInfo_SecondTicker( void *po )
 	}
 
 	//添加重新发送判断
-
+	if (pme->m_bSmsSuccess == FALSE) {
+		uint32 now = 0;
+		now = GETTIMESECONDS();
+		if (now - pme->m_startSmsTime >= 60 && pme->m_startSmsTime > 0) {
+			//resend ... TODO
+		}
+	}
+	
 	ISHELL_SetTimerEx(pme->a.m_pIShell, 1000, &pme->m_cbWatcherTimer);
 }
 
