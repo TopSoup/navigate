@@ -70,6 +70,7 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme);
 #else
 #define WATCHER_TIMER	60
 #endif
+#define MP_MAX_STRLEN         32
 
 static void		  CTopSoupApp_LocStart ( void *po );
 static void		  CTopSoupApp_LocStop ( void *po );
@@ -699,6 +700,22 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				{
 					//DBGPRINTF("CALL TEST END ...");
 					//CTopSoupApp_EndSOSCall(pme);
+					//启动定位
+                	{
+					struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
+					ZEROAT(pGetGPSInfo);
+
+					pme->m_gpsMode = AEEGPS_MODE_TRACK_STANDALONE;//AEEGPS_MODE_TRACK_NETWORK;
+					
+					//启动定位
+					CTopSoupApp_LocStart((IWindow*)pme);
+
+					//Callback
+					CALLBACK_Init(&pme->m_cbWatcherTimer, CTopSoupApp_GetGPSInfo_SecondTicker, pme);
+					ISHELL_SetTimerEx(pme->a.m_pIShell, 1000, &pme->m_cbWatcherTimer);
+
+					pme->m_bGetGpsInfo = FALSE;
+					}
 				}
 			 }
 		 case EVT_KEY_PRESS:
@@ -1738,6 +1755,9 @@ static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
     DBGPRINTF("@MakeSOSMsg:%s", szBuf);
 }
 
+//格式化浮点数
+extern int FORMATFLT(AECHAR* szLon, AECHAR* szLat, double lon, double lat);
+
 //构建SMS短信：
 //pos == NULL： 开启求助短信
 //pos != NULL:  发送带位置信息的求助短信
@@ -1761,16 +1781,15 @@ static void CTopSoupApp_MakeSMSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
 
     TS_GetTimeNow(&now);
 
+	STRTOWSTR(pme->m_imsi,szIMSI,sizeof(szIMSI));
+	STRTOWSTR(pme->m_meid,szMEID,sizeof(szMEID));
+	STRTOWSTR(pme->m_phone,szPhone,sizeof(szPhone));
+	STRTOWSTR(pme->m_rssi,szRssi,sizeof(szRssi));
+	WSPRINTF(szBaseInfo, sizeof(szBaseInfo), L"%s,%s,%s", szIMSI, szMEID, szPhone);
+	
     if (pos == NULL)
     {
 		//1 构建开启求助短信：&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,0.0,N,0.0,E,0.0,0,30$
-
-		STRTOWSTR(pme->m_imsi,szIMSI,sizeof(szIMSI));
-		STRTOWSTR(pme->m_meid,szMEID,sizeof(szMEID));
-		STRTOWSTR(pme->m_phone,szPhone,sizeof(szPhone));
-		STRTOWSTR(pme->m_rssi,szRssi,sizeof(szRssi));
-
-		WSPRINTF(szBaseInfo, sizeof(szBaseInfo), L"%s,%s,%s", szIMSI, szMEID, szPhone);
 		
         WSPRINTF(szTmp, sizeof(szTmp), L"%d-%02d-%02d", now.year, now.month, now.day);
 		WSPRINTF(szGpsTime, sizeof(szGpsTime), L"%s,%02d:%02d:%02d", szTmp, now.hour, now.minute, now.second);
@@ -1781,7 +1800,25 @@ static void CTopSoupApp_MakeSMSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
     }
     else
     {
-       
+		AECHAR bufLat[MP_MAX_STRLEN], bufLon[MP_MAX_STRLEN], bufVel[MP_MAX_STRLEN], bufHeading[MP_MAX_STRLEN];
+		AECHAR szKn[32];
+		double kn = 0, km = 0;
+
+		kn = FMUL(FDIV(pme->m_gpsInfo.theInfo.velocityHor, 1852.0), 3600.0);	//1节=1.852公里/小时 velocityHor为m/s --> 1节 = V*3600/1852
+		km = FMUL(pme->m_gpsInfo.theInfo.velocityHor, 3.6);  //m/s --> km/h
+		
+       	//1 构建开启求助短信：&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,0.0,N,0.0,E,0.0,0,30$
+		
+		FORMATFLT(bufLon, bufLat, pme->m_gpsInfo.theInfo.lon, pme->m_gpsInfo.theInfo.lat);
+
+        WSPRINTF(szTmp, sizeof(szTmp), L"%d-%02d-%02d", now.year, now.month, now.day);
+		WSPRINTF(szGpsTime, sizeof(szGpsTime), L"%s,%02d:%02d:%02d", szTmp, now.hour, now.minute, now.second);
+		WSTRCPY(szGpsCoord, L"0.0,N,0.0,E,0.0,0");
+		//WSPRINTF(szGpsCoord, sizeof(szGpsCoord), L"%s,N,%s,E,%s,%s", bufLon, bufLat, TS_FLT2SZ_3(bufVel, km), TS_FLT2SZ_3(bufHeading, pGetGpsInfo->theInfo.heading));
+		WSPRINTF(szGpsCoord, sizeof(szGpsCoord), L"%s,N,%s,E,%s,%s", bufLon, bufLat, TS_FLT2SZ_3(szKn, kn), TS_FLT2SZ_3(bufHeading, pme->m_gpsInfo.theInfo.heading));
+        WSPRINTF(szGpsInfo, sizeof(szGpsInfo), L"%s,%s", szGpsTime, szGpsCoord);
+
+        WSPRINTF(szMsg, sizeof(AECHAR)*256, L"&CMCZ,%s,%s,%s", szBaseInfo, szGpsInfo, szRssi);
     }
 
     WSTRTOSTR(szMsg, szBuf, sizeof(szBuf));
@@ -2085,8 +2122,9 @@ static void CTopSoupApp_GetGPSInfo_Callback( void *po )
 		//SEND TO SMS
 		if (STRLEN(pme->m_szSmsNum) > 0) {
 			AECHAR szMsg[256];
+			Coordinate co;
 			pme->m_bEnableSMS = TRUE;
-			CTopSoupApp_MakeSMSMsg(pme, szMsg, NULL);
+			CTopSoupApp_MakeSMSMsg(pme, szMsg, &co);
 			DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szSmsNum, WSTRLEN(szMsg));
 			CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szSmsNum);
 		} else {
@@ -2094,6 +2132,7 @@ static void CTopSoupApp_GetGPSInfo_Callback( void *po )
 			CTopSoupApp_StartSOS(pme);
 		}
 
+		CTopSoupApp_LocStop((IWindow*)pme);
 	}
 	else if( pGetGPSInfo->theInfo.nErr == EIDLE ) {
 		/* End of tracking */

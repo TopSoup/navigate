@@ -207,7 +207,7 @@ static AECHAR* FLT2RAD(AECHAR* szBuf, double val)
 }
 
 //格式化浮点数
-static int FORMATFLT(AECHAR* szLon, AECHAR* szLat, double lon, double lat)
+int FORMATFLT(AECHAR* szLon, AECHAR* szLat, double lon, double lat)
 {
 	AECHAR eFlag[3], nFlag[3];
 	AECHAR szBuf[32];
