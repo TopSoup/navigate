@@ -178,6 +178,7 @@ struct CTopSoupApp
 	boolean			  m_bEnableSMS;
 	boolean			  m_bSmsSuccess;
 	uint32			  m_startSmsTime;
+	uint16			  m_resendCount;
 	
     SOSOP             m_OP;
     int               m_id;                       //当前通知的号码索引
