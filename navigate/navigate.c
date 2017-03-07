@@ -2016,7 +2016,7 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
 	if (p != NULL) {
 		STRCPY(pme->m_phone, p);
 	} else {
-		STRCPY(pme->m_phone, "00000000000");
+		//STRCPY(pme->m_phone, "00000000000");
 	}
 
 	if (STRLEN(pme->m_rssi) == 0) {
@@ -2069,7 +2069,7 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
 		SNPRINTF(szGpsCoord, sizeof(szGpsCoord),"%s,N,%s,E,%s,%s", szLat, szLon, szVel, szHeading);
 		SNPRINTF(szGpsInfo, sizeof(szGpsInfo), "%s,%s", szGpsTime, szGpsCoord);
 
-		SNPRINTF(szMsg, sizeof(char)*256, "&CMCZ,%s,%s,%s", szBaseInfo, szGpsInfo, pme->m_rssi);
+		SNPRINTF(szMsg, sizeof(char)*256, "&CMCZ,%s,%s,%s$", szBaseInfo, szGpsInfo, pme->m_rssi);
     } else 
 	{
 		//1 构建开启求助短信：&CMCZ,460030971945060,00000000011110,18912345678,2010-01-01,18:35:40,0.0,N,0.0,E,0.0,0,30$
@@ -2111,7 +2111,7 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
 		SNPRINTF(szGpsCoord, sizeof(szGpsCoord), "%s,N,%s,E,%s,%s", szLat, szLon, szVel, szHeading);
         SNPRINTF(szGpsInfo, sizeof(szGpsInfo), "%s,%s", szGpsTime, szGpsCoord);
 
-        SNPRINTF(szMsg, sizeof(char)*256, "&CMCZ,%s,%s,%s", szBaseInfo, szGpsInfo, pme->m_rssi);
+        SNPRINTF(szMsg, sizeof(char)*256, "&CMCZ,%s,%s,%s$", szBaseInfo, szGpsInfo, pme->m_rssi);
     }
 
     //DBGPRINTF("@MakeSMSMsg:%s", szMsg);
