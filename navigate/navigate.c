@@ -2006,12 +2006,16 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
 	char szGpsInfo[128];
 	char szGpsTime[32];
 	char szGpsCoord[64];
+	char *p = NULL;
 
 	//AECHAR szTmp2[256];
 
     TS_GetTimeNow(&now);
 
-	if (STRLEN(pme->m_phone) == 0) {
+	p = confmgr_gets(pme->iConf, "device", "phone", NULL, NULL, NULL);
+	if (p != NULL) {
+		STRCPY(pme->m_phone, p);
+	} else {
 		STRCPY(pme->m_phone, "00000000000");
 	}
 
