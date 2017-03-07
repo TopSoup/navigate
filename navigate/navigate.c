@@ -49,7 +49,9 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32]);
 //Event
 #define EVT_SMS_END				EVT_USER + 100		// 发送SMS结束
 #define EVT_CALL_END			EVT_USER + 101		// 拨打电话结束
+#define EVT_ENUM_SMS_END        EVT_USER + 102     // 遍历SMS结束
 #define EVT_START_SOS           EVT_USER + 1000     // 启动SOS报警
+
 
 //解析短信内容
 //格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
@@ -544,23 +546,23 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 
 				//先向SMS短信中心发送报警信息
 				//SEND TO SMS
-				if (STRLEN(pme->m_szSmsNum) > 0) {
-					char szMsg[256];
-					//Coordinate co;
-					pme->m_bEnableSMS = TRUE;
-					pme->m_OP = SOS_SMS_SENDING;
-					CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, NULL);
-					DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
-					CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
+				// if (STRLEN(pme->m_szSmsNum) > 0) {
+				// 	char szMsg[256];
+				// 	//Coordinate co;
+				// 	pme->m_bEnableSMS = TRUE;
+				// 	pme->m_OP = SOS_SMS_SENDING;
+				// 	CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, NULL);
+				// 	DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
+				// 	CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
 
-					//For Test
-					// if (!ISHELL_PostEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
-					// 	DBGPRINTF("ISHELL_PostEvent EVT_SMS_END failure");
-					// }
+				// 	//For Test
+				// 	// if (!ISHELL_PostEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
+				// 	// 	DBGPRINTF("ISHELL_PostEvent EVT_SMS_END failure");
+				// 	// }
 					
-				} else {
-					CTopSoupApp_StartSOS(pme);
-				}
+				// } else {
+				// 	CTopSoupApp_StartSOS(pme);
+				// }
             }
             else
             {
@@ -575,6 +577,30 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				&pme->m_dwStatus);
 
             return TRUE;
+		 case EVT_ENUM_SMS_END:
+		 		//先向SMS短信中心发送报警信息
+				//SEND TO SMS
+				if (pme->m_bEnableSOS) {
+					if (STRLEN(pme->m_szSmsNum) > 0) {
+					char szMsg[256];
+					//Coordinate co;
+					pme->m_bEnableSMS = TRUE;
+					pme->m_OP = SOS_SMS_SENDING;
+					CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, NULL);
+					DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
+					CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
+
+					//For Test
+					// if (!ISHELL_PostEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
+					// 	DBGPRINTF("ISHELL_PostEvent EVT_SMS_END failure");
+					// }
+						
+					} else {
+						CTopSoupApp_StartSOS(pme);
+					}
+				}
+				
+		    return (TRUE);
 
          case EVT_APP_STOP:        // process STOP event
             pme->m_id = -1;
@@ -2287,6 +2313,11 @@ static void CTopSoupApp_EnumMsgNextCb(void * po)
 						pme->m_tag, 
 						&pme->m_enumMsgInitCb, 
 						&pme->m_dwStatus);
+		  } else {
+				//For Test
+				if (!ISHELL_PostEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_ENUM_SMS_END, 0, 0)) {
+					DBGPRINTF("ISHELL_PostEvent EVT_SMS_END failure");
+				}
 		  }
 
           //DBGPRINTF("OATSMS_EnumMsgNextCb end");
