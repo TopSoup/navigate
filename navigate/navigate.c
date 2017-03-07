@@ -292,14 +292,13 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
 	   pSmsNum = confmgr_gets(pme->iConf, "sms", "center", NULL, NULL, "1065902018810");
 	   if (pSmsNum != NULL) {
 		   STRCPY(pme->m_szSmsNum,pSmsNum);
-		   DBGPRINTF("@1%s", pme->m_szSmsNum);
+		   DBGPRINTF("@1 %s", pme->m_szSmsNum);
 	   } else {
 			STRCPY(pme->m_szSmsNum,"1065902018810");
-			DBGPRINTF("@2%s", pme->m_szSmsNum);
+			DBGPRINTF("@2 %s", pme->m_szSmsNum);
 	   }
 
 	   confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
-	   STRCPY(pme->m_szSmsNum,"15511823090");
    }
    
    //Tel
@@ -505,8 +504,8 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 {
     CTopSoupApp * pme = (CTopSoupApp *)pi;
 
-    if (eCode != EVT_APP_NO_SLEEP)
-    	DBGPRINTF("@TS Recv eCode:%x", eCode);
+    // if (eCode != EVT_APP_NO_SLEEP)
+    // 	DBGPRINTF("@TS Recv eCode:%x", eCode);
 
     switch ( eCode ) 
     {   
@@ -552,12 +551,12 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 					pme->m_OP = SOS_SMS_SENDING;
 					CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, NULL);
 					DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
-					//CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
+					CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
 
 					//For Test
-					if (!ISHELL_PostEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
-						DBGPRINTF("ISHELL_PostEvent EVT_SMS_END failure");
-					}
+					// if (!ISHELL_PostEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
+					// 	DBGPRINTF("ISHELL_PostEvent EVT_SMS_END failure");
+					// }
 					
 				} else {
 					CTopSoupApp_StartSOS(pme);
@@ -567,13 +566,13 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
             {
                 pme->m_eActiveWin = TSW_MAIN;
                 CTopSoupApp_SetWindow(pme, TSW_MAIN, 0);
-
-				ISMSSTORAGE_EnumMsgInit(pme->m_pISMSStorage, 
-                    pme->m_mt, 
-                    pme->m_tag, 
-                    &pme->m_enumMsgInitCb, 
-                    &pme->m_dwStatus);
             }
+
+			ISMSSTORAGE_EnumMsgInit(pme->m_pISMSStorage, 
+				pme->m_mt, 
+				pme->m_tag, 
+				&pme->m_enumMsgInitCb, 
+				&pme->m_dwStatus);
 
             return TRUE;
 
@@ -593,7 +592,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
             DBGPRINTF("@EVT_APP_RESUME sos:%d", pme->m_bEnableSOS);
 
 			//显示提示启用SOS
-			//if (pme->m_bEnableSOS) 
+			if (pme->m_bEnableSOS) 
 			{
 				TS_DrawSplash_Stop(pme);
 				{
@@ -630,15 +629,19 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
                 DBGPRINTF("Already Enabled SOS");
                 return (TRUE);
             }
-            DBGPRINTF("@Recv Start Navigate Use SOS Mode! wParam:%d dwParam:%s", wParam, (char*)dwParam);
 
-			// {
-			// 	char *phone = (char*)dwParam;
-			// 	if (phone != NULL && STRLEN(phone) > 0) {
-			// 		STRCPY(pme->m_phone, phone);
-			// 		SPRINTF(pme->m_rssi, "%d", wParam);
-			// 	}
-			// }
+            DBGPRINTF("@Recv Start Navigate Use SOS Mode! wParam:%d dwParam:%s dwParam:%x", wParam, (char*)dwParam, dwParam);
+
+			{
+				char *phone = (char*)dwParam;
+				SPRINTF(pme->m_rssi, "%d", wParam);
+				confmgr_puts(pme->iConf, "device", "rssi", pme->m_phone);
+
+				if (phone != NULL && STRLEN(phone) > 0) {
+					STRCPY(pme->m_phone, phone);
+					confmgr_puts(pme->iConf, "device", "phone", pme->m_phone);
+				}
+			}
 
             pme->m_bEnableSOS = TRUE;
             ISHELL_StartApplet(pme->a.m_pIShell, AEECLSID_NAVIGATE);
@@ -1058,9 +1061,12 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 		return FALSE;
 	}
 
-	if (STRNCMP(pBuf, "!alarm#", STRLEN("!alarm#")) == 0) {
-		pme->m_bSmsSuccess = TRUE;
-		return FALSE;
+	if (pme->m_bEnableSMS) {
+		if (STRNCMP(pBuf, "!alarm#", STRLEN("!alarm#")) == 0) {
+			pme->m_bSmsSuccess = TRUE;
+			DBGPRINTF("@pme->m_bSmsSuccess:%d", pme->m_bSmsSuccess);
+			return FALSE;
+		}
 	}
 
 	//#1
@@ -1184,9 +1190,12 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 		return TRUE;
 	}
 
-	if (WSTRNCMP(pBuf, L"!alarm#", WSTRLEN(L"!alarm#")) == 0) {
-		pme->m_bSmsSuccess = TRUE;
-		return TRUE;
+	if (pme->m_bEnableSMS) {
+		if (WSTRNCMP(pBuf, L"!alarm#", WSTRLEN(L"!alarm#")) == 0) {
+			pme->m_bSmsSuccess = TRUE;
+			DBGPRINTF("@pme->m_bSmsSuccess:%d", pme->m_bSmsSuccess);
+			return TRUE;
+		}
 	}
 
 	//#1
@@ -1273,18 +1282,21 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 static boolean CTopSoupApp_ReceiveSMSMessage(CTopSoupApp* pme, uint32 uMsgId)
 {
 	ISMSMsg *pSMS  = NULL;
-	if(ISMS_ReceiveMsg(pme->m_pISMS, uMsgId, &pSMS) ==AEE_SUCCESS) {
+	if(ISMS_ReceiveMsg(pme->m_pISMS, uMsgId, &pSMS) == AEE_SUCCESS) {
 		SMSMsgOpt TmpOpt;
 		char szPhone[32], szText[256];
 		MEMSET(szPhone, 0, sizeof(szPhone));
 		MEMSET(szText, 0, sizeof(szText));
 
-		if(ISMSMSG_GetOpt(pSMS, MSGOPT_FROM_DEVICE_SZ,&TmpOpt)==AEE_SUCCESS) {
+		DBGPRINTF("CTopSoupApp_ReceiveSMSMessage in");
+
+		if(ISMSMSG_GetOpt(pSMS, MSGOPT_FROM_DEVICE_SZ,&TmpOpt) == AEE_SUCCESS) {
 			STRCPY(szPhone, (char*)TmpOpt.pVal);
+			DBGPRINTF("CTopSoupApp_ReceiveSMSMessage szPhone:", szPhone);
 
 			//短信内容:目标位置:北京天安门,经度:E,114.000纬度:N,33.2222
 			///        目标位置:北京天安门#经度:E,114.000#纬度:N,33.2222
-			if(ISMSMSG_GetOpt(pSMS, MSGOPT_PAYLOAD_WSZ,&TmpOpt)==AEE_SUCCESS) {
+			if(ISMSMSG_GetOpt(pSMS, MSGOPT_PAYLOAD_WSZ,&TmpOpt) == AEE_SUCCESS) {
 				//WSTRTOUTF8((AECHAR*)TmpOpt.pVal,WSTRLEN((AECHAR*)TmpOpt.pVal), (byte*)szText, sizeof(szText));
 				WSTRTOSTR((AECHAR*)TmpOpt.pVal, (char*)szText, WSTRLEN((AECHAR*)TmpOpt.pVal));//, sizeof(szText));
 				DBGPRINTF("WSZ msg from %s: %s",szPhone,szText);
@@ -1891,7 +1903,7 @@ static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
     ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_HOUR,szHour,sizeof(szHour)); // 时
     ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_MIN,szMinute,sizeof(szMinute)); // 分
 
-	p = confmgr_gets(pme->iConf, "gps", "lat", NULL, NULL, "");
+	p = confmgr_gets(pme->iConf, "gps", "lat", NULL, NULL, NULL);
     if (pos == NULL && p == NULL)
     {
         ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS,szSOSInfo,sizeof(szSOSInfo));
@@ -1915,7 +1927,7 @@ static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
         ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LON, textLon, sizeof(textLon));
         ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_IS_NAVIGATE,szTail,sizeof(szTail));   // 分开启求助 //TODO
 
-		p = confmgr_gets(pme->iConf, "gps", "lat", NULL, NULL, "");
+		p = confmgr_gets(pme->iConf, "gps", "lat", NULL, NULL, NULL);
 		if (p != NULL) {
 			STRCPY(lat, p);
 			STRTOWSTR(lat, szLat, sizeof(szLat));
@@ -1925,7 +1937,7 @@ static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
 			WSTRTOSTR(szLat, szBuf, sizeof(szBuf));
 			DBGPRINTF("Lat: %s", szBuf);
 		}
-		p = confmgr_gets(pme->iConf, "gps", "lon", NULL, NULL, "");
+		p = confmgr_gets(pme->iConf, "gps", "lon", NULL, NULL, NULL);
 		if (p != NULL) {
 			STRCPY(lon, p);
 			STRTOWSTR(lon, szLon, sizeof(szLon));
@@ -1991,31 +2003,31 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
 		char szVel[16];
 		char *p = NULL;
 
-		p = confmgr_gets(pme->iConf, "gps", "lat", NULL, NULL, "");
+		p = confmgr_gets(pme->iConf, "gps", "lat", NULL, NULL, NULL);
 		if (p != NULL) {
 			STRCPY(szLat, p);
 		} else {
 			STRCPY(szLat, "0.0");
 		}
-		p = confmgr_gets(pme->iConf, "gps", "lon", NULL, NULL, "");
+		p = confmgr_gets(pme->iConf, "gps", "lon", NULL, NULL, NULL);
 		if (p != NULL) {
 			STRCPY(szLon, p);
 		} else {
 			STRCPY(szLon, "0.0");
 		}
-		p = confmgr_gets(pme->iConf, "gps", "vel", NULL, NULL, "");
+		p = confmgr_gets(pme->iConf, "gps", "vel", NULL, NULL, NULL);
 		if (p != NULL) {
 			STRCPY(szVel, p);
 		} else {
 			STRCPY(szVel, "0.0");
 		}
-		p = confmgr_gets(pme->iConf, "gps", "heading", NULL, NULL, "");
+		p = confmgr_gets(pme->iConf, "gps", "heading", NULL, NULL, NULL);
 		if (p != NULL) {
 			STRCPY(szHeading, p);
 		} else {
 			STRCPY(szHeading, "0");
 		}
-		p = confmgr_gets(pme->iConf, "gps", "time", NULL, NULL, "");
+		p = confmgr_gets(pme->iConf, "gps", "time", NULL, NULL, NULL);
 		if (p != NULL) {
 			STRCPY(szGpsTime, p);
 		} else {
@@ -2165,12 +2177,12 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
 				}
                 
 				DBGPRINTF("@SOS Send SMS To Num: %s Msg len:%d", pme->m_szNum[i], WSTRLEN(szMsg));
-                //CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szNum[i]);
+                CTopSoupApp_SendSOSSMSMessage(pme, USAGE_SMS_TX_UNICODE, szMsg, pme->m_szNum[i]);
 
 				//For Test
-				if (!ISHELL_PostEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
-					DBGPRINTF("ISHELL_PostEvent EVT_SMS_END failure");
-				}
+				// if (!ISHELL_PostEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
+				// 	DBGPRINTF("ISHELL_PostEvent EVT_SMS_END failure");
+				// }
 
                 break;
             }
@@ -2330,7 +2342,7 @@ static void CTopSoupApp_ReadSMS(CTopSoupApp * pme,ISMSMsg *pSMS)
 		pMyJulian = (JulianType *)TmpOpt.pVal;
 		SPRINTF(buf, "%d/%d/%d %d:%d:%d, weekday:%d", pMyJulian->wMonth, pMyJulian->wDay, pMyJulian->wYear, 
 																	pMyJulian->wHour, pMyJulian->wMinute, pMyJulian->wSecond, pMyJulian->wWeekDay);
-		DBGPRINTF("get MSGOPT_TIMESTAMP %s", buf);
+		//DBGPRINTF("get MSGOPT_TIMESTAMP %s", buf);
 		//WriteLine(pme,  buf, NULL, FALSE);
 	}
 
@@ -2595,7 +2607,6 @@ static void CTopSoupApp_GetGPSInfo_SecondTicker( void *po )
 					// if (!ISHELL_PostEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
 					// 	DBGPRINTF("ISHELL_PostEvent EVT_SMS_END failure");
 					// }
-					
 				}
 			} else {
 				ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
@@ -2619,13 +2630,12 @@ static void CTopSoupApp_GetDeviceInfo(CTopSoupApp *pme)
 
 	size = 32;
 	err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_MEIDS, pme->m_meid, &size);
-	DBGPRINTF("@meid: %s size:%d err:%d", pme->m_meid, size, err);
+	//DBGPRINTF("@meid: %s size:%d err:%d", pme->m_meid, size, err);
 
 	size = 32;
 	err = ISHELL_GetDeviceInfoEx(pme->a.m_pIShell, AEE_DEVICEITEM_MOBILE_ID, pme->m_imsi, &size);
-	DBGPRINTF("@m_imsi: %s size:%d err:%d", pme->m_imsi, size, err);
+	//DBGPRINTF("@m_imsi: %s size:%d err:%d", pme->m_imsi, size, err);
 
 	confmgr_puts(pme->iConf, "device", "meid", pme->m_meid);
 	confmgr_puts(pme->iConf, "device", "imsi", pme->m_imsi);
-	confmgr_puts(pme->iConf, "device", "phone", pme->m_phone);
 }
