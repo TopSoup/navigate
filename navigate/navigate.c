@@ -1,7 +1,7 @@
 #include "logicmacro.h"
 #include "configmgr.h"
 
-#define TS_VERSION  "1.0.6-20170306"
+#define TS_VERSION  "1.0.6-a1-20170307"
 
 /*-------------------------------------------------------------------
             Function Prototypes
@@ -1629,7 +1629,7 @@ void CTopSoupApp_SendSOSSMSMessage_ASC (CTopSoupApp * pme, uint16 wParam, char *
         awo[i].nId  = MSGOPT_PAYLOAD_SZ ;
         awo[i].pVal = (void *)szDesc;
         i++;
-        DBGPRINTF("ISMSMSG_AddOpt MSGOPT_PAYLOAD_SZ");
+        //DBGPRINTF("ISMSMSG_AddOpt MSGOPT_PAYLOAD_SZ");
 
         /* encoding */
         awo[i].nId  = MSGOPT_PAYLOAD_ENCODING;
@@ -2084,7 +2084,7 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
         SNPRINTF(szMsg, sizeof(char)*256, "&CMCZ,%s,%s,%s", szBaseInfo, szGpsInfo, pme->m_rssi);
     }
 
-    DBGPRINTF("@MakeSMSMsg:%s", szMsg);
+    //DBGPRINTF("@MakeSMSMsg:%s", szMsg);
 }
 
 static void CTopSoupApp_MakeSMSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordinate *pos)
@@ -2148,7 +2148,7 @@ static void CTopSoupApp_MakeSMSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
 
     WSTRTOSTR(szMsg, szBuf, sizeof(szBuf));
 
-    DBGPRINTF("@MakeSMSMsg:%s", szBuf);
+    //DBGPRINTF("@MakeSMSMsg:%s", szBuf);
 }
 // static void CTopSoupApp_onSplashCall(void * po)
 // {
@@ -2234,7 +2234,7 @@ static void CTopSoupApp_EnumMsgInitCb(void * po)
 {
    CTopSoupApp * pme = (CTopSoupApp *)po;
 
-   DBGPRINTF("CTopSoupApp_EnumMsgInitCb");
+   //DBGPRINTF("CTopSoupApp_EnumMsgInitCb");
 
    pme->m_pISMSMsg = NULL; // initial to save msg
    if (SUCCESS == pme->m_dwStatus)
@@ -2259,7 +2259,7 @@ static void CTopSoupApp_EnumMsgNextCb(void * po)
    int nErr = SUCCESS;
    CTopSoupApp * pme = (CTopSoupApp *)po;
 
-   DBGPRINTF("CTopSoupApp_EnumMsgNextCb index:%d", pme->m_dwIndex);
+   //DBGPRINTF("CTopSoupApp_EnumMsgNextCb index:%d", pme->m_dwIndex);
 
    if (SUCCESS == (nErr = pme->m_dwStatus)) 
    {
@@ -2280,7 +2280,7 @@ static void CTopSoupApp_EnumMsgNextCb(void * po)
       else
       {
 		  if (pme->m_tag != STRTOUL("1", NULL, 10)) {
-			DBGPRINTF("ISMSSTORAGE_EnumMsgInit Readed ");
+			//DBGPRINTF("ISMSSTORAGE_EnumMsgInit Readed ");
 			pme->m_tag = STRTOUL("1", NULL, 10);	//SMS TAG:AEESMS_TAG_MT_READ
 			ISMSSTORAGE_EnumMsgInit(pme->m_pISMSStorage, 
 						pme->m_mt, 
@@ -2289,7 +2289,7 @@ static void CTopSoupApp_EnumMsgNextCb(void * po)
 						&pme->m_dwStatus);
 		  }
 
-          DBGPRINTF("OATSMS_EnumMsgNextCb end");
+          //DBGPRINTF("OATSMS_EnumMsgNextCb end");
       }
    }
    else 
@@ -2304,7 +2304,7 @@ static void CTopSoupApp_ReadSMS(CTopSoupApp * pme,ISMSMsg *pSMS)
     SMSMsgOpt TmpOpt;
 	char szPhone[32], szText[256];
 
-    DBGPRINTF("CTopSoupApp_ReadSMS");
+    //DBGPRINTF("CTopSoupApp_ReadSMS");
     if(pme == NULL || pSMS == NULL)
     {
           DBGPRINTF("Null point");
@@ -2314,34 +2314,34 @@ static void CTopSoupApp_ReadSMS(CTopSoupApp * pme,ISMSMsg *pSMS)
 	// MSGOPT_FROM_DEVICE_SZ - 发送方号码
 	if(ISMSMSG_GetOpt(pSMS, MSGOPT_FROM_DEVICE_SZ, &TmpOpt)==AEE_SUCCESS)
 	{
-		DBGPRINTF("get MSGOPT_FROM_DEVICE_SZ Phone:%s", (char *)TmpOpt.pVal);
+		//DBGPRINTF("get MSGOPT_FROM_DEVICE_SZ Phone:%s", (char *)TmpOpt.pVal);
 		//WriteLine(pme,  (char *)TmpOpt.pVal, NULL, FALSE);
 	}
 
 	// MSGOPT_PAYLOAD_SZ - ASCII的短信内容
 	if(ISMSMSG_GetOpt(pSMS, MSGOPT_PAYLOAD_SZ, &TmpOpt)==AEE_SUCCESS)
 	{
-		DBGPRINTF("get MSGOPT_PAYLOAD_SZ SMS:%s", (char *)TmpOpt.pVal);
+		//DBGPRINTF("get MSGOPT_PAYLOAD_SZ SMS:%s", (char *)TmpOpt.pVal);
 		//WriteLine(pme,  (char *)TmpOpt.pVal, NULL, FALSE);
 	}
 
 	// MSGOPT_PAYLOAD_WSZ - UNICODE的短信内容
 	if(ISMSMSG_GetOpt(pSMS, MSGOPT_PAYLOAD_WSZ, &TmpOpt)==AEE_SUCCESS)
 	{
-		WSTRTOSTR((AECHAR*)TmpOpt.pVal, (char*)szText, sizeof(szText));
-		DBGPRINTF("get MSGOPT_PAYLOAD_WSZ SMS:%s", szText);
+		//WSTRTOSTR((AECHAR*)TmpOpt.pVal, (char*)szText, sizeof(szText));
+		//DBGPRINTF("get MSGOPT_PAYLOAD_WSZ SMS:%s", szText);
 		//WriteLine(pme,  NULL, (AECHAR *)TmpOpt.pVal, TRUE);
 	}
 
 	// MSGOPT_TIMESTAMP - 短信时间标签
 	if(ISMSMSG_GetOpt(pSMS, MSGOPT_TIMESTAMP, &TmpOpt)==AEE_SUCCESS)
 	{
-		JulianType *pMyJulian;
-		char buf[80];
+		// JulianType *pMyJulian;
+		// char buf[80];
 
-		pMyJulian = (JulianType *)TmpOpt.pVal;
-		SPRINTF(buf, "%d/%d/%d %d:%d:%d, weekday:%d", pMyJulian->wMonth, pMyJulian->wDay, pMyJulian->wYear, 
-																	pMyJulian->wHour, pMyJulian->wMinute, pMyJulian->wSecond, pMyJulian->wWeekDay);
+		// pMyJulian = (JulianType *)TmpOpt.pVal;
+		// SPRINTF(buf, "%d/%d/%d %d:%d:%d, weekday:%d", pMyJulian->wMonth, pMyJulian->wDay, pMyJulian->wYear, 
+		//															pMyJulian->wHour, pMyJulian->wMinute, pMyJulian->wSecond, pMyJulian->wWeekDay);
 		//DBGPRINTF("get MSGOPT_TIMESTAMP %s", buf);
 		//WriteLine(pme,  buf, NULL, FALSE);
 	}
@@ -2427,7 +2427,7 @@ static void CTopSoupApp_GetGPSInfo_Callback( void *po )
 	CTopSoupApp *pme = (CTopSoupApp*)po;
 	struct _GetGPSInfo *pGetGPSInfo = &pme->m_gpsInfo;
 
-	DBGPRINTF("CTopSoupApp_GetGPSInfo_Callback in nErr:%d", pGetGPSInfo->theInfo.nErr);
+	//DBGPRINTF("CTopSoupApp_GetGPSInfo_Callback in nErr:%d", pGetGPSInfo->theInfo.nErr);
 
 	if( pGetGPSInfo->theInfo.nErr == SUCCESS ) {
 		/* Process new data from IPosDet */
