@@ -177,6 +177,7 @@ struct CTopSoupApp
 	boolean			  m_bEnableSOS;
 	boolean			  m_bEnableSMS;
 	boolean			  m_bSmsSuccess;
+	boolean			  m_bSosSuccess;
 	uint32			  m_startSmsTime;
 	uint16			  m_resendCount;
 	

@@ -1,7 +1,7 @@
 #include "logicmacro.h"
 #include "configmgr.h"
 
-#define TS_VERSION  "1.0.6-a1-20170307"
+#define TS_VERSION  "1.0.6-20170309"
 
 /*-------------------------------------------------------------------
             Function Prototypes
@@ -686,11 +686,12 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				}
 				else
 				{
-					DBGPRINTF("@MakeSOSCall Failed with index:%d", pme->m_id);
+					DBGPRINTF("@MakeSOSCall Failed with index:%d pme->m_bSosSuccess:%d", pme->m_id, pme->m_bSosSuccess);
 					//索引异常，结束单呼流程
 					//pme->m_bEnableSOS = FALSE;
 					pme->m_OP = SOS_IDLE;
 					pme->m_id = -1;
+					pme->m_bSosSuccess = TRUE;
 
 					//ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
 				}
@@ -723,11 +724,12 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
             }
             else
             {
-                DBGPRINTF("@SOS End", pme->m_id);
+                DBGPRINTF("@SOS End pme->m_bSosSuccess:%d", pme->m_id, pme->m_bSosSuccess);
                 //结束单呼流程
                 //pme->m_bEnableSOS = FALSE;
                 pme->m_OP = SOS_IDLE;
                 pme->m_id = -1;
+				pme->m_bSosSuccess = TRUE;
 
                 //ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
             }
@@ -1087,7 +1089,8 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 		return FALSE;
 	}
 
-	if (pme->m_bEnableSMS) {
+	//SMS报警结束标志
+	if (pme->m_bEnableSOS) {
 		if (STRNCMP(pBuf, "!alarm#", STRLEN("!alarm#")) == 0) {
 			pme->m_bSmsSuccess = TRUE;
 			DBGPRINTF("@pme->m_bSmsSuccess:%d", pme->m_bSmsSuccess);
@@ -1206,23 +1209,46 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 
 	//解析短信	
 	//为配置SMS中心号码 #SMS:1065902018810
-	if (WSTRNCMP(pBuf, L"#SMS", WSTRLEN(L"#SMS")) == 0) {
-		MEMSET(szTmp,0,sizeof(szTmp));
-		WSTRCPY(szTmp, pBuf+WSTRLEN(L"#SMS")+1);
+	WSTRTOSTR(pBuf, szText, sizeof(szText));
+	if (STRNCMP(szText, "#SMS", STRLEN("#SMS")) == 0) {
 		MEMSET(pme->m_szSmsNum, 0, sizeof(pme->m_szSmsNum));
-		WSTRTOSTR(szTmp, (char*)pme->m_szSmsNum, sizeof(szTmp));
+		STRCPY(pme->m_szSmsNum, szText+STRLEN("#SMS")+1);
 		DBGPRINTF("pme->m_szSmsNum:%s", pme->m_szSmsNum);
 		confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
 		return TRUE;
 	}
 
-	if (pme->m_bEnableSMS) {
-		if (WSTRNCMP(pBuf, L"!alarm#", WSTRLEN(L"!alarm#")) == 0) {
+	//del
+	// if (WSTRNCMP(pBuf, L"#SMS", WSTRLEN(L"#SMS")) == 0) {
+	// 	MEMSET(szTmp,0,sizeof(szTmp));
+	// 	WSTRCPY(szTmp, pBuf+WSTRLEN(L"#SMS")+1);
+	// 	MEMSET(pme->m_szSmsNum, 0, sizeof(pme->m_szSmsNum));
+	// 	WSTRTOSTR(szTmp, (char*)pme->m_szSmsNum, sizeof(szTmp));
+	// 	DBGPRINTF("pme->m_szSmsNum:%s", pme->m_szSmsNum);
+	// 	confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
+	// 	return TRUE;
+	// }
+
+	//SMS报警结束标志
+	if (pme->m_bEnableSOS) 
+	{
+		WSTRTOSTR(pBuf, szText, sizeof(szText));
+		if (STRNCMP(szText, "!alarm#", STRLEN("!alarm#")) == 0) {
 			pme->m_bSmsSuccess = TRUE;
 			DBGPRINTF("@pme->m_bSmsSuccess:%d", pme->m_bSmsSuccess);
 			return TRUE;
 		}
 	}
+
+	//del
+	// if (pme->m_bEnableSOS) 
+	// {
+	// 	if (WSTRNCMP(pBuf, L"!alarm#", WSTRLEN(L"!alarm#")) == 0) {
+	// 		pme->m_bSmsSuccess = TRUE;
+	// 		DBGPRINTF("@pme->m_bSmsSuccess:%d", pme->m_bSmsSuccess);
+	// 		return TRUE;
+	// 	}
+	// }
 
 	//#1
 	pszTok = WSTRCHR(pBuf, L'#');
@@ -2232,11 +2258,12 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
 
     if (ret ==  EFAILED)
     {
-        DBGPRINTF("@No SOS Num ");
+        DBGPRINTF("@No SOS Num pme->m_bSosSuccess:%d", pme->m_bSosSuccess);
         //TODO alert message!
         pme->m_id = -1;
         pme->m_OP = SOS_IDLE;
         //pme->m_bEnableSOS = FALSE;
+		pme->m_bSosSuccess = TRUE;
 
         //ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
 
@@ -2617,34 +2644,44 @@ static void CTopSoupApp_GetGPSInfo_SecondTicker( void *po )
 		CTopSoupApp_LocStart((IWindow*)pme);
 	}
 
-	//添加重新发送判断
-	now = GETTIMESECONDS();
-	if (now - pme->m_startSmsTime >= 60 && pme->m_startSmsTime > 0) {
-		if (pme->m_bSmsSuccess) {
-			if (now - pme->m_startSmsTime >= 5*60) {
+	DBGPRINTF("@Where GetGPS CTopSoupApp_LocStart pme->m_bEnableSOS:%d pme->m_bSmsSuccess:%d pme->m_bSosSuccess:%d", pme->m_bEnableSOS, pme->m_bSmsSuccess, pme->m_bSosSuccess);
+
+	//SOS模式发送短信都结束
+	if (pme->m_bEnableSOS) {
+		if (pme->m_startSmsTime > 0) 
+		{	//已经定位成功过
+			if (pme->m_bSmsSuccess && pme->m_bSosSuccess) {
+				DBGPRINTF("@SOS End");
 				ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
 			}
-		} else {
-			//resend ... TODO
-			pme->m_startSmsTime = now;
-			pme->m_resendCount ++;
-			if (pme->m_resendCount <= 3) {
-				if (STRLEN(pme->m_szSmsNum) > 0) {
-					char szMsg[256];
-					//Coordinate co;
-					//pme->m_bEnableSMS = TRUE;
-					//pme->m_OP = SOS_SMS_SENDING;
-					CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, NULL);
-					DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
-					CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
+		}
 
-					//For Test
-					// if (!ISHELL_PostEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
-					// 	DBGPRINTF("ISHELL_PostEvent EVT_SMS_END failure");
-					// }
+		//添加重新发送判断
+		now = GETTIMESECONDS();
+		if (now - pme->m_startSmsTime >= 60 && pme->m_startSmsTime > 0) {
+			if (!pme->m_bSmsSuccess)
+			{
+				//resend try 2 seconds
+				pme->m_startSmsTime = now;
+				pme->m_resendCount ++;
+				if (pme->m_resendCount <= 3) {
+					if (STRLEN(pme->m_szSmsNum) > 0) {
+						char szMsg[256];
+						//Coordinate co;
+						//pme->m_bEnableSMS = TRUE;
+						//pme->m_OP = SOS_SMS_SENDING;
+						CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, NULL);
+						DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
+						CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
+
+						//For Test
+						// if (!ISHELL_PostEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
+						// 	DBGPRINTF("ISHELL_PostEvent EVT_SMS_END failure");
+						// }
+					}
+				} else {
+					ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
 				}
-			} else {
-				ISHELL_CloseApplet(pme->a.m_pIShell, FALSE);
 			}
 		}
 	}
