@@ -44,7 +44,7 @@ void* confmgr_createinstance(IShell* shell,void* iLog)
 		IFile* fp;
 		fp = IFILEMGR_OpenFile(confmgr->pFileMgr,NAVIGATE_CUSTOM_INI,_OFM_CREATE);
 		if( NULL == fp ) {
-			return -1;
+			return NULL;
 		}
 		IFILE_Release(fp);
 	}

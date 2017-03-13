@@ -592,6 +592,20 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
     {
         DBGPRINTF("CONFIG NOT EXIST!");
         IFILEMGR_Release(pIFileMgr);
+
+        {
+            const char *p = confmgr_gets(pme->m_pOwner->iConf, "sms", "sos", NULL, NULL, NULL);
+            if (p != NULL) {
+                STRCPY(pme->m_pOwner->m_szSosNum, p);
+                DBGPRINTF("load sos num:%s", p);
+            }
+        }
+
+        if (STRLEN(pme->m_pOwner->m_szSosNum) > 0) {
+            STRTOWSTR(pme->m_pOwner->m_szSosNum, pme->m_szTextA, sizeof(pme->m_szTextA));
+            WSTRCPY(pme->m_pOwner->m_szTextA, pme->m_szTextA);
+        }
+
         return SUCCESS;
     }
 
@@ -671,10 +685,24 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
     }
     DBGPRINTF("szC:%s", szC);
 
-    if (STRLEN(szA) > 0)
     {
-        STRTOWSTR(szA, pme->m_szTextA, sizeof(pme->m_szTextA));
+        const char *p = confmgr_gets(pme->m_pOwner->iConf, "sms", "sos", NULL, NULL, NULL);
+        if (p != NULL) {
+            STRCPY(pme->m_pOwner->m_szSosNum, p);
+            DBGPRINTF("load sos num:%s", p);
+        }
+    }
+
+    if (STRLEN(pme->m_pOwner->m_szSosNum) > 0) {
+        STRTOWSTR(pme->m_pOwner->m_szSosNum, pme->m_szTextA, sizeof(pme->m_szTextA));
         WSTRCPY(pme->m_pOwner->m_szTextA, pme->m_szTextA);
+    }
+    else {
+        if (STRLEN(szA) > 0)
+        {
+            STRTOWSTR(szA, pme->m_szTextA, sizeof(pme->m_szTextA));
+            WSTRCPY(pme->m_pOwner->m_szTextA, pme->m_szTextA);
+        }
     }
 
     if (STRLEN(szB) > 0)

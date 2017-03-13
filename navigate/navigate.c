@@ -30,7 +30,7 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
 /************************************************************************/
 /* 从配置文件加载亲友联系方式                                           */
 /************************************************************************/
-static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32]);
+static uint32 LoadSOSConfig(CTopSoupApp *pme,IShell *iShell, char szNum[3][32]);
 
 /*===============================================================================
                         SMS & TELEPHONE TEST
@@ -1053,7 +1053,98 @@ static void CTopSoupApp_ReleaseRes(CTopSoupApp * pme)
 /*===============================================================================
                         SMS & TELEPHONE TEST
 =============================================================================== */
+static boolean CTopSoupApp_ParseNum(CTopSoupApp* pme, char* pBuf) {
+	//$set,00,18812341234,62!
+	//$set,01,18812341234,62!
+	if (STRNCMP(pBuf, "$set,", STRLEN("$set,")) == 0) {
+		char *pszTok = NULL;
+		int offset = STRLEN("$set,");
+		int op = -1, len = 0;
+		char szNum[128] = {0};
+		char crc = 0;
+		char *pEnd = NULL;
 
+		//#1
+		pszTok = STRCHR(pBuf+offset, ',');
+		if (pszTok != NULL) {
+			len = pszTok-(pBuf+offset);
+			if (len == 2) {
+				if ((*(pBuf+offset)) == '0') {
+					if ((*(pBuf+offset+1)) == '0') {
+						op = 0;
+					} else if ((*(pszTok-1)) == '1') {
+						op = 1;
+					}
+				}
+				DBGPRINTF("@OP:%d", op);
+				if (op != -1) {
+					offset += len + 1;
+					//#2
+					pszTok = STRCHR(pBuf+offset, ',');
+					if (pszTok != NULL) {
+						len = pszTok-(pBuf+offset);
+						if (len > 0) {
+							MEMSET(szNum, 0, sizeof(szNum));
+							MEMCPY(szNum, pBuf+offset,len);
+							DBGPRINTF("@szNum:%s", szNum);
+
+							offset += len + 1;
+							//#3
+							pszTok = STRCHR(pBuf+offset, '!');
+							if (pszTok != NULL) {
+								len = pszTok-(pBuf+offset);
+								if (len > 0) {
+									char szCRC[8] = {0};
+									MEMCPY(szCRC, pBuf+offset, len);
+									szCRC[len] = 0;
+									crc = ATOI(szCRC);
+									DBGPRINTF("@Found CRC code:%d", crc);
+								} else {
+									DBGPRINTF("@Not Found CRC code");
+								}
+							} else {
+								DBGPRINTF("@Not Found end flag");
+							}
+						}
+					} else {
+						DBGPRINTF("@Not Found new num");
+					}
+				}
+			}
+		} else {
+			DBGPRINTF("@Not Found OP code");
+		}
+
+		if (op != -1 && crc != 0 && offset != -1 && STRLEN(szNum) > 0) {
+			char* p = NULL;
+			char newCrc = *pBuf;
+			//DBGPRINTF("%c", newCrc);
+			for (p = pBuf + 1; p < pBuf + offset; ) {
+				//DBGPRINTF("%c", *p);
+				newCrc ^= *p ++;
+			}
+
+			DBGPRINTF("newCrc:%d crc:%d", newCrc, crc);
+			if (newCrc == crc) {
+
+				if (op == 0) {	//set sms center num
+					MEMSET(pme->m_szSmsNum, 0, sizeof(pme->m_szSmsNum));
+					STRCPY(pme->m_szSmsNum, szNum);
+					DBGPRINTF("set new sms num:%s", pme->m_szSmsNum);
+					confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
+				} else if (op == 1) {
+					MEMSET(pme->m_szSosNum, 0, sizeof(pme->m_szSosNum));
+					STRCPY(pme->m_szSosNum, szNum);
+					DBGPRINTF("set new sos num:%s", pme->m_szSosNum);
+					confmgr_puts(pme->iConf, "sms", "sos", pme->m_szSosNum);
+				}
+
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
 //解析短信内容
 //格式: 目标位置:1111#纬度:E,20.012345#经度:N,120.012345
 static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean bAlert)
@@ -1067,9 +1158,13 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 	int len = 0;
 	AECHAR prompt[32];
     int nRet = 0;
-		
-	if (szMsg == NULL || STRLEN(szMsg) < 10)
-		return FALSE;
+
+	if (szMsg == NULL || STRLEN(szMsg) < 7)
+    {
+        DBGPRINTF("szmsg:%s, len:%d", szMsg, STRLEN(szMsg)); //!alarm#
+        return FALSE;
+    }
+
 
 	MEMSET(textDesc,0,sizeof(textDesc));
 	MEMSET(textLat,0,sizeof(textLat));
@@ -1084,17 +1179,31 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 	if (STRNCMP(pBuf, "#SMS", STRLEN("#SMS")) == 0) {
 		MEMSET(pme->m_szSmsNum, 0, sizeof(pme->m_szSmsNum));
 		STRCPY(pme->m_szSmsNum, pBuf+STRLEN("#SMS")+1);
+		{
+			uint16 i = 0;
+			char out = 0;
+			for (i = 0; i < STRLEN(pme->m_szSmsNum); i ++) {
+				out ^= pme->m_szSmsNum[i];
+			}
+            DBGPRINTF("out:%x", out);
+		}
 		DBGPRINTF("pme->m_szSmsNum:%s", pme->m_szSmsNum);
 		confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
-		return FALSE;
+		return TRUE;
+	}
+
+	//匹配新的SMS短信
+    if (CTopSoupApp_ParseNum(pme, pBuf)) {
+		return TRUE;
 	}
 
 	//SMS报警结束标志
-	if (pme->m_bEnableSOS) {
+	//if (pme->m_bEnableSOS)
+    {
 		if (STRNCMP(pBuf, "!alarm#", STRLEN("!alarm#")) == 0) {
 			pme->m_bSmsSuccess = TRUE;
 			DBGPRINTF("@pme->m_bSmsSuccess:%d", pme->m_bSmsSuccess);
-			return FALSE;
+			return TRUE;
 		}
 	}
 
@@ -1196,7 +1305,7 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	int len = 0;
 	AECHAR prompt[32];
 
-	if (szMsg == NULL || WSTRLEN(szMsg) < 10)
+	if (szMsg == NULL || WSTRLEN(szMsg) < 7) //!alarm#
 		return FALSE;
 
 	MEMSET(textDesc,0,sizeof(textDesc));
@@ -1218,6 +1327,11 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 		return TRUE;
 	}
 
+	//匹配新的SMS短信
+	if (CTopSoupApp_ParseNum(pme, szText)) {
+		return TRUE;
+	}
+
 	//del
 	// if (WSTRNCMP(pBuf, L"#SMS", WSTRLEN(L"#SMS")) == 0) {
 	// 	MEMSET(szTmp,0,sizeof(szTmp));
@@ -1230,7 +1344,7 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	// }
 
 	//SMS报警结束标志
-	if (pme->m_bEnableSOS) 
+	//if (pme->m_bEnableSOS)
 	{
 		WSTRTOSTR(pBuf, szText, sizeof(szText));
 		if (STRNCMP(szText, "!alarm#", STRLEN("!alarm#")) == 0) {
@@ -1802,7 +1916,7 @@ static void CTopSoupApp_EndSOSCall(CTopSoupApp * pme)
 /************************************************************************/
 /* 从配置文件加载亲友联系方式,只记录有效的地址                          */
 /************************************************************************/
-static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
+static uint32 LoadSOSConfig(CTopSoupApp *pme, IShell *iShell, char szNum[3][32])
 {
     IFileMgr	*pIFileMgr = NULL;
     IFile		*pIFile = NULL;
@@ -1815,7 +1929,7 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
     FileInfo	fiInfo;
     char    szA[32], szB[32], szC[32];
     uint32 len = 0;
-    int i =0;
+    int i = 0;
 
     pIShell = iShell;
 
@@ -1831,6 +1945,17 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
     {
         DBGPRINTF("CONFIG NOT EXIST!");
         IFILEMGR_Release(pIFileMgr);
+		{
+			const char* p = confmgr_gets(pme->iConf, "sms", "sos", NULL, NULL, NULL);
+			if (p != NULL) {
+				STRCPY(pme->m_szSosNum, p);
+			}
+			DBGPRINTF("load sos num:%s", p);
+		}
+
+		if (STRLEN(pme->m_szSosNum) > 0) {
+			STRCPY(szNum[i++], pme->m_szSosNum);
+		}
         return SUCCESS;
     }
 
@@ -1911,9 +2036,22 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
     DBGPRINTF("szC:%s", szC);
 
     i = 0;
-	if (STRLEN(szA) > 0)
 	{
-		STRCPY(szNum[i++], szA);
+		const char* p = confmgr_gets(pme->iConf, "sms", "sos", NULL, NULL, NULL);
+		if (p != NULL) {
+			STRCPY(pme->m_szSosNum, p);
+		}
+		DBGPRINTF("load sos num:%s", p);
+	}
+
+	if (STRLEN(pme->m_szSosNum) > 0) {
+		STRCPY(szNum[i++], pme->m_szSosNum);
+	}
+	else {
+		if (STRLEN(szA) > 0)
+		{
+			STRCPY(szNum[i++], szA);
+		}
 	}
 
 	if (STRLEN(szB) > 0)
@@ -1946,7 +2084,7 @@ static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
     AECHAR szHour[6];
     AECHAR szMinute[6];
     AECHAR szTail[32];
-	char *p = NULL;
+	const char *p = NULL;
 
     TS_GetTimeNow(&now);
 
@@ -1972,7 +2110,7 @@ static void CTopSoupApp_MakeSOSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
         AECHAR szLat[32], szLon[32];
 		char lat[16];
 		char lon[16];
-		char *p = NULL;
+		const char *p = NULL;
 
         ISHELL_LoadResString(pme->a.m_pIShell,NAVIGATE_RES_FILE,IDS_STRING_SOS_SMS_LAST,szSOSInfo,sizeof(szSOSInfo));
         ISHELL_LoadResString(pme->a.m_pIShell, NAVIGATE_RES_FILE, IDS_STRING_EDIT_LAT, textLat, sizeof(textLat));
@@ -2032,7 +2170,7 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
 	char szGpsInfo[128];
 	char szGpsTime[32];
 	char szGpsCoord[64];
-	char *p = NULL;
+	const char *p = NULL;
 
 	//AECHAR szTmp2[256];
 
@@ -2057,7 +2195,7 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
 		char szLon[16];
 		char szHeading[16];
 		char szVel[16];
-		char *p = NULL;
+		const char *p = NULL;
 
 		p = confmgr_gets(pme->iConf, "gps", "lat", NULL, NULL, NULL);
 		if (p != NULL) {
@@ -2219,7 +2357,7 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
 	int ret = EFAILED;
     int i = MAX_SOS_NUM;
 
-    if (SUCCESS == LoadSOSConfig((IShell *) pme->a.m_pIShell, pme->m_szNum)) {
+    if (SUCCESS == LoadSOSConfig(pme, (IShell *) pme->a.m_pIShell, pme->m_szNum)) {
         for (i = 0; i < MAX_SOS_NUM; i++) {
             if (STRLEN(pme->m_szNum[i]) > 0) {
                 AECHAR szMsg[256];
