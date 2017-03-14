@@ -592,7 +592,6 @@ static uint32 LoadConfig(CSOSRelativeWin *pme)
     {
         DBGPRINTF("CONFIG NOT EXIST!");
         IFILEMGR_Release(pIFileMgr);
-
         return SUCCESS;
     }
 

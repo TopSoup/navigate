@@ -1,7 +1,7 @@
 #include "logicmacro.h"
 #include "configmgr.h"
 
-#define TS_VERSION  "1.0.6-20170309"
+#define TS_VERSION  "1.0.6-r2-20170310"
 
 /*-------------------------------------------------------------------
             Function Prototypes
@@ -639,7 +639,9 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				 if( wp->cls == AEECLSID_SMSNOTIFIER ) {
 					 if( wp->dwMask == ((AEESMS_TYPE_TEXT << 16) | NMASK_SMS_TYPE) ) {
 						 uint32 uMsgId = (uint32)wp->pData;
+						 pme->m_bRecvSMS = TRUE;
 						 CTopSoupApp_ReceiveSMSMessage(pme, uMsgId);
+						 pme->m_bRecvSMS = FALSE;
 						 DBGPRINTF("msgid :%d", uMsgId);
 					 } else {
 						 DBGPRINTF("Recv unkown mask sms: %x",wp->dwMask);
@@ -1176,21 +1178,13 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 	
 	//解析短信	
 	//为配置SMS中心号码 #SMS:1065902018810
-	if (STRNCMP(pBuf, "#SMS", STRLEN("#SMS")) == 0) {
-		MEMSET(pme->m_szSmsNum, 0, sizeof(pme->m_szSmsNum));
-		STRCPY(pme->m_szSmsNum, pBuf+STRLEN("#SMS")+1);
-		{
-			uint16 i = 0;
-			char out = 0;
-			for (i = 0; i < STRLEN(pme->m_szSmsNum); i ++) {
-				out ^= pme->m_szSmsNum[i];
-			}
-            DBGPRINTF("out:%x", out);
-		}
-		DBGPRINTF("pme->m_szSmsNum:%s", pme->m_szSmsNum);
-		confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
-		return TRUE;
-	}
+//	if (STRNCMP(pBuf, "#SMS", STRLEN("#SMS")) == 0) {
+//		MEMSET(pme->m_szSmsNum, 0, sizeof(pme->m_szSmsNum));
+//		STRCPY(pme->m_szSmsNum, pBuf+STRLEN("#SMS")+1);
+//		DBGPRINTF("pme->m_szSmsNum:%s", pme->m_szSmsNum);
+//		confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
+//		return TRUE;
+//	}
 
 	//匹配新的SMS短信
     if (CTopSoupApp_ParseNum(pme, pBuf)) {
@@ -1198,8 +1192,7 @@ static boolean CTopSoupApp_SaveSMSMessage(CTopSoupApp* pme, char* szMsg, boolean
 	}
 
 	//SMS报警结束标志
-	//if (pme->m_bEnableSOS)
-    {
+	if (pme->m_bRecvSMS) {
 		if (STRNCMP(pBuf, "!alarm#", STRLEN("!alarm#")) == 0) {
 			pme->m_bSmsSuccess = TRUE;
 			DBGPRINTF("@pme->m_bSmsSuccess:%d", pme->m_bSmsSuccess);
@@ -1319,13 +1312,13 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	//解析短信	
 	//为配置SMS中心号码 #SMS:1065902018810
 	WSTRTOSTR(pBuf, szText, sizeof(szText));
-	if (STRNCMP(szText, "#SMS", STRLEN("#SMS")) == 0) {
-		MEMSET(pme->m_szSmsNum, 0, sizeof(pme->m_szSmsNum));
-		STRCPY(pme->m_szSmsNum, szText+STRLEN("#SMS")+1);
-		DBGPRINTF("pme->m_szSmsNum:%s", pme->m_szSmsNum);
-		confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
-		return TRUE;
-	}
+//	if (STRNCMP(szText, "#SMS", STRLEN("#SMS")) == 0) {
+//		MEMSET(pme->m_szSmsNum, 0, sizeof(pme->m_szSmsNum));
+//		STRCPY(pme->m_szSmsNum, szText+STRLEN("#SMS")+1);
+//		DBGPRINTF("pme->m_szSmsNum:%s", pme->m_szSmsNum);
+//		confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
+//		return TRUE;
+//	}
 
 	//匹配新的SMS短信
 	if (CTopSoupApp_ParseNum(pme, szText)) {
@@ -1343,8 +1336,8 @@ static boolean CTopSoupApp_SaveSMSMessageUnicode(CTopSoupApp* pme, AECHAR* szMsg
 	// 	return TRUE;
 	// }
 
-	//SMS报警结束标志
-	//if (pme->m_bEnableSOS)
+	//SMS报警结束标志 [运行领航收到停止]
+	if (pme->m_bRecvSMS) 
 	{
 		WSTRTOSTR(pBuf, szText, sizeof(szText));
 		if (STRNCMP(szText, "!alarm#", STRLEN("!alarm#")) == 0) {
@@ -1945,7 +1938,6 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
     {
         DBGPRINTF("CONFIG NOT EXIST!");
         IFILEMGR_Release(pIFileMgr);
-
         return SUCCESS;
     }
 
@@ -2026,7 +2018,6 @@ static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
     DBGPRINTF("szC:%s", szC);
 
     i = 0;
-
 	if (STRLEN(szA) > 0)
 	{
 		STRCPY(szNum[i++], szA);

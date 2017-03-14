@@ -13,8 +13,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7e0fdb48-a700-4f68-8dd1-57c7cff4b812" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate.mif" afterPath="$PROJECT_DIR$/navigate.mif" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/navigate.brx" afterPath="$PROJECT_DIR$/navigate/navigate.brx" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/navigate.c" afterPath="$PROJECT_DIR$/navigate/navigate.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/navigate.h" afterPath="$PROJECT_DIR$/navigate/navigate.h" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/navigate/sosrelativewindow.c" afterPath="$PROJECT_DIR$/navigate/sosrelativewindow.c" />
     </list>
     <ignored path="navigate.iws" />
@@ -38,9 +41,18 @@
       <file leaf-file-name="navigate.c" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/navigate/navigate.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="297">
-              <caret line="1918" column="28" selection-start-line="1918" selection-start-column="28" selection-end-line="1918" selection-end-column="28" />
-              <folding />
+            <state relative-caret-position="340">
+              <caret line="1320" column="5" selection-start-line="1320" selection-start-column="5" selection-end-line="1320" selection-end-column="5" />
+              <folding>
+                <element signature="e#3108#3132#0" expanded="true" />
+                <element signature="e#3812#5091#0" expanded="true" />
+                <element signature="e#14991#15081#0" expanded="true" />
+                <element signature="e#46706#46802#0" expanded="true" />
+                <element signature="e#48279#48486#0" expanded="true" />
+                <element signature="e#49860#49956#0" expanded="true" />
+                <element signature="e#52120#52222#0" expanded="true" />
+                <element signature="e#54306#54408#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -49,7 +61,7 @@
         <entry file="file://$PROJECT_DIR$/navigate/sosrelativewindow.c">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="371">
-              <caret line="678" column="5" selection-start-line="678" selection-start-column="5" selection-end-line="678" selection-end-column="5" />
+              <caret line="677" column="5" selection-start-line="677" selection-start-column="5" selection-end-line="677" selection-end-column="5" />
               <folding />
             </state>
           </provider>
@@ -59,7 +71,7 @@
         <entry file="file://$PROJECT_DIR$/navigate/navigate.h">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="656">
-              <caret line="187" column="32" selection-start-line="187" selection-start-column="22" selection-end-line="187" selection-end-column="32" />
+              <caret line="189" column="0" selection-start-line="188" selection-start-column="22" selection-end-line="188" selection-end-column="32" />
               <folding />
             </state>
           </provider>
@@ -149,38 +161,7 @@
     </navigator>
     <panes>
       <pane id="ProjectPane">
-        <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="navigate" />
-              <option name="myItemType" value="com.jetbrains.cidr.projectView.CidrFilesViewHelper$MyProjectTreeStructure$1" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="navigate" />
-              <option name="myItemType" value="com.jetbrains.cidr.projectView.CidrFilesViewHelper$MyProjectTreeStructure$1" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="navigate" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="navigate" />
-              <option name="myItemType" value="com.jetbrains.cidr.projectView.CidrFilesViewHelper$MyProjectTreeStructure$1" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="navigate" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="navigate" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-        </subPane>
+        <subPane />
       </pane>
     </panes>
   </component>
@@ -408,12 +389,12 @@
       <workItem from="1489328509996" duration="268000" />
       <workItem from="1489414188596" duration="7466000" />
       <workItem from="1489502118534" duration="599000" />
-      <workItem from="1489504330915" duration="182000" />
+      <workItem from="1489504330915" duration="636000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="14942000" />
+    <option name="totallyTimeSpent" value="15396000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -430,22 +411,22 @@
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.121420994" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32963374" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.4154013" sideWeight="0.6818664" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33650795" sideWeight="0.4874214" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21800433" sideWeight="0.5466596" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2112676" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329718" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21800433" sideWeight="0.4533404" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4154013" sideWeight="0.6818664" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21800433" sideWeight="0.4533404" order="3" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32963374" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -484,7 +465,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/navigate/navigate.c</url>
-          <line>1202</line>
+          <line>1195</line>
           <option name="timeStamp" value="38" />
         </line-breakpoint>
       </breakpoints>
@@ -524,7 +505,16 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15485">
           <caret line="815" column="0" selection-start-line="815" selection-start-column="0" selection-end-line="817" selection-end-column="22" />
-          <folding />
+          <folding>
+            <element signature="e#3108#3132#0" expanded="true" />
+            <element signature="e#3812#5091#0" expanded="true" />
+            <element signature="e#14991#15081#0" expanded="true" />
+            <element signature="e#46706#46802#0" expanded="true" />
+            <element signature="e#48279#48486#0" expanded="true" />
+            <element signature="e#49860#49956#0" expanded="true" />
+            <element signature="e#52120#52222#0" expanded="true" />
+            <element signature="e#54306#54408#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -777,7 +767,7 @@
     <entry file="file://$PROJECT_DIR$/navigate/navigate.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="656">
-          <caret line="187" column="32" selection-start-line="187" selection-start-column="22" selection-end-line="187" selection-end-column="32" />
+          <caret line="189" column="0" selection-start-line="188" selection-start-column="22" selection-end-line="188" selection-end-column="32" />
           <folding />
         </state>
       </provider>
@@ -785,16 +775,25 @@
     <entry file="file://$PROJECT_DIR$/navigate/sosrelativewindow.c">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="371">
-          <caret line="678" column="5" selection-start-line="678" selection-start-column="5" selection-end-line="678" selection-end-column="5" />
+          <caret line="677" column="5" selection-start-line="677" selection-start-column="5" selection-end-line="677" selection-end-column="5" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/navigate/navigate.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="297">
-          <caret line="1918" column="28" selection-start-line="1918" selection-start-column="28" selection-end-line="1918" selection-end-column="28" />
-          <folding />
+        <state relative-caret-position="340">
+          <caret line="1320" column="5" selection-start-line="1320" selection-start-column="5" selection-end-line="1320" selection-end-column="5" />
+          <folding>
+            <element signature="e#3108#3132#0" expanded="true" />
+            <element signature="e#3812#5091#0" expanded="true" />
+            <element signature="e#14991#15081#0" expanded="true" />
+            <element signature="e#46706#46802#0" expanded="true" />
+            <element signature="e#48279#48486#0" expanded="true" />
+            <element signature="e#49860#49956#0" expanded="true" />
+            <element signature="e#52120#52222#0" expanded="true" />
+            <element signature="e#54306#54408#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
