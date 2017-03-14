@@ -302,7 +302,15 @@ boolean CTopSoupApp_InitAppData(IApplet* po)
 
 	   confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
    }
-   
+    {
+        const char* pSosNum = NULL;
+        pSosNum = confmgr_gets(pme->iConf, "sms", "sos", NULL, NULL, NULL);
+        if (pSosNum != NULL) {
+            STRCPY(pme->m_szNum[0],pSosNum);
+            DBGPRINTF("@1 %s", pme->m_szNum[0]);
+        }
+    }
+
    //Tel
    nErr =ISHELL_CreateInstance(pme->a.m_pIShell, AEECLSID_CALLMGR, (void**) &pme->m_pCallMgr);
    DBGPRINTF("CreateInst AEECLSID_CALLMGR ret %d", nErr);
@@ -582,18 +590,18 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
 				//SEND TO SMS
 				if (pme->m_bEnableSOS) {
 					if (STRLEN(pme->m_szSmsNum) > 0) {
-					char szMsg[256];
-					//Coordinate co;
-					pme->m_bEnableSMS = TRUE;
-					pme->m_OP = SOS_SMS_SENDING;
-					CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, NULL);
-					DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
-					CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
+                        char szMsg[256];
+                        //Coordinate co;
+                        pme->m_bEnableSMS = TRUE;
+                        pme->m_OP = SOS_SMS_SENDING;
+                        CTopSoupApp_MakeSMSMsg_ASC(pme, szMsg, NULL);
+                        DBGPRINTF("@SOS Send SMS To Num: %s Msg %s len:%d num:%d", pme->m_szSmsNum, szMsg, STRLEN(szMsg), STRLEN(pme->m_szSmsNum));
+                        CTopSoupApp_SendSOSSMSMessage_ASC(pme, USAGE_SMS_TX_ASCII, szMsg, pme->m_szSmsNum);
 
-					//For Test
-					// if (!ISHELL_PostEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
-					// 	DBGPRINTF("ISHELL_PostEvent EVT_SMS_END failure");
-					// }
+                        //For Test
+                        // if (!ISHELL_PostEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_SMS_END, 0, 0)) {
+                        // 	DBGPRINTF("ISHELL_PostEvent EVT_SMS_END failure");
+                        // }
 						
 					} else {
 						CTopSoupApp_StartSOS(pme);
@@ -1135,10 +1143,10 @@ static boolean CTopSoupApp_ParseNum(CTopSoupApp* pme, char* pBuf) {
 					DBGPRINTF("set new sms num:%s", pme->m_szSmsNum);
 					confmgr_puts(pme->iConf, "sms", "center", pme->m_szSmsNum);
 				} else if (op == 1) {
-					MEMSET(pme->m_szSosNum, 0, sizeof(pme->m_szSosNum));
-					STRCPY(pme->m_szSosNum, szNum);
-					DBGPRINTF("set new sos num:%s", pme->m_szSosNum);
-					confmgr_puts(pme->iConf, "sms", "sos", pme->m_szSosNum);
+					MEMSET(pme->m_szNum[0], 0, sizeof(pme->m_szNum[0]));
+					STRCPY(pme->m_szNum[0], szNum);
+					DBGPRINTF("set new sos num:%s", pme->m_szNum[0]);
+					confmgr_puts(pme->iConf, "sms", "sos", pme->m_szNum[0]);
 				}
 
 				return TRUE;
@@ -2454,7 +2462,7 @@ static void CTopSoupApp_EnumMsgNextCb(void * po)
 		  } else {
 				//For Test
 				if (!ISHELL_PostEvent(pme->a.m_pIShell, AEECLSID_NAVIGATE, EVT_ENUM_SMS_END, 0, 0)) {
-					DBGPRINTF("ISHELL_PostEvent EVT_SMS_END failure");
+					DBGPRINTF("ISHELL_PostEvent EVT_ENUM_SMS_END failure");
 				}
 		  }
 
