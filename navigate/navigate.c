@@ -523,7 +523,7 @@ static boolean CTopSoupApp_HandleEvent(IApplet * pi, AEEEvent eCode, uint16 wPar
             DBGPRINTF(TS_VERSION);
 
 			CTopSoupApp_GetDeviceInfo(pme);
-			
+
             //SOS模式开始发送短信和呼叫联系人
             if (pme->m_bEnableSOS)
             {
@@ -2333,6 +2333,8 @@ static void CTopSoupApp_MakeSMSMsg(CTopSoupApp *pme, AECHAR szMsg[256], Coordina
 static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
 	int ret = EFAILED;
     int i = MAX_SOS_NUM;
+
+	pme->m_bSosSuccess = FALSE;
 
     if (SUCCESS == LoadSOSConfig((IShell *) pme->a.m_pIShell, pme->m_szNum)) {
         for (i = 0; i < MAX_SOS_NUM; i++) {
