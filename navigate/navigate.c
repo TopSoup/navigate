@@ -30,7 +30,7 @@ static void CTopSoupApp_MakeSMSMsg_ASC(CTopSoupApp *pme, char szMsg[256], Coordi
 /************************************************************************/
 /* 从配置文件加载亲友联系方式                                           */
 /************************************************************************/
-static uint32 LoadSOSConfig(CTopSoupApp *pme,IShell *iShell, char szNum[3][32]);
+static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32]);
 
 /*===============================================================================
                         SMS & TELEPHONE TEST
@@ -1916,7 +1916,7 @@ static void CTopSoupApp_EndSOSCall(CTopSoupApp * pme)
 /************************************************************************/
 /* 从配置文件加载亲友联系方式,只记录有效的地址                          */
 /************************************************************************/
-static uint32 LoadSOSConfig(CTopSoupApp *pme, IShell *iShell, char szNum[3][32])
+static uint32 LoadSOSConfig(IShell *iShell, char szNum[3][32])
 {
     IFileMgr	*pIFileMgr = NULL;
     IFile		*pIFile = NULL;
@@ -1945,17 +1945,7 @@ static uint32 LoadSOSConfig(CTopSoupApp *pme, IShell *iShell, char szNum[3][32])
     {
         DBGPRINTF("CONFIG NOT EXIST!");
         IFILEMGR_Release(pIFileMgr);
-		{
-			const char* p = confmgr_gets(pme->iConf, "sms", "sos", NULL, NULL, NULL);
-			if (p != NULL) {
-				STRCPY(pme->m_szSosNum, p);
-			}
-			DBGPRINTF("load sos num:%s", p);
-		}
 
-		if (STRLEN(pme->m_szSosNum) > 0) {
-			STRCPY(szNum[i++], pme->m_szSosNum);
-		}
         return SUCCESS;
     }
 
@@ -2036,22 +2026,10 @@ static uint32 LoadSOSConfig(CTopSoupApp *pme, IShell *iShell, char szNum[3][32])
     DBGPRINTF("szC:%s", szC);
 
     i = 0;
-	{
-		const char* p = confmgr_gets(pme->iConf, "sms", "sos", NULL, NULL, NULL);
-		if (p != NULL) {
-			STRCPY(pme->m_szSosNum, p);
-		}
-		DBGPRINTF("load sos num:%s", p);
-	}
 
-	if (STRLEN(pme->m_szSosNum) > 0) {
-		STRCPY(szNum[i++], pme->m_szSosNum);
-	}
-	else {
-		if (STRLEN(szA) > 0)
-		{
-			STRCPY(szNum[i++], szA);
-		}
+	if (STRLEN(szA) > 0)
+	{
+		STRCPY(szNum[i++], szA);
 	}
 
 	if (STRLEN(szB) > 0)
@@ -2357,7 +2335,7 @@ static void CTopSoupApp_StartSOS(CTopSoupApp *pme) {
 	int ret = EFAILED;
     int i = MAX_SOS_NUM;
 
-    if (SUCCESS == LoadSOSConfig(pme, (IShell *) pme->a.m_pIShell, pme->m_szNum)) {
+    if (SUCCESS == LoadSOSConfig((IShell *) pme->a.m_pIShell, pme->m_szNum)) {
         for (i = 0; i < MAX_SOS_NUM; i++) {
             if (STRLEN(pme->m_szNum[i]) > 0) {
                 AECHAR szMsg[256];
