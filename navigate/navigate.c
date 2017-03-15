@@ -1,7 +1,7 @@
 #include "logicmacro.h"
 #include "configmgr.h"
 
-#define TS_VERSION  "1.0.6-r2-20170310"
+#define TS_VERSION  "1.0.6-r3-20170315"
 
 /*-------------------------------------------------------------------
             Function Prototypes
@@ -1107,8 +1107,9 @@ static boolean CTopSoupApp_ParseNum(CTopSoupApp* pme, char* pBuf) {
 									char szCRC[8] = {0};
 									MEMCPY(szCRC, pBuf+offset, len);
 									szCRC[len] = 0;
-									crc = ATOI(szCRC);
-									DBGPRINTF("@Found CRC code:%d", crc);
+                                    //crc = ATOI(szCRC);
+                                    crc = STRTOUL(szCRC, NULL, 16);
+									DBGPRINTF("@Found CRC code:%d-%x-%s", crc, crc, szCRC);
 								} else {
 									DBGPRINTF("@Not Found CRC code");
 								}
