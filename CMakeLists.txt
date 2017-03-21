@@ -21,8 +21,8 @@ include_directories(./navigate
         ./navigate/Location
         ./navigate/db
         ./navigate/controls
-        d:/brew/sdk/inc
-        d:/brew/sdk/sdk/inc)
+        d:/tools/brew/sdk/inc
+        d:/tools/brew/sdk/sdk/inc)
 
 set(SOURCE_FILES
     navigate/controls/gmenuctl.c
@@ -83,7 +83,12 @@ set(SOURCE_FILES
     navigate/wincontrol.c
     navigate/wincontrol.h
     navigate/window.c
-    navigate/window.h)
+    navigate/window.h
+    navigate/configmgr.c
+    navigate/configmgr.h
+    navigate/minIni.c
+    navigate/minIni.h
+    navigate/minGlue-brew)
 
 function(gen_brh_and_bar BRX)
     message( ${BRX} )

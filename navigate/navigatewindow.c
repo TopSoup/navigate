@@ -532,6 +532,53 @@ static void CNavigateWin_GetGPSInfo_Callback( IWindow *po )
 		//	pme->m_bGetGpsInfo = FALSE;
 		//}
 
+		if (pme->m_pOwner->m_bGetGpsInfo) {
+			//记录当前定位信息, 备用
+			{
+				ts_time_t now;
+				char szTmp[128];
+				char szGpsTime[32];
+				char szLat[16];
+				char szLon[16];
+				char szHeading[16];
+				char szVel[16];
+				AECHAR szwLat[16], szwLon[16];
+				AECHAR szwKn[16], szwKm[16];
+				double kn = 0, km = 0;
+				int heading = 0;
+
+				TS_GetTimeNow(&now);
+				SNPRINTF(szTmp, sizeof(szTmp), "%d-%02d-%02d", now.year, now.month, now.day);
+				SNPRINTF(szGpsTime, sizeof(szGpsTime), "%s,%02d:%02d:%02d", szTmp, now.hour, now.minute, now.second);
+
+				TS_FLT2SZ_7(szwLat, pGetGPSInfo->theInfo.lat);
+				TS_FLT2SZ_7(szwLon, pGetGPSInfo->theInfo.lon);
+				WSTRTOSTR(szwLat, szLat, sizeof(szLat));
+				WSTRTOSTR(szwLon, szLon, sizeof(szLon));
+
+				//For Test
+				//pGetGPSInfo->velocityHor = 12.250;
+
+				kn = FMUL(FDIV(pGetGPSInfo->theInfo.velocityHor, 1852.0), 3600.0);	//1节=1.852公里/小时 velocityHor为m/s --> 1节 = V*3600/1852
+				km = FMUL(pGetGPSInfo->theInfo.velocityHor, 3.6);  //m/s --> km/h
+				
+				TS_FLT2SZ_1(szwKm, km);
+				TS_FLT2SZ_1(szwKn, kn);
+				
+				//WSTRTOSTR(szwKm, szVel, sizeof(szVel));
+				WSTRTOSTR(szwKn, szVel, sizeof(szVel));
+
+				heading = FLTTOINT(pGetGPSInfo->theInfo.heading);
+				SPRINTF(szHeading, "%d", heading);
+				
+				confmgr_puts(pme->m_pOwner->iConf, "gps", "lat", szLat);
+				confmgr_puts(pme->m_pOwner->iConf, "gps", "lon", szLon);
+				confmgr_puts(pme->m_pOwner->iConf, "gps", "vel", szVel);
+				confmgr_puts(pme->m_pOwner->iConf, "gps", "heading", szHeading);
+				confmgr_puts(pme->m_pOwner->iConf, "gps", "time", szGpsTime);
+			}
+		}
+
 		CNavigateWin_Redraw(po);
 	}
 	else if( pGetGPSInfo->theInfo.nErr == EIDLE ) {

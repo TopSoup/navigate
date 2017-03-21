@@ -20,7 +20,7 @@ typedef struct _IWindow  IWindow;
 #define AMOUNT_BUFFER_SIZE           10                   // Max string buffer size for amount strings
 #define MAX_DESC_SIZE                32
 
-#define MAX_SOS_NUM                  3                     // Max Num for SOS NUM
+#define MAX_SOS_NUM                  4                     // Max Num for SOS NUM [0:reserved]
 
 //TODO how to add annotate
 typedef enum TSWindow
@@ -28,66 +28,66 @@ typedef enum TSWindow
 	TSW_NONE,
 
 	/* First Level */
-	TSW_MAIN,			//Ö÷Ò³Ãæ
+	TSW_MAIN,			//ä¸»é¡µé¢
 
 	/* Second Level */
-	TSW_WHERE,				//1 ÎÒÔÚÄÄ
-	TSW_NAVIGATE_DEST,		//2 Ä¿±êÁìº½
+	TSW_WHERE,				//1 æˆ‘åœ¨å“ª
+	TSW_NAVIGATE_DEST,		//2 ç›®æ ‡é¢†èˆª
 	TSW_SOS,				//3 SOS
 
 	/* Third Level */
 	//2
-	TSW_DEST_LIST,	//Ä¿µÄµØÁĞ±í
-	TSW_DEST_NEW,	//ĞÂ½¨Ä¿µÄµØ
-	TSW_DEST_INFO,	//¹¦ÄÜËµÃ÷
+	TSW_DEST_LIST,	//ç›®çš„åœ°åˆ—è¡¨
+	TSW_DEST_NEW,	//æ–°å»ºç›®çš„åœ°
+	TSW_DEST_INFO,	//åŠŸèƒ½è¯´æ˜
 
-	//TSW_WHERE-Ñ¡Ïî
-	TSW_WHERE_FUCTION, //ÎÒÔÚÄÄÑ¡Ïî´°¿Ú
+	//TSW_WHERE-é€‰é¡¹
+	TSW_WHERE_FUCTION, //æˆ‘åœ¨å“ªé€‰é¡¹çª—å£
 
 	/* Fouth Level */
-    TSW_WHERE_FUCTION_SAVE, //±£´æÎ»ÖÃ´°¿Ú
-    TSW_DEST_LIST_FUCTION,  //Ä¿µÄµØÁĞ±í-Ñ¡Ïî´°¿Ú
-    TSW_DEST_NEW_FUCTION, //ĞÂ½¨Ä¿µÄµØ-Ñ¡Ïî´°¿Ú
+    TSW_WHERE_FUCTION_SAVE, //ä¿å­˜ä½ç½®çª—å£
+    TSW_DEST_LIST_FUCTION,  //ç›®çš„åœ°åˆ—è¡¨-é€‰é¡¹çª—å£
+    TSW_DEST_NEW_FUCTION, //æ–°å»ºç›®çš„åœ°-é€‰é¡¹çª—å£
 
 	/* Fifth Level */
-	TSW_DEST_LIST_FUCTION_INFO, //Ä¿µÄµØĞÅÏ¢
-	TSW_DEST_LIST_FUCTION_EDIT, //Ä¿µÄµØÖØÃüÃû
+	TSW_DEST_LIST_FUCTION_INFO, //ç›®çš„åœ°ä¿¡æ¯
+	TSW_DEST_LIST_FUCTION_EDIT, //ç›®çš„åœ°é‡å‘½å
 
 
 	//3 
-	//Ä¿µÄµØÁĞ±íÏîÄÚÈİ
-	TSW_DEST_LIST_ITEM,	//ÁĞ±íÏîÄÚÈİ
-	TSW_LOCINFO,//ÁĞ±íÏî-Ñ¡Ïî-Î»ÖÃĞÅÏ¢ËµÃ÷
+	//ç›®çš„åœ°åˆ—è¡¨é¡¹å†…å®¹
+	TSW_DEST_LIST_ITEM,	//åˆ—è¡¨é¡¹å†…å®¹
+	TSW_LOCINFO,//åˆ—è¡¨é¡¹-é€‰é¡¹-ä½ç½®ä¿¡æ¯è¯´æ˜
 
-	//SOSºÍ·¢ËÍ¶ÌĞÅ¸´ÓÃ½çÃæ
-	TSW_SEND_NUM,		//½ÓÊÕµç»°ºÅÂë
+	//SOSå’Œå‘é€çŸ­ä¿¡å¤ç”¨ç•Œé¢
+	TSW_SEND_NUM,		//æ¥æ”¶ç”µè¯å·ç 
 	
 
-	//Î»ÖÃĞÅÏ¢ËµÃ÷
-	TSW_WHERE_DETAILS,			//ÎÒÔÚÄÄÑ¡Ïî->ĞÅÏ¢ËµÃ÷
-	TSW_LOCATION_RANGE_INFO,	//Ä¿µÄµØ¾­Î³¶È·¶Î§ËµÃ÷
+	//ä½ç½®ä¿¡æ¯è¯´æ˜
+	TSW_WHERE_DETAILS,			//æˆ‘åœ¨å“ªé€‰é¡¹->ä¿¡æ¯è¯´æ˜
+	TSW_LOCATION_RANGE_INFO,	//ç›®çš„åœ°ç»çº¬åº¦èŒƒå›´è¯´æ˜
 
 	/* Interval */
 	//1
-	TSW_LOCATING,		//¶¨Î»ÖĞ...
-	TSW_NAVIGATE,		//Áìº½
-	TSW_NAVIGATE_EX,	//Áìº½2
+	TSW_LOCATING,		//å®šä½ä¸­...
+	TSW_NAVIGATE,		//é¢†èˆª
+	TSW_NAVIGATE_EX,	//é¢†èˆª2
 	
 	//3 
-	TSW_ADDRBOOK,		//ÁªÏµÈË½çÃæ
-	TSW_SMSBOX,			//¶ÌĞÅÊÕ¼şÏä
+	TSW_ADDRBOOK,		//è”ç³»äººç•Œé¢
+	TSW_SMSBOX,			//çŸ­ä¿¡æ”¶ä»¶ç®±
 
 	
-	//ÊäÈëĞÅÏ¢[Î»ÖÃÃû³Æ, ¶ÌĞÅÁªÏµÈË, ]
+	//è¾“å…¥ä¿¡æ¯[ä½ç½®åç§°, çŸ­ä¿¡è”ç³»äºº, ]
 	TSW_TEXTCTL,
 
-	TSW_SOS_RELATIVE,		//1 SOSÇ×ÊôºÅÂëÉè¶¨
-	TSW_SOS_INFO,			//2 SOS¹¦ÄÜËµÃ÷
+	TSW_SOS_RELATIVE,		//1 SOSäº²å±å·ç è®¾å®š
+	TSW_SOS_INFO,			//2 SOSåŠŸèƒ½è¯´æ˜
 
 	TSW_LAST
 } TSWindow;
 
-//SOS ²Ù×÷
+//SOS æ“ä½œ
 typedef enum _SOSOP{
     SOS_IDLE,
     SOS_SMS_SENDING,
@@ -138,6 +138,15 @@ struct CTopSoupApp
 	GetGPSInfo		  m_gpsInfo;	//
 
     boolean			  m_bGetGpsInfo; //where win gpsstatus
+    
+	AEECallback		  m_cbWatcherTimer;
+	AEEGPSMode		  m_gpsMode;			//GPSæ¨¡å¼
+
+	//Device
+	char				m_meid[32];				//è®¾å¤‡MEID
+	char				m_imsi[32];				//å¡IMSI
+	char				m_phone[32];			//æ‰‹æœºå·
+	char				m_rssi[32];				//ä¿¡å·å€¼
 
 	//SMS
 	ISMS              *m_pISMS;      
@@ -145,26 +154,44 @@ struct CTopSoupApp
 	AEECallback       m_cb;				// General callback
 	uint32            m_retVal;         // General place holder for error
 
+	ISMSStorage 	  *m_pISMSStorage;      // ISMSStorage Interface
+	uint32            m_dwStatus;          // Status
+	AEECallback 	  m_enumMsgInitCb;
+    AEECallback 	  m_enumMsgNextCb;
+    uint32         	  m_dwIndex;           // Message Index
+    AEESMSTag 		  m_tag;
+    AEESMSType 		  m_mt;
+
 	//Tel
 	ICallMgr *m_pCallMgr;
 	ICall *m_pOutgoingCall;
     CallListener callListener;
 
+	//INI
+	void			*iConf;
     //SOS
 	AECHAR				m_szTextA[64];
 	AECHAR				m_szTextB[64];
 	AECHAR				m_szTextC[64];
 
 	boolean			  m_bEnableSOS;
+	boolean			  m_bEnableSMS;
+	boolean			  m_bSmsSuccess;
+	boolean			  m_bSosSuccess;
+	boolean			  m_bRecvSMS;
+	uint32			  m_startSmsTime;
+	uint16			  m_resendCount;
+	
     SOSOP             m_OP;
-    int               m_id;                       //µ±Ç°Í¨ÖªµÄºÅÂëË÷Òı
-    char			  m_szNum[MAX_SOS_NUM][32];   //Í¨ÖªµÄºÅÂëÁĞ±í
+    int               m_id;                       //å½“å‰é€šçŸ¥çš„å·ç ç´¢å¼•
+    char			  m_szNum[MAX_SOS_NUM][32];   //é€šçŸ¥çš„å·ç åˆ—è¡¨[0:ç”¨äºä¿å­˜çŸ­ä¿¡è®¾å®šçš„ç´§æ€¥è”ç³»äºº]
+	char			  m_szSmsNum[32];   //SMSä¸­å¿ƒå·ç 
 
 	//Destination DataBse
 	IDatabase*		m_pDatabase;		// Database
 
 
-	//ĞÂ½¨Ä¿µÄµØÊ¹ÓÃµÄ±äÁ¿
+	//æ–°å»ºç›®çš„åœ°ä½¿ç”¨çš„å˜é‡
 	AECHAR				m_szTextLat[32];
 	AECHAR				m_szTextLon[32];
 	AECHAR				m_szTextDesc[32];
@@ -173,10 +200,10 @@ struct CTopSoupApp
 	AECHAR          m_pTextctlText[TS_MAX_STRLEN];
 	int             m_pTextctlMode;     //input mode
 	TSWindow        m_pTextctlWin; 
-	int				m_op;				//TEXTCTL OP: 0-±£´æµ½Ä¿µÄµØÁĞ±í 1-¶ÌĞÅ·¢ËÍ
+	int				m_op;				//TEXTCTL OP: 0-ä¿å­˜åˆ°ç›®çš„åœ°åˆ—è¡¨ 1-çŸ­ä¿¡å‘é€
 	boolean			m_opStatus;
 
-	//Áìº½Ç°Ò»¸ö´°¿Ú
+	//é¢†èˆªå‰ä¸€ä¸ªçª—å£
 	TSWindow        m_pPreNaviWin; 
 };
 
@@ -191,11 +218,11 @@ void CTopSoupApp_Redraw(CTopSoupApp * pme, boolean bDefer);
 boolean CTopSoupApp_SetWindow(CTopSoupApp * pme, TSWindow eWin, uint32 dwParam);
 void CTopSoupApp_onSplashDrawOver(void * po);
 
-//·¢ËÍÎ»ÖÃ¶ÌĞÅ
-//¸ñÊ½: Ä¿±êÎ»ÖÃ:1111#Î³¶È:E,20.012345#¾­¶È:N,120.012345
+//å‘é€ä½ç½®çŸ­ä¿¡
+//æ ¼å¼: ç›®æ ‡ä½ç½®:1111#çº¬åº¦:E,20.012345#ç»åº¦:N,120.012345
 void CTopSoupApp_SendSMSMessage(CTopSoupApp * pMe, uint16 wParam, AECHAR *szDesc,AECHAR* szLat,AECHAR* szLon,char* phoneNumber);
 
-//¸ñÊ½£º½ô¼±ÇóÖú£¡
+//æ ¼å¼ï¼šç´§æ€¥æ±‚åŠ©ï¼
 void CTopSoupApp_SendSOSSMSMessage (CTopSoupApp * pme, uint16 wParam, AECHAR *szDesc, char* phoneNumber);
 
 

@@ -4,7 +4,7 @@
 #include "navigatepch.h"
 
 #define TS_HEADER_Y           17
-#define TS_TITLE_Y	TS_HEADER_Y + 38	//38Îª±êÌâÍ¼Æ¬¸ß¶È
+#define TS_TITLE_Y	TS_HEADER_Y + 38	//38Îªï¿½ï¿½ï¿½ï¿½Í¼Æ¬ï¿½ß¶ï¿½
 
 #define TS_MIN_RELATIVE_NUM     2
 #define TS_MAX_RELATIVE_NUM     20
@@ -19,12 +19,15 @@ void       TS_FreeIF(IBase ** ppif);
 void       TS_FreeWin(IWindow ** ppif);
 
 AECHAR*	   TS_FLT2SZ(AECHAR* szBuf, double val);
-AECHAR*    TS_FLT2SZ_3(AECHAR* szBuf, double val);
+AECHAR* TS_FLT2SZ_7(AECHAR* szBuf, double val);
 
-//¹ýÂË¿Õ¸ñ
+AECHAR*    TS_FLT2SZ_3(AECHAR* szBuf, double val);
+AECHAR*    TS_FLT2SZ_1(AECHAR* szBuf, double val);
+
+//ï¿½ï¿½ï¿½Ë¿Õ¸ï¿½
 int TrimSpace(char *inbuf, char *outbuf);
 
-//»æÖÆÎÄ×Ö
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void       TS_DrawText(IDisplay* pIDisplay, AEEFont nFont, AECHAR* pText, AEERect *rect);
 
 
@@ -45,16 +48,16 @@ typedef struct _ts_time_t {
 #endif// !_TS_TIME_T_
 	
 /**
- * @brief »ñµÃµ±Ç°Ê±¼ä
+ * @brief ï¿½ï¿½ï¿½Ãµï¿½Ç°Ê±ï¿½ï¿½
  */
 int			TS_GetTimeNow(ts_time_t* tw);
 
 /**
- * @brief ¾­¶ÈÐ£Ñé[-180,180]
+ * @brief ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½[-180,180]
  */
 boolean		TS_CheckLon(AECHAR* szLon);
 /**
- * @brief Î³¶ÈÐ£Ñé[-90,90]
+ * @brief Î³ï¿½ï¿½Ð£ï¿½ï¿½[-90,90]
  */
 boolean		TS_CheckLat(AECHAR* szLon);
 
@@ -68,5 +71,6 @@ boolean		TS_CheckLat(AECHAR* szLon);
 #define TS_ISSEL(e, c)                 ((e) == EVT_KEY_PRESS && (c) == AVK_SELECT)
 
 #	define RELATIVE_ADDRESS_CFG			"address.txt"
+#	define RELATIVE_SMS_CFG			"sms.txt"
 
 #endif
